@@ -667,10 +667,12 @@ function rExec(){
   drawGauge('gaugeYTD',pY);
 
   dc('cTend');
-  const recM=fm.r.slice(0,3).filter(v=>v>0);
-  const recL=MO.slice(0,recM.length).map(m=>m+'/26');
-  const bgTend=recM.map((_,i)=>execMes>0&&(i+1)===execMes?'rgba(0,116,255,.25)':'rgba(0,116,255,.08)');
-  const ptTend=recM.map((_,i)=>execMes>0&&(i+1)===execMes?9:6);
+  const allOpsForTrend=filterRW();
+  const recMFull=[],recLFull=[],recMMonths=[];
+  for(let mi=1;mi<=3;mi++){const vi=9+mi;const tval=allOpsForTrend.filter(r=>r[0]===1&&r[vi]>0).reduce((a,r)=>a+r[vi],0);if(tval>0){recMFull.push(tval);recLFull.push(MO[mi-1]+'/26');recMMonths.push(mi);}}
+  const recM=recMFull,recL=recLFull;
+  const bgTend=recMFull.map((_,i)=>execMes>0?(recMMonths[i]===execMes?'rgba(0,116,255,.85)':'rgba(0,116,255,.08)'):'rgba(0,116,255,.08)');
+  const ptTend=recMFull.map((_,i)=>execMes>0?(recMMonths[i]===execMes?10:4):6);
   ch['cTend']=new Chart(document.getElementById('cTend'),{type:'line',data:{labels:recL,datasets:[{data:recM.map(v=>v/1e6),borderColor:'var(--accent)',backgroundColor:bgTend,fill:true,tension:.3,pointRadius:ptTend,pointBackgroundColor:'var(--accent)',pointBorderWidth:2,pointBorderColor:'#F5F7FA',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const mi=els[0].index+1;if(execMes===mi){fl.em='-1';document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));document.querySelector('[data-em="-1"]').classList.add('on');}else{fl.em=String(mi);document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));const btn=document.querySelector('[data-em="'+mi+'"]');if(btn)btn.classList.add('on');}rr();}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.raw.toFixed(1)+'M'}}},scales:{y:{title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false}}}}});
   document.getElementById('cTend').style.cursor='pointer';
   const lastVar=recM.length>=2?((recM[recM.length-1]-recM[recM.length-2])/recM[recM.length-2]*100):0;
@@ -683,12 +685,14 @@ function rExec(){
   if(fl.s==='m') regList=[];
   const regData=regList.map(({name:rn})=>{
     let tEI=0,tCad=0,tApr=0,tEA=0;
-    for(let m=0;m<3;m++){const rd=D.cc[m]&&D.cc[m].r[rn];if(rd){if(m===0)tEI+=rd[5];tCad+=rd[6];tApr+=rd[7];if(m===2)tEA=rd[9];}}
-    const movimentado=tEI+tCad-tEA;
+    const mStart=execMes>0?execMes-1:0;const mEnd=execMes>0?execMes-1:2;
+    for(let m=mStart;m<=mEnd;m++){const rd=D.cc[m]&&D.cc[m].r[rn];if(rd){if(m===mStart)tEI+=rd[5];tCad+=rd[6];tApr+=rd[7];if(m===mEnd)tEA=rd[9];}}
+    const movimentado=execMes>0?tCad:(tEI+tCad-tEA);
     const convCC=movimentado>0?(tApr/movimentado*100):0;
     return{name:rn,movimentado:movimentado/1e6,pago:tApr/1e6,convCC};
   });
-  const ccRegTitle=fl.r!=='t'?`Conversão Conta Corrente — ${RN[parseInt(fl.r)]} — YTD 26`:`Conversão Conta Corrente por Regional — YTD 26`;
+  const mesLabelCC=execMes>0?` — ${MO[execMes-1]}/26`:' — YTD 26';
+  const ccRegTitle=fl.r!=='t'?`Conversão Conta Corrente — ${RN[parseInt(fl.r)]}${mesLabelCC}`:`Conversão Conta Corrente por Regional${mesLabelCC}`;
   const hCCEl=document.getElementById('hCCReg');if(hCCEl)hCCEl.textContent=ccRegTitle;
   const regBgMov=regData.map(r=>{const ri=RN.indexOf(r.name);return(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri)?'rgba(0,166,140,1)':'rgba(0,166,140,.7)'});
   const regBgPago=regData.map(r=>{const ri=RN.indexOf(r.name);return(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri)?'rgba(0,116,255,.85)':'rgba(0,116,255,.5)'});
@@ -702,21 +706,23 @@ function rExec(){
   // ===== GRÁFICOS DIÁRIOS: Volume & Ticket Médio (aba Executivo) =====
   if(typeof DY!=='undefined' && DY.length>0){
     const rFilt=fl.r!=='t'?parseInt(fl.r):-1;
-    const dyLabels=DY.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
-    const dyVol=DY.map(d=>{
+    const dyFiltered=execMes>0?DY.filter(d=>parseInt(d[0].split('-')[1])===execMes):DY;
+    const dyLabels=dyFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dyVol=dyFiltered.map(d=>{
       if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[0]:0;}
       return d[1];
     });
-    const dyVal=DY.map(d=>{
+    const dyVal=dyFiltered.map(d=>{
       if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[1]:0;}
       return d[2];
     });
-    const dyTicket=DY.map((d,i)=>dyVol[i]>0?(dyVal[i]/dyVol[i]/1e3):0);
+    const dyTicket=dyFiltered.map((d,i)=>dyVol[i]>0?(dyVal[i]/dyVol[i]/1e3):0);
     const avgVol=dyVol.length>0?(dyVol.reduce((a,b)=>a+b,0)/dyVol.length):0;
     const avgTicket=dyTicket.filter(v=>v>0).length>0?(dyTicket.reduce((a,b)=>a+b,0)/dyTicket.filter(v=>v>0).length):0;
     const rLabel=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
-    document.getElementById('hVolDia').textContent='Volume Diário de Propostas — YTD 26'+rLabel;
-    document.getElementById('hTickDia').textContent='Ticket Médio Diário — YTD 26'+rLabel;
+    const periodLabel=execMes>0?MO[execMes-1]+'/26':'YTD 26';
+    document.getElementById('hVolDia').textContent='Volume Diário de Propostas — '+periodLabel+rLabel;
+    document.getElementById('hTickDia').textContent='Ticket Médio Diário — '+periodLabel+rLabel;
 
     dc('cVolDia');
     ch['cVolDia']=new Chart(document.getElementById('cVolDia'),{type:'bar',data:{labels:dyLabels,datasets:[
@@ -1065,19 +1071,19 @@ function rDevolucoes(){
   if(countEl) countEl.textContent=`${repOpsAll.length} devoluções encontradas`;
 
   const MOS=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  let th='<table><thead><tr><th>#</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Motivo de Encerramento</th><th>Mês</th><th style="text-align:right">Valor Líquido Real</th><th>Etapa</th><th>Atividade</th></tr></thead><tbody>';
+  let th='<table><thead><tr><th>#</th><th>Credor</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Motivo de Encerramento</th><th>Mês</th><th style="text-align:right">Valor Líquido Real</th></tr></thead><tbody>';
   if(repOpsAll.length===0){
-    th+='<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
+    th+='<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
   } else {
     repOpsAll.sort((a,b)=>b[14]-a[14]).forEach((r,i)=>{
       const mot=(MT[r[6]]||'Não informado').replace('Motivo de encerramento: ','');
       const seg=r[1]===0?'Mid-Market':'Varejo';
       const mes=r[15]>0?MOS[r[15]]:'—';
-      const etapa=ET[r[4]]||'—';
-      const atv=(AV[r[5]]||'—').length>30?(AV[r[5]].substring(0,30)+'…'):AV[r[5]]||'—';
+      const credor=(r.length>16&&r[16]>=0&&TT&&TT[r[16]])?TT[r[16]]:'—';
       const motColor=mot==='Não informado'?'color:var(--text4)':'color:var(--red)';
       th+=`<tr>
         <td style="color:var(--text4)">${i+1}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${credor}">${credor}</td>
         <td><strong>${NG[r[8]]||'—'}</strong></td>
         <td>${CO[r[9]]||'—'}</td>
         <td>${RN[r[2]]||'—'}</td>
@@ -1085,8 +1091,6 @@ function rDevolucoes(){
         <td style="${motColor};font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${mot}">${mot}</td>
         <td>${mes}</td>
         <td style="text-align:right;font-weight:600">${F(r[14])}</td>
-        <td style="font-size:10px;color:var(--text3)">${etapa}</td>
-        <td style="font-size:10px;color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${AV[r[5]]||''}">${atv}</td>
       </tr>`;
     });
   }
