@@ -249,10 +249,10 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
   <div id="kpi1" class="krow"></div>
   <div id="gaugeRow" style="display:flex;gap:16px;margin-bottom:16px"></div>
   <div id="mc1"></div>
-  <div class="st">Resumo Regional — Meta vs Realizado — YTD 26 <span style="font-size:10px;font-weight:400;color:var(--text4)">(Volume Líquido)</span></div>
+  <div class="st" id="hRM">Resumo Regional — Meta vs Realizado — YTD 26 <span style="font-size:10px;font-weight:400;color:var(--text4)">(Volume Líquido)</span></div>
   <div class="cd" style="margin-bottom:16px"><div class="tw" id="tRM"></div></div>
   <div class="row2">
-    <div class="cd"><h3>Tendência Valor Líquido Pago Mensal — YTD 26</h3><div class="cw" style="height:260px"><canvas id="cTend"></canvas></div><div id="varBadge" style="text-align:center"></div></div>
+    <div class="cd"><h3 id="hTend">Tendência Valor Líquido Pago Mensal — YTD 26</h3><div class="cw" style="height:260px"><canvas id="cTend"></canvas></div><div id="varBadge" style="text-align:center"></div></div>
     <div class="cd"><h3 id="hCCReg">Conversão Conta Corrente por Regional — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Base: Volume Líquido | Pago / (EI + Cadastrado − Em Andamento)</div><div class="cw" style="height:260px"><canvas id="cRegPerf"></canvas></div></div>
   </div>
   <div class="st">Acompanhamento Diário — Volume de Propostas & Ticket Médio</div>
@@ -677,6 +677,7 @@ function rExec(){
   document.getElementById('cTend').style.cursor='pointer';
   const lastVar=recM.length>=2?((recM[recM.length-1]-recM[recM.length-2])/recM[recM.length-2]*100):0;
   document.getElementById('varBadge').innerHTML=lastVar!==0?`<span class="var-badge ${lastVar>=0?'var-up':'var-down'}">${lastVar>=0?'+':''}${lastVar.toFixed(1)}% vs mês anterior</span>`:'';
+  const hTendEl=document.getElementById('hTend');if(hTendEl)hTendEl.textContent='Tendência Valor Líquido Pago Mensal — '+(execMes>0?MO[execMes-1]+'/26':'YTD 26');
 
   dc('cRegPerf');
   // Filtrar regionais conforme filtro ativo
@@ -751,8 +752,11 @@ function rExec(){
   });
   // Filtrar regionais: quando uma regional é selecionada, mostrar somente ela
   const regsFiltered=fl.r!=='t'?regs.filter(x=>x.n===RN[parseInt(fl.r)]):regs;
-  let h='<table><thead><tr><th>Regional</th><th>Coord.</th><th style="text-align:right">Meta Jan</th><th style="text-align:right">Real Jan</th><th style="text-align:right">%</th><th style="text-align:right">Meta Fev</th><th style="text-align:right">Real Fev</th><th style="text-align:right">%</th><th style="text-align:right">Meta Mar</th><th style="text-align:right">Real Mar</th><th style="text-align:right">%</th><th style="text-align:right">Meta YTD</th><th style="text-align:right">Real YTD</th><th style="text-align:right">% YTD</th></tr></thead><tbody>';
-  regsFiltered.forEach(x=>{const ytR=x.r.slice(0,3).reduce((a,b)=>a+b,0);const ytM=x.m.slice(0,3).reduce((a,b)=>a+b,0);const ytP=ytM?(ytR/ytM*100):0;h+='<tr>';h+=`<td><strong style="color:${x.col}">${x.n}</strong></td><td>${x.c}</td>`;for(let i=0;i<3;i++){const p=x.m[i]?(x.r[i]/x.m[i]*100):0;h+=`<td style="text-align:right">${F(x.m[i])}</td><td style="text-align:right">${F(x.r[i])}</td><td style="text-align:right"><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></td>`}h+=`<td style="text-align:right">${F(ytM)}</td><td style="text-align:right"><strong>${F(ytR)}</strong></td><td style="text-align:right"><span class="bd ${bc(ytP)}">${ytP.toFixed(0)}%</span></td></tr>`});
+  const hRMEl=document.getElementById('hRM');if(hRMEl)hRMEl.innerHTML='Resumo Regional — Meta vs Realizado — '+(execMes>0?MO[execMes-1]+'/26':'YTD 26')+' <span style="font-size:10px;font-weight:400;color:var(--text4)">(Volume Líquido)</span>';
+  let h='<table><thead><tr><th>Regional</th><th>Coord.</th>';
+  if(execMes>0){h+=`<th style="text-align:right">Meta ${MO[execMes-1]}</th><th style="text-align:right">Real ${MO[execMes-1]}</th><th style="text-align:right">%</th>`;}else{for(let i=0;i<3;i++)h+=`<th style="text-align:right">Meta ${MO[i]}</th><th style="text-align:right">Real ${MO[i]}</th><th style="text-align:right">%</th>`;h+='<th style="text-align:right">Meta YTD</th><th style="text-align:right">Real YTD</th><th style="text-align:right">% YTD</th>';}
+  h+='</tr></thead><tbody>';
+  regsFiltered.forEach(x=>{h+='<tr>';h+=`<td><strong style="color:${x.col}">${x.n}</strong></td><td>${x.c}</td>`;if(execMes>0){const mi=execMes-1;const p=x.m[mi]?(x.r[mi]/x.m[mi]*100):0;h+=`<td style="text-align:right">${F(x.m[mi])}</td><td style="text-align:right">${F(x.r[mi])}</td><td style="text-align:right"><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></td>`;}else{const ytR=x.r.slice(0,3).reduce((a,b)=>a+b,0);const ytM=x.m.slice(0,3).reduce((a,b)=>a+b,0);const ytP=ytM?(ytR/ytM*100):0;for(let i=0;i<3;i++){const p=x.m[i]?(x.r[i]/x.m[i]*100):0;h+=`<td style="text-align:right">${F(x.m[i])}</td><td style="text-align:right">${F(x.r[i])}</td><td style="text-align:right"><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></td>`}h+=`<td style="text-align:right">${F(ytM)}</td><td style="text-align:right"><strong>${F(ytR)}</strong></td><td style="text-align:right"><span class="bd ${bc(ytP)}">${ytP.toFixed(0)}%</span></td>`;}h+='</tr>'});
   h+='</tbody></table>';document.getElementById('tRM').innerHTML=h;
 }
 
