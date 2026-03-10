@@ -598,7 +598,6 @@ function rExec(){
   // KPIs filtram por negociador (via filterRW) e por mês se selecionado
   const allOps=filterRW();
   let aprOps,repOps,andOps,kpiLabel,receitaFiltered;
-  let aprCountConv,repCountConv;
   if(execMes>0){
     const vi=9+execMes;
     aprOps=allOps.filter(r=>r[0]===1&&r[vi]>0);
@@ -606,17 +605,12 @@ function rExec(){
     andOps=allOps.filter(r=>r[0]===0&&r[15]===execMes);
     receitaFiltered=aprOps.reduce((a,r)=>a+r[vi],0);
     kpiLabel=MO[execMes-1]+'/26';
-    // Conversão: usar mês cadastro (r[15]) para ambos, garantindo consistência
-    aprCountConv=allOps.filter(r=>r[0]===1&&r[15]===execMes).length;
-    repCountConv=repOps.length;
   } else {
     aprOps=allOps.filter(r=>r[0]===1);
     repOps=allOps.filter(r=>r[0]===2);
     andOps=allOps.filter(r=>r[0]===0);
     receitaFiltered=aprOps.reduce((a,r)=>a+r[10]+r[11]+r[12],0);
     kpiLabel='YTD 26';
-    aprCountConv=aprOps.length;
-    repCountConv=repOps.length;
   }
   const aprCount=aprOps.length;
   const repCount=repOps.length;
@@ -625,16 +619,21 @@ function rExec(){
   const allAndOps=allOps.filter(r=>r[0]===0);
   const pipeVal=allAndOps.reduce((a,r)=>a+r[3],0);
   const pipeCount=allAndOps.length;
-  const convR=(aprCountConv+repCountConv)>0?(aprCountConv/(aprCountConv+repCountConv)*100):0;
+  // Conversão: usar D.cc (conta corrente) para alinhar com aba Performance
+  function getExecCC(mi){const ccM=D.cc[mi];if(!ccM)return[0,0,0,0,0,0,0,0,0,0];if(fl.r!=='t'){const rn=RN[parseInt(fl.r)];return ccM.r[rn]||[0,0,0,0,0,0,0,0,0,0];}if(fl.s==='v'){const sum=[0,0,0,0,0,0,0,0,0,0];['Regional A','Regional B','Regional C','Regional D'].forEach(rn=>{const rd=ccM.r[rn];if(rd)rd.forEach((v,j)=>sum[j]+=v);});return sum;}if(fl.s==='m'){return ccM.r['Mid-Market']||[0,0,0,0,0,0,0,0,0,0];}return ccM.t;}
+  let ccApr=0,ccRep=0;
+  if(execMes>0){const cc=getExecCC(execMes-1);ccApr=cc[2];ccRep=cc[3];}
+  else{for(let mi=0;mi<3;mi++){const cc=getExecCC(mi);ccApr+=cc[2];ccRep+=cc[3];}}
+  const convR=(ccApr+ccRep)>0?(ccApr/(ccApr+ccRep)*100):0;
   const ticket=aprCount>0?receitaFiltered/aprCount:0;
 
   document.getElementById('kpi1').innerHTML=`
     <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO — ${kpiLabel}</div><div class="kc-val" style="color:var(--green)">${execMes>0?F(receitaFiltered):F(rY)}</div><div class="kc-sub">Volume líquido ${execMes>0?'pago no período':'a receber YTD'}</div></div>
     <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${pipeCount} operações em andamento | Volume projetado</div></div>
     <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES APROVADAS — ${kpiLabel}</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
-    <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">${aprCountConv} aprovadas / ${aprCountConv+repCountConv} finalizadas | Mês Cadastro</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">${ccApr} aprovadas / ${ccApr+ccRep} finalizadas | Conta Corrente</div></div>
     <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO — ${kpiLabel}</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
-    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${repCountConv}</div><div class="kc-sub">${(aprCountConv+repCountConv)>0?(repCountConv/(aprCountConv+repCountConv)*100).toFixed(1):0}% do total fechado | Mês Cadastro</div></div>
+    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${ccRep}</div><div class="kc-sub">${(ccApr+ccRep)>0?(ccRep/(ccApr+ccRep)*100).toFixed(1):0}% do total fechado | Conta Corrente</div></div>
   `;
 
   // Meta card: highlight selected month
