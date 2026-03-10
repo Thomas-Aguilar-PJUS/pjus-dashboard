@@ -615,13 +615,16 @@ function rExec(){
   const aprCount=aprOps.length;
   const repCount=repOps.length;
   const andCount=andOps.length;
-  const pipeVal=andOps.reduce((a,r)=>a+r[3],0);
+  // Pipeline SEMPRE usa todas as operações em andamento (não filtra por mês)
+  const allAndOps=allOps.filter(r=>r[0]===0);
+  const pipeVal=allAndOps.reduce((a,r)=>a+r[3],0);
+  const pipeCount=allAndOps.length;
   const convR=(aprCount+repCount)>0?(aprCount/(aprCount+repCount)*100):0;
   const ticket=aprCount>0?receitaFiltered/aprCount:0;
 
   document.getElementById('kpi1').innerHTML=`
     <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO — ${kpiLabel}</div><div class="kc-val" style="color:var(--green)">${execMes>0?F(receitaFiltered):F(rY)}</div><div class="kc-sub">Volume líquido ${execMes>0?'pago no período':'a receber YTD'}</div></div>
-    <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${andCount} operações em andamento | Volume projetado</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${pipeCount} operações em andamento | Volume projetado</div></div>
     <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES APROVADAS — ${kpiLabel}</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
     <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">Qtd. Aprovados / (Aprovados + Reprovados)</div></div>
     <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO — ${kpiLabel}</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
