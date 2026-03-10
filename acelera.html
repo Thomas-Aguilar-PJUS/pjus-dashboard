@@ -689,10 +689,12 @@ function rExec(){
   if(fl.s==='m') regList=[];
   const regData=regList.map(({name:rn})=>{
     let tEI=0,tCad=0,tApr=0,tEA=0;
+    let cEI=0,cCad=0,cApr=0,cEA=0;
     const mStart=execMes>0?execMes-1:0;const mEnd=execMes>0?execMes-1:2;
-    for(let m=mStart;m<=mEnd;m++){const rd=D.cc[m]&&D.cc[m].r[rn];if(rd){if(m===mStart)tEI+=rd[5];tCad+=rd[6];tApr+=rd[7];if(m===mEnd)tEA=rd[9];}}
+    for(let m=mStart;m<=mEnd;m++){const rd=D.cc[m]&&D.cc[m].r[rn];if(rd){if(m===mStart){tEI+=rd[5];cEI+=rd[0];}tCad+=rd[6];tApr+=rd[7];cCad+=rd[1];cApr+=rd[2];if(m===mEnd){tEA+=rd[9];cEA+=rd[4];}}}
     const movimentado=execMes>0?tCad:(tEI+tCad-tEA);
-    const convCC=movimentado>0?(tApr/movimentado*100):0;
+    const cntMov=execMes>0?cCad:(cEI+cCad-cEA);
+    const convCC=cntMov>0?(cApr/cntMov*100):0;
     return{name:rn,movimentado:movimentado/1e6,pago:tApr/1e6,convCC};
   });
   const mesLabelCC=execMes>0?` — ${MO[execMes-1]}/26`:' — YTD 26';
@@ -801,29 +803,29 @@ function rPerf(){
   let ccHTML='',cfHTML='';
   if(mAtv){
     const cc=getCCData(mI-1);
-    const vEI=cc[5],vCad=cc[6],vApr=cc[7],vRep=cc[8],vEA=cc[9];
-    const denomCC=vEI+vCad-vEA;
-    const convCC=denomCC>0?(vApr/denomCC*100):0;
+    const cEI=cc[0],cCad=cc[1],cApr=cc[2],cRep=cc[3],cEA=cc[4];
+    const denomCC=cEI+cCad-cEA;
+    const convCC=denomCC>0?(cApr/denomCC*100):0;
     const ccCol=convCC>=50?'var(--green)':convCC>=30?'var(--yellow)':'var(--red)';
-    ccHTML=`<div class="kc kb"><div class="kc-label">${IC.conversao} CONVERSÃO CONTA CORRENTE</div><div class="kc-val" style="color:${ccCol}">${convCC.toFixed(1)}%</div><div class="kc-sub">Pago ${F(vApr)} / Est. Mov. ${F(denomCC)} | Vol. Líquido</div></div>`;
-    const denomF=vApr+vRep;
-    const convF=denomF>0?(vApr/denomF*100):0;
+    ccHTML=`<div class="kc kb"><div class="kc-label">${IC.conversao} CONVERSÃO CONTA CORRENTE</div><div class="kc-val" style="color:${ccCol}">${convCC.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomCC} movimentadas | Qtd. Operações</div></div>`;
+    const denomF=cApr+cRep;
+    const convF=denomF>0?(cApr/denomF*100):0;
     const cfCol=convF>=50?'var(--green)':convF>=30?'var(--yellow)':'var(--red)';
-    cfHTML=`<div class="kc ko"><div class="kc-label">${IC.conversao} CONVERSÃO FINALIZADOS</div><div class="kc-val" style="color:${cfCol}">${convF.toFixed(1)}%</div><div class="kc-sub">Pago ${F(vApr)} / Final. ${F(denomF)} | Vol. Líquido</div></div>`;
+    cfHTML=`<div class="kc ko"><div class="kc-label">${IC.conversao} CONVERSÃO FINALIZADOS</div><div class="kc-val" style="color:${cfCol}">${convF.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomF} finalizadas | Qtd. Operações</div></div>`;
   } else {
     // YTD: somar 3 meses respeitando filtros
     const ytdCC=[0,0,0,0,0,0,0,0,0,0];
     for(let mi=0;mi<3;mi++){const md=getCCData(mi);md.forEach((v,j)=>ytdCC[j]+=v);}
     const ccM0=getCCData(0), ccM2=getCCData(2);
-    const vEI=ccM0[5], vCad=ytdCC[6], vApr=ytdCC[7], vRep=ytdCC[8], vEA=ccM2[9];
-    const denomCC=vEI+vCad-vEA;
-    const convCC=denomCC>0?(vApr/denomCC*100):0;
+    const cEI=ccM0[0], cCad=ytdCC[1], cApr=ytdCC[2], cRep=ytdCC[3], cEA=ccM2[4];
+    const denomCC=cEI+cCad-cEA;
+    const convCC=denomCC>0?(cApr/denomCC*100):0;
     const ccCol=convCC>=50?'var(--green)':convCC>=30?'var(--yellow)':'var(--red)';
-    ccHTML=`<div class="kc kb"><div class="kc-label">${IC.conversao} CONVERSÃO CONTA CORRENTE — YTD 26</div><div class="kc-val" style="color:${ccCol}">${convCC.toFixed(1)}%</div><div class="kc-sub">Pago ${F(vApr)} / Est. Mov. ${F(denomCC)} | Vol. Líquido</div></div>`;
-    const denomF=vApr+vRep;
-    const convF=denomF>0?(vApr/denomF*100):0;
+    ccHTML=`<div class="kc kb"><div class="kc-label">${IC.conversao} CONVERSÃO CONTA CORRENTE — YTD 26</div><div class="kc-val" style="color:${ccCol}">${convCC.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomCC} movimentadas | Qtd. Operações</div></div>`;
+    const denomF=cApr+cRep;
+    const convF=denomF>0?(cApr/denomF*100):0;
     const cfCol=convF>=50?'var(--green)':convF>=30?'var(--yellow)':'var(--red)';
-    cfHTML=`<div class="kc ko"><div class="kc-label">${IC.conversao} CONVERSÃO FINALIZADOS — YTD 26</div><div class="kc-val" style="color:${cfCol}">${convF.toFixed(1)}%</div><div class="kc-sub">Pago ${F(vApr)} / Final. ${F(denomF)} | Vol. Líquido</div></div>`;
+    cfHTML=`<div class="kc ko"><div class="kc-label">${IC.conversao} CONVERSÃO FINALIZADOS — YTD 26</div><div class="kc-val" style="color:${cfCol}">${convF.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomF} finalizadas | Qtd. Operações</div></div>`;
   }
   document.getElementById('kpi2').innerHTML=`
     <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO ${perfLabel}</div><div class="kc-val" style="color:var(--green)">${F(tA)}</div><div class="kc-sub">${tC} contratos aprovados | Volume líquido</div></div>
