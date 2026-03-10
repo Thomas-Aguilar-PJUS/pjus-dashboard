@@ -136,6 +136,25 @@ tr:hover td{background:rgba(0,116,255,.03)}
 .analitico-wrap table th{position:sticky;top:0;z-index:2}
 
 .hidden{display:none!important}
+
+/* Tab objective banner */
+.tab-info{background:linear-gradient(135deg,rgba(14,47,93,.04),rgba(0,116,255,.07));border:1px solid rgba(0,116,255,.18);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:flex-start;gap:14px}
+.tab-info-icon{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#0E2F5D,#0074FF);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tab-info-body{flex:1}
+.tab-info-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.tab-info-desc{font-size:12px;color:var(--text3);line-height:1.6}
+
+/* Cross-filter active badge */
+.cf-active{display:none;align-items:center;gap:10px;padding:7px 14px;border-radius:8px;background:rgba(0,116,255,.07);border:1px solid rgba(0,116,255,.22);font-size:12px;font-weight:600;color:var(--accent);margin-bottom:10px}
+.cf-active.show{display:flex}
+.cf-active-lbl{flex:1}
+.cf-clear{padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid rgba(0,116,255,.3);background:transparent;color:var(--accent);cursor:pointer;transition:background .15s}
+.cf-clear:hover{background:rgba(0,116,255,.12)}
+
+/* Devolucoes table */
+.dev-wrap{max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--border)}
+.dev-wrap table th{position:sticky;top:0;z-index:2}
+
 @media(max-width:1200px){.krow{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.krow{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.ct{padding:12px 16px}}
 </style>
@@ -212,6 +231,21 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 <div class="ct">
 <!-- EXECUTIVO -->
 <div id="v-exec">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Visão Executiva</div>
+      <div class="tab-info-desc">Panorama estratégico do Projeto Acelera Comercial: acompanhamento de metas anuais e YTD, conversão conta corrente por regional e tendência de receita mensal. Use o filtro de mês para detalhar um período específico ou clique em qualquer barra dos gráficos para filtrar a aba automaticamente.</div>
+    </div>
+  </div>
+  <div class="local-filters">
+    <span class="fl">Mês:</span>
+    <button class="fb on" data-em="-1" onclick="setExecMes(this)">Todos</button>
+    <button class="fb" data-em="1" onclick="setExecMes(this)">Janeiro</button>
+    <button class="fb" data-em="2" onclick="setExecMes(this)">Fevereiro</button>
+    <button class="fb" data-em="3" onclick="setExecMes(this)">Março</button>
+  </div>
+  <div id="cf-exec" class="cf-active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span class="cf-active-lbl" id="cf-exec-lbl"></span><button class="cf-clear" onclick="clearCF('exec')">✕ Limpar filtro</button></div>
   <div id="kpi1" class="krow"></div>
   <div id="gaugeRow" style="display:flex;gap:16px;margin-bottom:16px"></div>
   <div id="mc1"></div>
@@ -230,6 +264,13 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 
 <!-- PERFORMANCE -->
 <div id="v-perf" class="hidden">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Performance Comercial</div>
+      <div class="tab-info-desc">Ranking e análise de desempenho individual e por regional. Compare volume pago, taxa de conversão e ticket médio de cada negociador. Filtre por mês para acompanhar resultados período a período — ou clique em uma barra do ranking para destacar aquele negociador em toda a aba.</div>
+    </div>
+  </div>
   <div class="local-filters">
     <span class="fl">Mês:</span>
     <select class="fsel" id="perfMes" onchange="fl.m=this.value;rr()">
@@ -239,6 +280,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
       <option value="3">Março</option>
     </select>
   </div>
+  <div id="cf-perf" class="cf-active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span class="cf-active-lbl" id="cf-perf-lbl"></span><button class="cf-clear" onclick="clearCF('perf')">✕ Limpar filtro</button></div>
   <div id="kpi2" class="krow" style="grid-template-columns:repeat(5,1fr)"></div>
   <div class="st">Performance Regional — KPIs YTD</div>
   <div id="tRP" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px"></div>
@@ -258,26 +300,58 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 
 <!-- FUNIL & ESTOQUE -->
 <div id="v-funil" class="hidden">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 3H2l8 9.46V19l4 2V12.46z"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Funil de Negociação & Estoque</div>
+      <div class="tab-info-desc">Acompanhamento das operações em andamento por etapa do funil, atividades comerciais em aberto, pendências por regional e análise de devoluções (operações reprovadas). Clique nas barras do funil ou nos motivos de encerramento para filtrar a tabela de devoluções abaixo.</div>
+    </div>
+  </div>
   <div class="local-filters">
     <span class="fl">Etapa:</span>
     <select class="fsel" id="funilEtapa" onchange="fl.fe=this.value;rFunil()">
       <option value="-1">Todas</option>
     </select>
+    <span class="fl" style="margin-left:8px">Mês Cadastro:</span>
+    <select class="fsel" id="funilMes" onchange="fl.fm=this.value;rFunil()">
+      <option value="-1">Todos</option>
+      <option value="1">Janeiro</option>
+      <option value="2">Fevereiro</option>
+      <option value="3">Março</option>
+    </select>
   </div>
+  <div id="cf-funil" class="cf-active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span class="cf-active-lbl" id="cf-funil-lbl"></span><button class="cf-clear" onclick="clearCF('funil')">✕ Limpar filtro</button></div>
   <div id="kpi3" class="krow"></div>
   <div class="st">Pendências Comerciais por Regional</div>
   <div class="cd" style="margin-bottom:16px"><div class="tw" id="tPD"></div></div>
   <div class="row2">
-    <div class="cd"><h3>Funil por Etapa</h3><div class="cw" style="height:340px"><canvas id="cFN"></canvas></div></div>
+    <div class="cd"><h3>Funil por Etapa <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar devoluções)</span></h3><div class="cw" style="height:340px"><canvas id="cFN"></canvas></div></div>
     <div class="cd"><h3>Atividade Atual</h3><div class="cw" style="height:340px"><canvas id="cAT"></canvas></div></div>
   </div>
-  <div class="st">Motivos de Encerramento</div>
+  <div class="st">Motivos de Encerramento <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar tabela abaixo)</span></div>
   <div class="row1"><div class="cd"><div class="cw" style="height:340px"><canvas id="cMT"></canvas></div></div></div>
+  <div class="st">Tabela Analítica de Devoluções</div>
+  <div class="cd" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--text3)">Filtrar por motivo:</span>
+      <select class="fsel" id="devMot" onchange="rDevolucoes()"><option value="-1">Todos os motivos</option></select>
+      <select class="fsel" id="devReg" onchange="rDevolucoes()"><option value="-1">Todas as regionais</option><option value="0">Regional A</option><option value="1">Regional B</option><option value="2">Regional C</option><option value="3">Regional D</option></select>
+      <span id="devCount" style="font-size:11px;color:var(--text4);margin-left:auto"></span>
+    </div>
+    <div class="dev-wrap" id="tDEV"></div>
+  </div>
   <div id="insights-funil"></div>
 </div>
 
 <!-- ANALÍTICO ESTOQUE -->
 <div id="v-analitico" class="hidden">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Analítico de Estoque</div>
+      <div class="tab-info-desc">Visão operacional completa das operações em andamento. Use os filtros de regional, coordenador, negociador, etapa e pendência para identificar operações prioritárias, acompanhar titulares e entes devedores individuais — e exporte os dados para análise via Excel.</div>
+    </div>
+  </div>
   <div class="local-filters">
     <span class="fl">Regional:</span>
     <select class="fsel" id="anaReg" onchange="rAnalitico()">
@@ -318,7 +392,39 @@ const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez
 const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
 
 
-let ch={},at='exec',fl={s:'t',r:'t',n:'-1',m:'-1',fm:'-1',fe:'-1'};
+let ch={},at='exec',fl={s:'t',r:'t',n:'-1',m:'-1',em:'-1',fm:'-1',fe:'-1',dm:'-1'};
+// cf = cross-filter state per tab: {exec:{type,val,label}, perf:{...}, funil:{...}}
+const cf={exec:{active:false},perf:{active:false},funil:{active:false}};
+
+function setExecMes(btn){
+  fl.em=btn.dataset.em;
+  document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  rr();
+}
+
+function setCF(tab,type,val,label){
+  cf[tab]={active:true,type,val,label};
+  const el=document.getElementById('cf-'+tab);
+  const lbl=document.getElementById('cf-'+tab+'-lbl');
+  if(el){el.classList.add('show')}
+  if(lbl){lbl.textContent='Filtro ativo: '+label}
+  if(type==='reg'){fl.r=String(val);document.querySelectorAll('.fb[data-f="r"]').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.fb[data-f="r"][data-v="'+val+'"]').forEach(b=>b.classList.add('on'));populateNegFilter();}
+  if(type==='neg'){fl.n=String(val);const sel=document.getElementById('negFilter');if(sel){sel.value=String(val);}}
+  if(type==='etapa'){fl.fe=String(val);const s=document.getElementById('funilEtapa');if(s)s.value=String(val);}
+  if(type==='dev_mot'){window._cfDevMot=val;rDevolucoes();}
+  rr();
+}
+
+function clearCF(tab){
+  cf[tab]={active:false};
+  const el=document.getElementById('cf-'+tab);
+  if(el)el.classList.remove('show');
+  if(tab==='exec'){fl.r='t';document.querySelectorAll('.fb[data-f="r"]').forEach(b=>b.classList.remove('on'));document.querySelector('.fb[data-f="r"][data-v="t"]').classList.add('on');populateNegFilter();}
+  if(tab==='perf'){fl.n='-1';const sel=document.getElementById('negFilter');if(sel)sel.value='-1';}
+  if(tab==='funil'){fl.fe='-1';const s=document.getElementById('funilEtapa');if(s)s.value='-1';window._cfDevMot=undefined;}
+  rr();
+}
 
 // Chart defaults
 Chart.defaults.color='#64748B';Chart.defaults.borderColor='#E2E8F0';
@@ -483,32 +589,52 @@ function calcNegByMonth(month){
 function rExec(){
   // Meta NÃO filtra por negociador - somente até nível regional
   const fm=gm();
+  const execMes=fl.em!=='-1'?parseInt(fl.em):-1;
   const rY=fm.r.slice(0,3).reduce((a,b)=>a+b,0);
   const mY=fm.m.slice(0,3).reduce((a,b)=>a+b,0);
   const pY=mY?(rY/mY*100):0;
   const pA=fm.a?(rY/fm.a*100):0;
 
-  // KPIs filtram por negociador (via filterRW)
+  // KPIs filtram por negociador (via filterRW) e por mês se selecionado
   const allOps=filterRW();
-  const aprOps=allOps.filter(r=>r[0]===1);
+  let aprOps,repOps,andOps,kpiLabel,receitaFiltered;
+  if(execMes>0){
+    const vi=9+execMes;
+    aprOps=allOps.filter(r=>r[0]===1&&r[vi]>0);
+    repOps=allOps.filter(r=>r[0]===2&&r[15]===execMes);
+    andOps=allOps.filter(r=>r[0]===0&&r[15]===execMes);
+    receitaFiltered=aprOps.reduce((a,r)=>a+r[vi],0);
+    kpiLabel=MO[execMes-1]+'/26';
+  } else {
+    aprOps=allOps.filter(r=>r[0]===1);
+    repOps=allOps.filter(r=>r[0]===2);
+    andOps=allOps.filter(r=>r[0]===0);
+    receitaFiltered=aprOps.reduce((a,r)=>a+r[10]+r[11]+r[12],0);
+    kpiLabel='YTD 26';
+  }
   const aprCount=aprOps.length;
-  const repCount=allOps.filter(r=>r[0]===2).length;
-  const andCount=allOps.filter(r=>r[0]===0).length;
-  const pipeVal=allOps.filter(r=>r[0]===0).reduce((a,r)=>a+r[3],0);
-  const receitaFiltered=aprOps.reduce((a,r)=>a+r[10]+r[11]+r[12],0);
+  const repCount=repOps.length;
+  const andCount=andOps.length;
+  const pipeVal=andOps.reduce((a,r)=>a+r[3],0);
   const convR=(aprCount+repCount)>0?(aprCount/(aprCount+repCount)*100):0;
   const ticket=aprCount>0?receitaFiltered/aprCount:0;
 
   document.getElementById('kpi1').innerHTML=`
-    <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO — YTD 26</div><div class="kc-val" style="color:var(--green)">${F(rY)}</div><div class="kc-sub">Volume líquido a receber</div></div>
+    <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO — ${kpiLabel}</div><div class="kc-val" style="color:var(--green)">${execMes>0?F(receitaFiltered):F(rY)}</div><div class="kc-sub">Volume líquido ${execMes>0?'pago no período':'a receber YTD'}</div></div>
     <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${andCount} operações em andamento | Volume projetado</div></div>
-    <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES APROVADAS — YTD 26</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
-    <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — YTD 26</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">Qtd. Aprovados / (Aprovados + Reprovados)</div></div>
-    <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO — YTD 26</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
-    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — YTD 26</div><div class="kc-val" style="color:var(--red)">${repCount}</div><div class="kc-sub">${(repCount/(aprCount+repCount)*100).toFixed(1)}% do total fechado | Qtd. de processos</div></div>
+    <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES APROVADAS — ${kpiLabel}</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">Qtd. Aprovados / (Aprovados + Reprovados)</div></div>
+    <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO — ${kpiLabel}</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
+    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${repCount}</div><div class="kc-sub">${(aprCount+repCount)>0?(repCount/(aprCount+repCount)*100).toFixed(1):0}% do total fechado | Qtd. de processos</div></div>
   `;
 
-  document.getElementById('mc1').innerHTML=`<div class="meta-card"><h3>Meta vs Realizado — ${fm.l}</h3><div class="mg"><div class="mh"><h4>Meta Anual</h4><div class="mr"><span class="lb">Meta Total</span><span class="vl">${F(fm.a)}</span></div><div class="mr"><span class="lb">Realizado YTD</span><span class="vl" style="color:var(--green)">${F(rY)}</span></div><div class="mr"><span class="lb">Atingimento</span><span class="bd ${bc(pA)}">${pA.toFixed(1)}%</span></div><div class="mbar"><div class="mbar-f" style="width:${Math.min(pA,100)}%;background:${pA>=80?'var(--green)':pA>=40?'var(--yellow)':'var(--red)'}"></div></div></div><div class="mh"><h4>Acumulado YTD (Jan — Mar)</h4><div class="mr"><span class="lb">Meta Acumulada</span><span class="vl">${F(mY)}</span></div><div class="mr"><span class="lb">Realizado</span><span class="vl" style="color:var(--green)">${F(rY)}</span></div><div class="mr"><span class="lb">Atingimento</span><span class="bd ${bc(pY)}">${pY.toFixed(1)}%</span></div><div class="mbar"><div class="mbar-f" style="width:${Math.min(pY,100)}%;background:${pY>=80?'var(--green)':pY>=40?'var(--yellow)':'var(--red)'}"></div></div><div style="margin-top:10px;display:flex;gap:16px;font-size:11px;color:var(--text4)">${fm.r.slice(0,3).map((v,i)=>{const p=fm.m[i]?(v/fm.m[i]*100):0;return`<div><div style="font-weight:700;color:var(--text2)">${MO[i]}/26</div><div>${F(v)}</div><div><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></div></div>`}).join('')}</div></div></div></div>`;
+  // Meta card: highlight selected month
+  const metaMesesHtml=fm.r.slice(0,3).map((v,i)=>{
+    const p=fm.m[i]?(v/fm.m[i]*100):0;
+    const isSelected=execMes===(i+1);
+    return`<div style="${isSelected?'background:rgba(0,116,255,.08);border-radius:8px;padding:6px 10px;':''}"><div style="font-weight:700;color:${isSelected?'var(--accent)':'var(--text2)'}">${MO[i]}/26${isSelected?' ◀':''}</div><div>${F(v)}</div><div><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></div></div>`;
+  }).join('');
+  document.getElementById('mc1').innerHTML=`<div class="meta-card"><h3>Meta vs Realizado — ${fm.l}</h3><div class="mg"><div class="mh"><h4>Meta Anual</h4><div class="mr"><span class="lb">Meta Total</span><span class="vl">${F(fm.a)}</span></div><div class="mr"><span class="lb">Realizado YTD</span><span class="vl" style="color:var(--green)">${F(rY)}</span></div><div class="mr"><span class="lb">Atingimento</span><span class="bd ${bc(pA)}">${pA.toFixed(1)}%</span></div><div class="mbar"><div class="mbar-f" style="width:${Math.min(pA,100)}%;background:${pA>=80?'var(--green)':pA>=40?'var(--yellow)':'var(--red)'}"></div></div></div><div class="mh"><h4>Acumulado YTD (Jan — Mar)</h4><div class="mr"><span class="lb">Meta Acumulada</span><span class="vl">${F(mY)}</span></div><div class="mr"><span class="lb">Realizado</span><span class="vl" style="color:var(--green)">${F(rY)}</span></div><div class="mr"><span class="lb">Atingimento</span><span class="bd ${bc(pY)}">${pY.toFixed(1)}%</span></div><div class="mbar"><div class="mbar-f" style="width:${Math.min(pY,100)}%;background:${pY>=80?'var(--green)':pY>=40?'var(--yellow)':'var(--red)'}"></div></div><div style="margin-top:10px;display:flex;gap:16px;font-size:11px;color:var(--text4)">${metaMesesHtml}</div></div></div></div>`;
 
   // Gauge speedometers
   document.getElementById('gaugeRow').innerHTML=`
@@ -543,7 +669,10 @@ function rExec(){
   dc('cTend');
   const recM=fm.r.slice(0,3).filter(v=>v>0);
   const recL=MO.slice(0,recM.length).map(m=>m+'/26');
-  ch['cTend']=new Chart(document.getElementById('cTend'),{type:'line',data:{labels:recL,datasets:[{data:recM.map(v=>v/1e6),borderColor:'var(--accent)',backgroundColor:'rgba(0,116,255,.08)',fill:true,tension:.3,pointRadius:6,pointBackgroundColor:'var(--accent)',pointBorderWidth:2,pointBorderColor:'#F5F7FA',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.raw.toFixed(1)+'M'}}},scales:{y:{title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false}}}}});
+  const bgTend=recM.map((_,i)=>execMes>0&&(i+1)===execMes?'rgba(0,116,255,.25)':'rgba(0,116,255,.08)');
+  const ptTend=recM.map((_,i)=>execMes>0&&(i+1)===execMes?9:6);
+  ch['cTend']=new Chart(document.getElementById('cTend'),{type:'line',data:{labels:recL,datasets:[{data:recM.map(v=>v/1e6),borderColor:'var(--accent)',backgroundColor:bgTend,fill:true,tension:.3,pointRadius:ptTend,pointBackgroundColor:'var(--accent)',pointBorderWidth:2,pointBorderColor:'#F5F7FA',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const mi=els[0].index+1;if(execMes===mi){fl.em='-1';document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));document.querySelector('[data-em="-1"]').classList.add('on');}else{fl.em=String(mi);document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));const btn=document.querySelector('[data-em="'+mi+'"]');if(btn)btn.classList.add('on');}rr();}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.raw.toFixed(1)+'M'}}},scales:{y:{title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false}}}}});
+  document.getElementById('cTend').style.cursor='pointer';
   const lastVar=recM.length>=2?((recM[recM.length-1]-recM[recM.length-2])/recM[recM.length-2]*100):0;
   document.getElementById('varBadge').innerHTML=lastVar!==0?`<span class="var-badge ${lastVar>=0?'var-up':'var-down'}">${lastVar>=0?'+':''}${lastVar.toFixed(1)}% vs mês anterior</span>`:'';
 
@@ -561,11 +690,14 @@ function rExec(){
   });
   const ccRegTitle=fl.r!=='t'?`Conversão Conta Corrente — ${RN[parseInt(fl.r)]} — YTD 26`:`Conversão Conta Corrente por Regional — YTD 26`;
   const hCCEl=document.getElementById('hCCReg');if(hCCEl)hCCEl.textContent=ccRegTitle;
+  const regBgMov=regData.map(r=>{const ri=RN.indexOf(r.name);return(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri)?'rgba(0,166,140,1)':'rgba(0,166,140,.7)'});
+  const regBgPago=regData.map(r=>{const ri=RN.indexOf(r.name);return(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri)?'rgba(0,116,255,.85)':'rgba(0,116,255,.5)'});
   ch['cRegPerf']=new Chart(document.getElementById('cRegPerf'),{type:'bar',data:{labels:regData.map(r=>r.name),datasets:[
-    {label:'Est. Movimentado',data:regData.map(r=>r.movimentado),backgroundColor:'rgba(0,166,140,.7)',borderRadius:4,yAxisID:'y'},
-    {label:'Valor Pago',data:regData.map(r=>r.pago),backgroundColor:'rgba(0,116,255,.5)',borderRadius:4,yAxisID:'y'},
+    {label:'Est. Movimentado',data:regData.map(r=>r.movimentado),backgroundColor:regBgMov,borderRadius:4,yAxisID:'y'},
+    {label:'Valor Pago',data:regData.map(r=>r.pago),backgroundColor:regBgPago,borderRadius:4,yAxisID:'y'},
     {label:'Conversão Conta Corrente (%)',data:regData.map(r=>r.convCC),type:'line',borderColor:'#eab308',backgroundColor:'rgba(234,179,8,.1)',pointBackgroundColor:'#eab308',pointRadius:5,borderWidth:2.5,tension:.3,yAxisID:'y1'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10}}},title:{display:false}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v+'M'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,max:100,title:{display:true,text:'Conversão (%)'},ticks:{callback:v=>v+'%'},grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  ]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const idx=els[0].index;const rName=regData[idx].name;const ri=RN.indexOf(rName);if(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri){clearCF('exec');}else{setCF('exec','reg',ri,rName);}}},plugins:{legend:{position:'top',align:'end',labels:{font:{size:10}}},title:{display:false},tooltip:{callbacks:{title:t=>`${t[0].label} (clique para filtrar)`}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v+'M'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,max:100,title:{display:true,text:'Conversão (%)'},ticks:{callback:v=>v+'%'},grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  document.getElementById('cRegPerf').style.cursor='pointer';
 
   // ===== GRÁFICOS DIÁRIOS: Volume & Ticket Médio (aba Executivo) =====
   if(typeof DY!=='undefined' && DY.length>0){
@@ -716,9 +848,15 @@ function rPerf(){
   negs.forEach((n,i)=>{th+=`<tr><td><span class="rn ${rc(i)}">${i+1}</span></td><td><strong>${n[0]}</strong></td><td>${n[1]}</td><td>${n[2]}</td><td style="text-align:right">${n[3]}</td><td style="text-align:right;color:var(--green)">${n[4]}</td><td style="text-align:right;color:var(--red)">${n[5]}</td><td style="text-align:right;color:var(--blue)">${n[6]}</td><td style="text-align:right">${n[7]>0?F(n[7]):'-'}</td><td style="text-align:right">${n[8]>0?F(n[8]):'-'}</td><td style="text-align:right">${n[9]>0?F(n[9]):'-'}</td><td style="text-align:right"><strong>${F(n[10])}</strong></td><td style="text-align:right"><span class="bd ${n[11]>=50?'bg':n[11]>=30?'by':'br'}">${typeof n[11]==='number'?n[11].toFixed(1):n[11]}%</span></td><td style="text-align:right">${n[13]>0?F(n[13]):'-'}</td></tr>`});
   th+='</tbody></table>';document.getElementById('tNG').innerHTML=th;
 
-  dc('cTN');const t10=negs.slice(0,10);ch['cTN']=new Chart(document.getElementById('cTN'),{type:'bar',data:{labels:t10.map(n=>n[0]),datasets:[{data:t10.map(n=>n[10]/1e6),backgroundColor:'rgba(0,166,140,.65)',borderColor:'#00A68C',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.raw.toFixed(2)+'M'}}},scales:{x:{title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v+'M'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  dc('cTN');const t10=negs.slice(0,10);
+  const cTNbg=t10.map(n=>{const ni=NG.indexOf(n[0]);return(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni)?'rgba(0,166,140,1)':'rgba(0,166,140,.65)'});
+  ch['cTN']=new Chart(document.getElementById('cTN'),{type:'bar',data:{labels:t10.map(n=>n[0]),datasets:[{data:t10.map(n=>n[10]/1e6),backgroundColor:cTNbg,borderColor:'#00A68C',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const name=t10[els[0].index][0];const ni=NG.indexOf(name);if(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni){clearCF('perf');}else{setCF('perf','neg',ni,name);}}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.raw.toFixed(2)+'M',title:t=>`${t[0].label} (clique para filtrar)`}}},scales:{x:{title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v+'M'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}}}});
+  document.getElementById('cTN').style.cursor='pointer';
 
-  dc('cTC');const cn=negs.filter(n=>n[3]>=5).sort((a,b)=>b[11]-a[11]).slice(0,10);ch['cTC']=new Chart(document.getElementById('cTC'),{type:'bar',data:{labels:cn.map(n=>n[0]),datasets:[{data:cn.map(n=>typeof n[11]==='number'?n[11]:parseFloat(n[11])),backgroundColor:cn.map(n=>n[11]>=50?'rgba(0,166,140,.65)':n[11]>=30?'rgba(234,179,8,.65)':'rgba(239,68,68,.65)'),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%'}}},scales:{x:{beginAtZero:true,max:100,title:{display:true,text:'Conversão (%)'},ticks:{callback:v=>v+'%'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  dc('cTC');const cn=negs.filter(n=>n[3]>=5).sort((a,b)=>b[11]-a[11]).slice(0,10);
+  const cTCbg=cn.map(n=>{const ni=NG.indexOf(n[0]);const sel=(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni);return sel?'rgba(0,116,255,.85)':n[11]>=50?'rgba(0,166,140,.65)':n[11]>=30?'rgba(234,179,8,.65)':'rgba(239,68,68,.65)'});
+  ch['cTC']=new Chart(document.getElementById('cTC'),{type:'bar',data:{labels:cn.map(n=>n[0]),datasets:[{data:cn.map(n=>typeof n[11]==='number'?n[11]:parseFloat(n[11])),backgroundColor:cTCbg,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const name=cn[els[0].index][0];const ni=NG.indexOf(name);if(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni){clearCF('perf');}else{setCF('perf','neg',ni,name);}}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%',title:t=>`${t[0].label} (clique para filtrar)`}}},scales:{x:{beginAtZero:true,max:100,title:{display:true,text:'Conversão (%)'},ticks:{callback:v=>v+'%'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}}}});
+  document.getElementById('cTC').style.cursor='pointer';
 
   // ===== GRÁFICOS DIÁRIOS na aba Performance (com filtro de mês) =====
   if(typeof DY!=='undefined' && DY.length>0){
@@ -819,8 +957,9 @@ function rPerf(){
 function rFunil(){
   const andOps=filterRW(0);
   let funilData=andOps;
-  
+
   if(fl.fe && fl.fe!=='-1') funilData=funilData.filter(r=>r[4]===parseInt(fl.fe));
+  if(fl.fm && fl.fm!=='-1') funilData=funilData.filter(r=>r[15]===parseInt(fl.fm));
 
   const tF=funilData.length;
   const tFv=funilData.reduce((a,r)=>a+r[3],0);
@@ -872,7 +1011,9 @@ function rFunil(){
   const etapaOrdem=['Documentos preliminares','Conferência inicial','Avaliação do ativo','Providências jurídicas','Cálculo','Parecer do titular','Conferência final','Parecer jurídico','Confecção de documentos','Assinatura','Protocolo de cessão','Homologação','Pagamento'];
   const funSorted=Object.entries(funEtapas).sort((a,b)=>{const ia=etapaOrdem.indexOf(a[0]);const ib=etapaOrdem.indexOf(b[0]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
   const fc=['#0074FF','#6366f1','#0E2F5D','#a855f7','#c084fc','#00A68C','#14b8a6','#eab308','#f97316','#ef4444'];
-  ch['cFN']=new Chart(document.getElementById('cFN'),{type:'bar',data:{labels:funSorted.map(f=>f[0]),datasets:[{label:'Quantidade',data:funSorted.map(f=>f[1].count),backgroundColor:fc.slice(0,funSorted.length),borderRadius:4,yAxisID:'y'},{label:'Valor Líquido (R$ MM)',data:funSorted.map(f=>f[1].val/1e6),type:'line',borderColor:'var(--accent)',pointBackgroundColor:'var(--accent)',pointRadius:4,tension:.3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},title:{display:false},tooltip:{callbacks:{label:c=>c.datasetIndex===0?c.raw+' operações':'R$ '+c.raw.toFixed(1)+'M'}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'Qtd Operações'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,title:{display:true,text:'R$ Milhões'},grid:{display:false},ticks:{callback:v=>'R$ '+v+'M'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}}}}});
+  const cFNbg=funSorted.map((f,i)=>{const ei=ET.indexOf(f[0]);const sel=(cf.funil.active&&cf.funil.type==='etapa'&&cf.funil.val==ei);return sel?fc[i%fc.length]:fc[i%fc.length].replace(/,\d+(\.\d+)?\)$/,',0.65)')});
+  ch['cFN']=new Chart(document.getElementById('cFN'),{type:'bar',data:{labels:funSorted.map(f=>f[0]),datasets:[{label:'Quantidade',data:funSorted.map(f=>f[1].count),backgroundColor:fc.slice(0,funSorted.length),borderRadius:4,yAxisID:'y'},{label:'Valor Líquido (R$ MM)',data:funSorted.map(f=>f[1].val/1e6),type:'line',borderColor:'var(--accent)',pointBackgroundColor:'var(--accent)',pointRadius:4,tension:.3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0&&els[0].datasetIndex===0){const eName=funSorted[els[0].index][0];const ei=ET.indexOf(eName);if(cf.funil.active&&cf.funil.type==='etapa'&&cf.funil.val==ei){clearCF('funil');}else{setCF('funil','etapa',ei,eName);}}},plugins:{legend:{position:'bottom'},title:{display:false},tooltip:{callbacks:{label:c=>c.datasetIndex===0?c.raw+' operações':'R$ '+c.raw.toFixed(1)+'M',title:t=>`${t[0].label} (clique para filtrar)`}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'Qtd Operações'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,title:{display:true,text:'R$ Milhões'},grid:{display:false},ticks:{callback:v=>'R$ '+v+'M'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}}}}}}});
+  document.getElementById('cFN').style.cursor='pointer';
 
   dc('cAT');
   const ativGroups={};
@@ -891,7 +1032,67 @@ function rFunil(){
   const motGroups={};
   repOps.forEach(r=>{const m=MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado';if(!motGroups[m])motGroups[m]=0;motGroups[m]++});
   const motSorted=Object.entries(motGroups).sort((a,b)=>b[1]-a[1]);
-  ch['cMT']=new Chart(document.getElementById('cMT'),{type:'bar',data:{labels:motSorted.map(m=>m[0]),datasets:[{data:motSorted.map(m=>m[1]),backgroundColor:motSorted.map((_,i)=>`rgba(239,68,68,${.85-i*.04})`),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:false}},scales:{x:{beginAtZero:true,title:{display:true,text:'Quantidade'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  ch['cMT']=new Chart(document.getElementById('cMT'),{type:'bar',data:{labels:motSorted.map(m=>m[0]),datasets:[{data:motSorted.map(m=>m[1]),backgroundColor:motSorted.map((_,i)=>`rgba(239,68,68,${.85-i*.04})`),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const mot=motSorted[els[0].index][0];if(cf.funil.active&&cf.funil.type==='dev_mot'&&cf.funil.label===mot){clearCF('funil');}else{window._cfDevMot=mot;setCF('funil','dev_mot',mot,mot);rDevolucoes();}}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{title:t=>`${t[0].label} (clique para filtrar devoluções)`}}},scales:{x:{beginAtZero:true,title:{display:true,text:'Quantidade'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}}});
+  document.getElementById('cMT').style.cursor='pointer';
+
+  // Render devolucoes table after funil charts
+  rDevolucoes();
+}
+
+// ===== DEVOLUÇÕES TABLE =====
+function rDevolucoes(){
+  let repOpsAll=filterRW(2);
+  // Apply month filter
+  if(fl.fm && fl.fm!=='-1') repOpsAll=repOpsAll.filter(r=>r[15]===parseInt(fl.fm));
+  // Apply dev_mot cross-filter
+  const cfMot=window._cfDevMot;
+  if(cfMot){repOpsAll=repOpsAll.filter(r=>{const m=MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado';return m===cfMot;});}
+  // Apply dev motivo filter dropdown
+  const motSel=document.getElementById('devMot');
+  if(motSel&&motSel.value!=='-1') repOpsAll=repOpsAll.filter(r=>{const m=MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado';return m===motSel.value;});
+  // Apply dev regional filter
+  const regSel=document.getElementById('devReg');
+  if(regSel&&regSel.value!=='-1') repOpsAll=repOpsAll.filter(r=>r[2]===parseInt(regSel.value));
+
+  // Populate motivo dropdown
+  if(motSel){
+    const curMot=motSel.value;
+    const allMots=[...new Set(filterRW(2).map(r=>MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado'))].sort();
+    motSel.innerHTML='<option value="-1">Todos os motivos</option>'+allMots.map(m=>`<option value="${m}" ${m===curMot?'selected':''}>${m}</option>`).join('');
+  }
+
+  const countEl=document.getElementById('devCount');
+  if(countEl) countEl.textContent=`${repOpsAll.length} devoluções encontradas`;
+
+  const MOS=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  let th='<table><thead><tr><th>#</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Motivo de Encerramento</th><th>Mês</th><th style="text-align:right">Valor Líquido Real</th><th>Etapa</th><th>Atividade</th></tr></thead><tbody>';
+  if(repOpsAll.length===0){
+    th+='<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
+  } else {
+    repOpsAll.sort((a,b)=>b[14]-a[14]).forEach((r,i)=>{
+      const mot=(MT[r[6]]||'Não informado').replace('Motivo de encerramento: ','');
+      const seg=r[1]===0?'Mid-Market':'Varejo';
+      const mes=r[15]>0?MOS[r[15]]:'—';
+      const etapa=ET[r[4]]||'—';
+      const atv=(AV[r[5]]||'—').length>30?(AV[r[5]].substring(0,30)+'…'):AV[r[5]]||'—';
+      const motColor=mot==='Não informado'?'color:var(--text4)':'color:var(--red)';
+      th+=`<tr>
+        <td style="color:var(--text4)">${i+1}</td>
+        <td><strong>${NG[r[8]]||'—'}</strong></td>
+        <td>${CO[r[9]]||'—'}</td>
+        <td>${RN[r[2]]||'—'}</td>
+        <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${r[1]===0?'rgba(99,102,241,.12)':'rgba(0,116,255,.1)'};color:${r[1]===0?'#6366f1':'var(--accent)'};font-weight:600">${seg}</span></td>
+        <td style="${motColor};font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${mot}">${mot}</td>
+        <td>${mes}</td>
+        <td style="text-align:right;font-weight:600">${F(r[14])}</td>
+        <td style="font-size:10px;color:var(--text3)">${etapa}</td>
+        <td style="font-size:10px;color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${AV[r[5]]||''}">${atv}</td>
+      </tr>`;
+    });
+  }
+  th+='</tbody></table>';
+  const tDEV=document.getElementById('tDEV');
+  if(tDEV) tDEV.innerHTML=th;
 }
 
 // ===== ANALÍTICO ESTOQUE TAB =====
