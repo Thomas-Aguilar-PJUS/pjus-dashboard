@@ -598,6 +598,7 @@ function rExec(){
   // KPIs filtram por negociador (via filterRW) e por mês se selecionado
   const allOps=filterRW();
   let aprOps,repOps,andOps,kpiLabel,receitaFiltered;
+  let aprCountConv,repCountConv;
   if(execMes>0){
     const vi=9+execMes;
     aprOps=allOps.filter(r=>r[0]===1&&r[vi]>0);
@@ -605,12 +606,17 @@ function rExec(){
     andOps=allOps.filter(r=>r[0]===0&&r[15]===execMes);
     receitaFiltered=aprOps.reduce((a,r)=>a+r[vi],0);
     kpiLabel=MO[execMes-1]+'/26';
+    // Conversão: usar mês cadastro (r[15]) para ambos, garantindo consistência
+    aprCountConv=allOps.filter(r=>r[0]===1&&r[15]===execMes).length;
+    repCountConv=repOps.length;
   } else {
     aprOps=allOps.filter(r=>r[0]===1);
     repOps=allOps.filter(r=>r[0]===2);
     andOps=allOps.filter(r=>r[0]===0);
     receitaFiltered=aprOps.reduce((a,r)=>a+r[10]+r[11]+r[12],0);
     kpiLabel='YTD 26';
+    aprCountConv=aprOps.length;
+    repCountConv=repOps.length;
   }
   const aprCount=aprOps.length;
   const repCount=repOps.length;
@@ -619,16 +625,16 @@ function rExec(){
   const allAndOps=allOps.filter(r=>r[0]===0);
   const pipeVal=allAndOps.reduce((a,r)=>a+r[3],0);
   const pipeCount=allAndOps.length;
-  const convR=(aprCount+repCount)>0?(aprCount/(aprCount+repCount)*100):0;
+  const convR=(aprCountConv+repCountConv)>0?(aprCountConv/(aprCountConv+repCountConv)*100):0;
   const ticket=aprCount>0?receitaFiltered/aprCount:0;
 
   document.getElementById('kpi1').innerHTML=`
     <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO — ${kpiLabel}</div><div class="kc-val" style="color:var(--green)">${execMes>0?F(receitaFiltered):F(rY)}</div><div class="kc-sub">Volume líquido ${execMes>0?'pago no período':'a receber YTD'}</div></div>
     <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${pipeCount} operações em andamento | Volume projetado</div></div>
     <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES APROVADAS — ${kpiLabel}</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
-    <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">Qtd. Aprovados / (Aprovados + Reprovados)</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">${aprCountConv} aprovadas / ${aprCountConv+repCountConv} finalizadas | Mês Cadastro</div></div>
     <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO — ${kpiLabel}</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
-    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${repCount}</div><div class="kc-sub">${(aprCount+repCount)>0?(repCount/(aprCount+repCount)*100).toFixed(1):0}% do total fechado | Qtd. de processos</div></div>
+    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${repCountConv}</div><div class="kc-sub">${(aprCountConv+repCountConv)>0?(repCountConv/(aprCountConv+repCountConv)*100).toFixed(1):0}% do total fechado | Mês Cadastro</div></div>
   `;
 
   // Meta card: highlight selected month
@@ -1079,26 +1085,29 @@ function rDevolucoes(){
   const countEl=document.getElementById('devCount');
   if(countEl) countEl.textContent=`${repOpsAll.length} devoluções encontradas`;
 
-  const MOS=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  let th='<table><thead><tr><th>#</th><th>Credor</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Motivo de Encerramento</th><th>Mês</th><th style="text-align:right">Valor Líquido Real</th></tr></thead><tbody>';
+  let th='<table><thead><tr><th>#</th><th>Op. Titular</th><th>Titular</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Esfera</th><th>Tribunal</th><th>Motivo de Encerramento</th><th style="text-align:right">Valor Líquido Real</th></tr></thead><tbody>';
   if(repOpsAll.length===0){
-    th+='<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
+    th+='<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
   } else {
     repOpsAll.sort((a,b)=>b[14]-a[14]).forEach((r,i)=>{
       const mot=(MT[r[6]]||'Não informado').replace('Motivo de encerramento: ','');
       const seg=r[1]===0?'Mid-Market':'Varejo';
-      const mes=r[15]>0?MOS[r[15]]:'—';
-      const credor=(r.length>16&&r[16]>=0&&TT&&TT[r[16]])?TT[r[16]]:'—';
+      const titular=(r.length>16&&r[16]>=0&&TT&&TT[r[16]])?TT[r[16]]:'—';
+      const opTit=(r.length>17&&r[17])?r[17]:'—';
+      const esfera=(r.length>18&&r[18]>=0&&typeof ES!=='undefined'&&ES[r[18]])?ES[r[18]]:'—';
+      const tribunal=(r.length>19&&r[19]>=0&&typeof TR!=='undefined'&&TR[r[19]])?TR[r[19]]:'—';
       const motColor=mot==='Não informado'?'color:var(--text4)':'color:var(--red)';
       th+=`<tr>
         <td style="color:var(--text4)">${i+1}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${credor}">${credor}</td>
+        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--text4)" title="${opTit}">${opTit}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${titular}">${titular}</td>
         <td><strong>${NG[r[8]]||'—'}</strong></td>
         <td>${CO[r[9]]||'—'}</td>
         <td>${RN[r[2]]||'—'}</td>
         <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${r[1]===0?'rgba(99,102,241,.12)':'rgba(0,116,255,.1)'};color:${r[1]===0?'#6366f1':'var(--accent)'};font-weight:600">${seg}</span></td>
+        <td>${esfera}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${tribunal}">${tribunal}</td>
         <td style="${motColor};font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${mot}">${mot}</td>
-        <td>${mes}</td>
         <td style="text-align:right;font-weight:600">${F(r[14])}</td>
       </tr>`;
     });
