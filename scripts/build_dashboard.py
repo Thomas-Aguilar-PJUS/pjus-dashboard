@@ -232,8 +232,8 @@ for op in ARGUS.get('oportunidades', []):
         "fonte": "DJEN", "trib": op.get('trib', 'DJEN'),
         "scoreN": min(5, score), "scoreP": min(5, max(1, score - 1)),
         "ente": (op.get('ente_devedor', 'N/D') or 'N/D').upper(),
-        "benef": benef.upper() if benef != 'N/D' else benef,
-        "adv": adv.upper() if adv != 'N/D' else adv,
+        "benef": (benef or 'N/D').upper() if benef and benef != 'N/D' else 'N/D',
+        "adv": (adv or 'N/D').upper() if adv and adv != 'N/D' else 'N/D',
         "valor": valor,
         "fase": FASE_LABELS.get(fase, fase), "mat": mat,
     })
@@ -241,7 +241,7 @@ for op in ARGUS.get('oportunidades', []):
 # ── BENEFS (from top_beneficiarios) ──
 BENEFS = []
 for tb in ARGUS.get('top_beneficiarios', []):
-    nome = extract_name(tb.get('nome', 'N/D')).upper()
+    nome = (extract_name(tb.get('nome', 'N/D')) or 'N/D').upper()
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, tb.get('pubs', 1) // n_months)
@@ -261,7 +261,7 @@ for tb in ARGUS.get('top_beneficiarios', []):
 # ── ADV_DATA (from top_advogados) ──
 ADV_DATA = []
 for ta in ARGUS.get('top_advogados', []):
-    nome = extract_name(ta.get('nome', 'N/D')).upper()
+    nome = (extract_name(ta.get('nome', 'N/D')) or 'N/D').upper()
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, ta.get('pubs', 1) // n_months)
@@ -399,7 +399,7 @@ for al in ARGUS.get('alertas', []):
         "tipo": tipo,
         "trib": al.get('trib', 'DJEN'),
         "ente": (al.get('ente_devedor', 'N/D') or 'N/D').upper(),
-        "benef": benef.upper() if benef != 'N/D' else benef,
+        "benef": (benef or 'N/D').upper() if benef and benef != 'N/D' else 'N/D',
         "valor": valor,
         "score": score,
         "fase": FASE_LABELS.get(fase, fase), "mat": mat,
