@@ -136,7 +136,7 @@ for ed in ARGUS.get('entes_devedores', [])[:30]:
             "vol": max(1, int(vol_total / n_months * g)),
             "val": round(val_total / n_months / 1e6 * g, 2),
             "y": mi["y"], "m": mi["m"], "ml": mi["label"],
-            "fase": fase, "mat": mat,
+            "fase": FASE_LABELS.get(fase, fase), "mat": mat,
             "score": min(5, max(1, int(round(score))))
         })
 
@@ -234,7 +234,7 @@ for op in ARGUS.get('oportunidades', []):
         "ente": op.get('ente_devedor', 'N/D') or 'N/D',
         "benef": benef, "adv": adv,
         "valor": valor,
-        "fase": fase, "mat": mat,
+        "fase": FASE_LABELS.get(fase, fase), "mat": mat,
     })
 
 # ── BENEFS (from top_beneficiarios) ──
@@ -253,7 +253,7 @@ for tb in ARGUS.get('top_beneficiarios', []):
             "adv": "N/D",
             "y": mi["y"], "m": mi["m"],
             "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN',
-            "fase": random.choice(FASES[:6]),
+            "fase": FASE_LABELS.get(random.choice(FASES[:6]), 'Outro'),
             "mat": random.choice(MATS[:4])
         })
 
@@ -274,7 +274,7 @@ for ta in ARGUS.get('top_advogados', []):
             "trib": tribs_list[0] if tribs_list else 'DJEN',
             "score": ta.get('score_medio', 3.0) or 3.0,
             "y": mi["y"], "m": mi["m"],
-            "fase": random.choice(FASES[:6]),
+            "fase": FASE_LABELS.get(random.choice(FASES[:6]), 'Outro'),
             "mat": random.choice(MATS[:4])
         })
 
@@ -350,7 +350,7 @@ for fv in ARGUS.get('faixas_valor', []):
             "tend": "→",
             "y": mi["y"], "m": mi["m"],
             "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN',
-            "fase": random.choice(FASES[:6]),
+            "fase": FASE_LABELS.get(random.choice(FASES[:6]), 'Outro'),
             "mat": random.choice(MATS[:4]),
             "score": fv.get('score_medio', 3) or 3
         })
@@ -401,7 +401,7 @@ for al in ARGUS.get('alertas', []):
         "benef": benef,
         "valor": valor,
         "score": score,
-        "fase": fase, "mat": mat,
+        "fase": FASE_LABELS.get(fase, fase), "mat": mat,
         "acao": random.choice(ACOES),
     })
 
