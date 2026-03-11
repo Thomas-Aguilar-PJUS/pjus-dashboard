@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-PJUS - Extrator de Dados do Banco Argus (GitHub Actions version)
-Uses environment variables for DB credentials.
+PJUS - Extrator de Dados do Banco Argus (v6 - robust valor_face conversion)
+GitHub Actions version - uses environment variables for DB credentials.
+Handles: "R$ 130.000,00", "R$8211.21", "60 salarios minimos", "A CALCULAR", "106.421.15", etc.
 """
 
 import json
@@ -25,7 +26,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "..")
 ERROS = []
 
-# Robust valor_face conversion
+# Robust valor_face conversion using regex validation BEFORE casting
 VCONV = """CASE
     WHEN REGEXP_REPLACE(TRIM(COALESCE(valor_face,'')), '^R\\$\\s*', '') ~ '^\\d{1,3}(\\.\\d{3})*(,\\d+)?$' THEN
         REPLACE(REPLACE(REPLACE(REPLACE(valor_face, 'R$ ', ''), 'R$', ''), '.', ''), ',', '.')::numeric
@@ -64,7 +65,7 @@ def q(conn, sql, name):
 
 def main():
     print("=" * 60)
-    print("PJUS - Extracao de Dados (GitHub Actions)")
+    print("PJUS - Extracao de Dados v6 (GitHub Actions)")
     print(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
     print("=" * 60)
 
@@ -256,32 +257,34 @@ def main():
         GROUP BY sigla_tribunal, y, m ORDER BY trib, y, m
     """, "tendencia_tribunal")
 
+    # Top beneficiarios
     D["top_beneficiarios"] = q(conn, f"""
-        SELECT COALESCE(b->>'nome', b#>>'{{}}') AS nome,
+        SELECT b AS nome,
                COUNT(*) AS pubs,
                COALESCE(SUM({VCONV}), 0) AS valor_total,
                ROUND(AVG(score_interesse)::numeric, 1) AS score_medio,
                COUNT(DISTINCT sigla_tribunal) AS num_tribs
         FROM djen_precatorio,
-             LATERAL jsonb_array_elements(beneficiarios_ia) AS b
+             LATERAL jsonb_array_elements_text(beneficiarios_ia) AS b
         WHERE beneficiarios_ia IS NOT NULL
           AND jsonb_array_length(beneficiarios_ia) > 0
           AND score_interesse >= 3
-        GROUP BY nome ORDER BY pubs DESC LIMIT 50
+        GROUP BY b ORDER BY pubs DESC LIMIT 50
     """, "top_beneficiarios")
 
+    # Top advogados
     D["top_advogados"] = q(conn, f"""
-        SELECT COALESCE(a->>'nome', a#>>'{{}}') AS nome,
+        SELECT a AS nome,
                COUNT(*) AS pubs,
                COALESCE(SUM({VCONV}), 0) AS valor_total,
                ROUND(AVG(score_interesse)::numeric, 1) AS score_medio,
                COUNT(DISTINCT sigla_tribunal) AS num_tribs
         FROM djen_precatorio,
-             LATERAL jsonb_array_elements(advogados_ia) AS a
+             LATERAL jsonb_array_elements_text(advogados_ia) AS a
         WHERE advogados_ia IS NOT NULL
           AND jsonb_array_length(advogados_ia) > 0
           AND score_interesse >= 3
-        GROUP BY nome ORDER BY pubs DESC LIMIT 50
+        GROUP BY a ORDER BY pubs DESC LIMIT 50
     """, "top_advogados")
 
     # ── AMAPÁ ──
@@ -315,7 +318,7 @@ def main():
     conn.close()
     D["erros"] = ERROS
 
-    # Save to repo root as data.json
+    # Save
     path = os.path.join(OUTPUT_DIR, "data", "dados_argus.json")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
