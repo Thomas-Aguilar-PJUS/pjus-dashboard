@@ -163,7 +163,7 @@ def main():
                COUNT(*) AS vol,
                COALESCE(SUM({VCONV}), 0) AS val
         FROM djen_precatorio
-        WHERE fase_pjus IS NOT NULL
+        WHERE fase_pjus IS NOT NULL AND fase_pjus != ''
           AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '12 months'
         GROUP BY fase_pjus, y, m ORDER BY fase, y, m
     """, "pipeline_mensal")

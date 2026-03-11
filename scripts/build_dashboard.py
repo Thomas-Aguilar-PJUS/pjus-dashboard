@@ -282,7 +282,9 @@ for ta in ARGUS.get('top_advogados', []):
 # ── PIPELINE (from pipeline_fase + pipeline_mensal) ──
 PIPELINE = []
 for pm in ARGUS.get('pipeline_mensal', []):
-    fase = pm.get('fase', 'outro')
+    fase = pm.get('fase', '') or ''
+    if not fase or fase.strip() == '':
+        continue  # Skip records with empty fase
     mat = FASE_MAT.get(fase, 'Média')
     label = FASE_LABELS.get(fase, fase)
     PIPELINE.append({
