@@ -161,7 +161,9 @@ def main():
                EXTRACT(YEAR FROM data_disponibilizacao)::int AS y,
                EXTRACT(MONTH FROM data_disponibilizacao)::int AS m,
                COUNT(*) AS vol,
-               COALESCE(SUM({VCONV}), 0) AS val
+               COALESCE(SUM({VCONV}), 0) AS val,
+               ROUND(AVG(score_interesse)::numeric, 1) AS score_medio,
+               ROUND(AVG(EXTRACT(EPOCH FROM (CURRENT_DATE - data_disponibilizacao)) / 86400)::numeric, 0) AS dias_medio
         FROM djen_precatorio
         WHERE fase_pjus IS NOT NULL AND fase_pjus != ''
           AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '12 months'

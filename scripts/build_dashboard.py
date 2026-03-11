@@ -280,6 +280,11 @@ for ta in ARGUS.get('top_advogados', []):
         })
 
 # ── PIPELINE (from pipeline_fase + pipeline_mensal) ──
+# Build score lookup from pipeline_fase (fallback for older data without score_medio)
+FASE_SCORE = {}
+for pf in ARGUS.get('pipeline_fase', []):
+    FASE_SCORE[pf.get('fase', '')] = pf.get('score_medio', 3.0) or 3.0
+
 PIPELINE = []
 for pm in ARGUS.get('pipeline_mensal', []):
     fase = pm.get('fase', '') or ''
@@ -287,12 +292,21 @@ for pm in ARGUS.get('pipeline_mensal', []):
         continue  # Skip records with empty fase
     mat = FASE_MAT.get(fase, 'Média')
     label = FASE_LABELS.get(fase, fase)
+    # Use real score_medio from query (or fallback to pipeline_fase lookup)
+    score = pm.get('score_medio') or FASE_SCORE.get(fase, 3.0)
+    score = round(float(score), 1) if score else 3.0
+    # Use real dias_medio from query (or estimate from maturidade)
+    dias = pm.get('dias_medio')
+    if dias:
+        dias = int(float(dias))
+    else:
+        dias = {'Muito Alta': 30, 'Alta': 60, 'Média': 100, 'Média-Baixa': 130, 'Baixa': 160}.get(mat, 100)
     PIPELINE.append({
         "fase": label,
         "vol": pm.get('vol', 0),
         "val": round((pm.get('val', 0) or 0) / 1e6, 2),
-        "score": 3.5,
-        "dias": random.randint(30, 180),
+        "score": score,
+        "dias": dias,
         "mat": mat,
         "acao": "Monitorar",
         "y": pm.get('y', 2026),
