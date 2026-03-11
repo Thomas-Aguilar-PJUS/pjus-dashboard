@@ -9,6 +9,20 @@ from datetime import date, timedelta, datetime
 
 random.seed(42)
 
+def extract_name(val):
+    """Extract name from JSONB object or return string as-is."""
+    if isinstance(val, dict):
+        return val.get('nome', val.get('name', str(val)))
+    if isinstance(val, str):
+        # Try parsing as JSON in case it's a text representation
+        try:
+            parsed = json.loads(val)
+            if isinstance(parsed, dict):
+                return parsed.get('nome', parsed.get('name', val))
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return str(val) if val else 'N/D'
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.join(SCRIPT_DIR, "..")
 
@@ -166,12 +180,16 @@ for op in ARGUS.get('oportunidades', []):
     if isinstance(benef_list, str):
         try: benef_list = json.loads(benef_list)
         except: benef_list = [benef_list]
-    benef = benef_list[0] if benef_list else 'N/D'
+    if not isinstance(benef_list, list):
+        benef_list = [benef_list] if benef_list else []
+    benef = extract_name(benef_list[0]) if benef_list else 'N/D'
     adv_list = op.get('advogados', [])
     if isinstance(adv_list, str):
         try: adv_list = json.loads(adv_list)
         except: adv_list = [adv_list]
-    adv = adv_list[0] if adv_list else 'N/D'
+    if not isinstance(adv_list, list):
+        adv_list = [adv_list] if adv_list else []
+    adv = extract_name(adv_list[0]) if adv_list else 'N/D'
     valor_str = str(op.get('valor', '0'))
     try:
         valor = float(valor_str.replace('R$ ', '').replace('R$', '').replace('.', '').replace(',', '.'))
@@ -189,7 +207,7 @@ for op in ARGUS.get('oportunidades', []):
 # ── BENEFS ──
 BENEFS = []
 for tb in ARGUS.get('top_beneficiarios', []):
-    nome = tb.get('nome', 'N/D')
+    nome = extract_name(tb.get('nome', 'N/D'))
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         BENEFS.append({
@@ -205,7 +223,7 @@ for tb in ARGUS.get('top_beneficiarios', []):
 # ── ADV_DATA ──
 ADV_DATA = []
 for ta in ARGUS.get('top_advogados', []):
-    nome = ta.get('nome', 'N/D')
+    nome = extract_name(ta.get('nome', 'N/D'))
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         tribs_list = random.sample(TRIBS[:8], min(ta.get('num_tribs', 1) or 1, len(TRIBS[:8])))
@@ -298,7 +316,9 @@ for al in ARGUS.get('alertas', []):
     if isinstance(benef_list, str):
         try: benef_list = json.loads(benef_list)
         except: benef_list = [benef_list]
-    benef = benef_list[0] if benef_list else 'N/D'
+    if not isinstance(benef_list, list):
+        benef_list = [benef_list] if benef_list else []
+    benef = extract_name(benef_list[0]) if benef_list else 'N/D'
     valor_str = str(al.get('valor', '0'))
     try:
         valor = float(valor_str.replace('R$ ', '').replace('R$', '').replace('.', '').replace(',', '.'))
