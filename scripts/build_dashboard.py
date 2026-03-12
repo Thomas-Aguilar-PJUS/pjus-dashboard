@@ -260,6 +260,14 @@ for op in ARGUS.get('oportunidades', []):
         "fase": fase, "mat": mat,
     })
 
+# ── Deduplicate OPPS by (benef, ente, trib) keeping highest valor ──
+seen_opps = {}
+for op in OPPS:
+    key = (op['benef'], op['ente'], op['trib'])
+    if key not in seen_opps or op['valor'] > seen_opps[key]['valor']:
+        seen_opps[key] = op
+OPPS = sorted(seen_opps.values(), key=lambda x: (x['y'], x['m']), reverse=True)
+
 # ── BENEFS (from top_beneficiarios) ──
 BENEFS = []
 for tb in ARGUS.get('top_beneficiarios', []):

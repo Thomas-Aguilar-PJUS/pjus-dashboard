@@ -274,6 +274,7 @@ def main():
     """, "tendencia_tribunal")
 
     # Top beneficiarios — using jsonb_array_elements with ->>'nome' to extract names
+    # Filter: only beneficiaries with valid valor_face (valor_total > 0)
     D["top_beneficiarios"] = q(conn, f"""
         SELECT COALESCE(b->>'nome', b::text) AS nome,
                COUNT(*) AS pubs,
@@ -288,10 +289,12 @@ def main():
         GROUP BY COALESCE(b->>'nome', b::text)
         HAVING COALESCE(b->>'nome', b::text) IS NOT NULL
            AND COALESCE(b->>'nome', b::text) != ''
-        ORDER BY pubs DESC LIMIT 50
+           AND COALESCE(SUM({VCONV}), 0) > 0
+        ORDER BY valor_total DESC, pubs DESC LIMIT 50
     """, "top_beneficiarios")
 
     # Top advogados — using jsonb_array_elements with ->>'nome' to extract names
+    # Filter: only advogados with valid valor_face (valor_total > 0)
     D["top_advogados"] = q(conn, f"""
         SELECT COALESCE(a->>'nome', a::text) AS nome,
                COUNT(*) AS pubs,
@@ -306,7 +309,8 @@ def main():
         GROUP BY COALESCE(a->>'nome', a::text)
         HAVING COALESCE(a->>'nome', a::text) IS NOT NULL
            AND COALESCE(a->>'nome', a::text) != ''
-        ORDER BY pubs DESC LIMIT 50
+           AND COALESCE(SUM({VCONV}), 0) > 0
+        ORDER BY valor_total DESC, pubs DESC LIMIT 50
     """, "top_advogados")
 
     # ── AMAPÁ DETALHADO ──
