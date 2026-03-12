@@ -230,12 +230,20 @@ for op in ARGUS.get('oportunidades', []):
         adv_list = [adv_list] if adv_list else []
     adv = extract_name(adv_list[0]) if adv_list else 'N/D'
 
-    # Parse valor
-    valor_str = str(op.get('valor', '0'))
-    try:
-        valor_clean = valor_str.replace('R$ ', '').replace('R$', '').replace('.', '').replace(',', '.')
-        valor = float(valor_clean)
-    except:
+    # Parse valor — now comes as numeric from VCONV in SQL, or None
+    raw_valor = op.get('valor')
+    if raw_valor is not None:
+        try:
+            valor = float(raw_valor)
+        except (TypeError, ValueError):
+            # Fallback: try parsing as string (R$ format)
+            try:
+                valor_str = str(raw_valor)
+                valor_clean = valor_str.replace('R$ ', '').replace('R$', '').replace('.', '').replace(',', '.')
+                valor = float(valor_clean)
+            except:
+                valor = 0
+    else:
         valor = 0
 
     trib = op.get('trib', 'DJEN')
@@ -255,7 +263,7 @@ for op in ARGUS.get('oportunidades', []):
 # ── BENEFS (from top_beneficiarios) ──
 BENEFS = []
 for tb in ARGUS.get('top_beneficiarios', []):
-    nome = tb.get('nome', 'N/D')
+    nome = extract_name(tb.get('nome', 'N/D'))
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, tb.get('pubs', 1) // n_months)
@@ -275,7 +283,7 @@ for tb in ARGUS.get('top_beneficiarios', []):
 # ── ADV_DATA (from top_advogados) ──
 ADV_DATA = []
 for ta in ARGUS.get('top_advogados', []):
-    nome = ta.get('nome', 'N/D')
+    nome = extract_name(ta.get('nome', 'N/D'))
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, ta.get('pubs', 1) // n_months)
@@ -401,11 +409,19 @@ for al in ARGUS.get('alertas', []):
         benef_list = [benef_list] if benef_list else []
     benef = extract_name(benef_list[0]) if benef_list else 'N/D'
 
-    valor_str = str(al.get('valor', '0'))
-    try:
-        valor_clean = valor_str.replace('R$ ', '').replace('R$', '').replace('.', '').replace(',', '.')
-        valor = float(valor_clean)
-    except:
+    # Parse valor — now comes as numeric from VCONV in SQL, or None
+    raw_valor = al.get('valor')
+    if raw_valor is not None:
+        try:
+            valor = float(raw_valor)
+        except (TypeError, ValueError):
+            try:
+                valor_str = str(raw_valor)
+                valor_clean = valor_str.replace('R$ ', '').replace('R$', '').replace('.', '').replace(',', '.')
+                valor = float(valor_clean)
+            except:
+                valor = 0
+    else:
         valor = 0
 
     tipo = ALERT_TYPES[0] if score >= 5 else ALERT_TYPES[1] if score >= 4 else ALERT_TYPES[2]

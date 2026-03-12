@@ -183,15 +183,15 @@ def main():
         GROUP BY fase_pjus, y, m ORDER BY fase, y, m
     """, "pipeline_mensal")
 
-    # ORIGINAL simple oportunidades query — no ROW_NUMBER, no subquery
-    D["oportunidades"] = q(conn, """
+    # Oportunidades query — uses VCONV for robust valor conversion
+    D["oportunidades"] = q(conn, f"""
         SELECT data_disponibilizacao AS data,
                sigla_tribunal AS trib,
                score_interesse AS score,
                fase_pjus AS fase,
                acao_pjus AS acao,
                ente_devedor_ia AS ente_devedor,
-               valor_face AS valor,
+               ({VCONV}) AS valor,
                beneficiarios_ia AS beneficiarios,
                advogados_ia AS advogados,
                resumo_ia AS resumo
@@ -209,7 +209,7 @@ def main():
                fase_pjus AS fase,
                acao_pjus AS acao,
                ente_devedor_ia AS ente_devedor,
-               valor_face AS valor,
+               ({VCONV}) AS valor,
                beneficiarios_ia AS beneficiarios,
                advogados_ia AS advogados,
                resumo_ia AS resumo
