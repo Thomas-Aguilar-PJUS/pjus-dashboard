@@ -171,7 +171,7 @@ def main():
     """, "pipeline_mensal")
 
     D["oportunidades"] = q(conn, """
-        SELECT data_disponibilizacao AS data,
+        (SELECT data_disponibilizacao AS data,
                sigla_tribunal AS trib,
                score_interesse AS score,
                fase_pjus AS fase,
@@ -182,10 +182,42 @@ def main():
                advogados_ia AS advogados,
                resumo_ia AS resumo
         FROM djen_precatorio
-        WHERE score_interesse >= 3
+        WHERE score_interesse = 5
           AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
-        ORDER BY data_disponibilizacao DESC, score_interesse DESC
-        LIMIT 500
+        ORDER BY data_disponibilizacao DESC
+        LIMIT 150)
+        UNION ALL
+        (SELECT data_disponibilizacao AS data,
+               sigla_tribunal AS trib,
+               score_interesse AS score,
+               fase_pjus AS fase,
+               acao_pjus AS acao,
+               ente_devedor_ia AS ente_devedor,
+               valor_face AS valor,
+               beneficiarios_ia AS beneficiarios,
+               advogados_ia AS advogados,
+               resumo_ia AS resumo
+        FROM djen_precatorio
+        WHERE score_interesse = 4
+          AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
+        ORDER BY data_disponibilizacao DESC
+        LIMIT 150)
+        UNION ALL
+        (SELECT data_disponibilizacao AS data,
+               sigla_tribunal AS trib,
+               score_interesse AS score,
+               fase_pjus AS fase,
+               acao_pjus AS acao,
+               ente_devedor_ia AS ente_devedor,
+               valor_face AS valor,
+               beneficiarios_ia AS beneficiarios,
+               advogados_ia AS advogados,
+               resumo_ia AS resumo
+        FROM djen_precatorio
+        WHERE score_interesse = 3
+          AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
+        ORDER BY data_disponibilizacao DESC
+        LIMIT 200)
     """, "oportunidades")
 
     D["alertas"] = q(conn, f"""
