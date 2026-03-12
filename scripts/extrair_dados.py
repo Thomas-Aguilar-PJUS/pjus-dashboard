@@ -3,15 +3,22 @@
 PJUS - Extrator de Dados do Banco Argus (v6 - robust valor_face conversion)
 GitHub Actions version - uses environment variables for DB credentials.
 Handles: "R$ 130.000,00", "R$8211.21", "60 salarios minimos", "A CALCULAR", "106.421.15", etc.
+
+RESTORED from original extrair_dados_argus.py with minimal path changes.
 """
 
 import json
 import os
 import sys
+import traceback
 from datetime import datetime
 
-import psycopg2
-import psycopg2.extras
+try:
+    import psycopg2
+    import psycopg2.extras
+except ImportError:
+    print("Erro: psycopg2 nao encontrado. Rode: pip install psycopg2-binary")
+    sys.exit(1)
 
 CONN = {
     "host": os.environ.get("DB_HOST", "35.247.210.198"),
@@ -27,6 +34,9 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, "..")
 ERROS = []
 
 # Robust valor_face conversion using regex validation BEFORE casting
+# Pattern 1: BRL format like "R$ 130.000,00" or "130.000,00" -> validated by regex
+# Pattern 2: US/plain format like "R$8211.21" or "8211.21" -> validated by regex
+# Anything else (text, malformed) -> NULL
 VCONV = """CASE
     WHEN REGEXP_REPLACE(TRIM(COALESCE(valor_face,'')), '^R\\$\\s*', '') ~ '^\\d{1,3}(\\.\\d{3})*(,\\d+)?$' THEN
         REPLACE(REPLACE(REPLACE(REPLACE(valor_face, 'R$ ', ''), 'R$', ''), '.', ''), ',', '.')::numeric
@@ -35,8 +45,8 @@ VCONV = """CASE
     ELSE NULL
 END"""
 
+# WHERE clause to filter only valid valor_face
 VWHERE = f"({VCONV}) IS NOT NULL"
-
 
 def serialize(obj):
     if hasattr(obj, 'isoformat'):
@@ -45,6 +55,12 @@ def serialize(obj):
         return float(obj)
     return str(obj)
 
+def save(data, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, default=serialize)
+    size = os.path.getsize(path) / 1024
+    print(f"  Salvo: {path} ({size:.1f} KB)")
 
 def q(conn, sql, name):
     print(f"  [{name}]...", end=" ", flush=True)
@@ -62,7 +78,6 @@ def q(conn, sql, name):
         ERROS.append(msg)
         return []
 
-
 def main():
     print("=" * 60)
     print("PJUS - Extracao de Dados v6 (GitHub Actions)")
@@ -74,7 +89,7 @@ def main():
         conn = psycopg2.connect(**CONN)
         print("Conectado!\n")
     except Exception as e:
-        print(f"ERRO de conexao: {e}")
+        print(f"ERRO: {e}")
         sys.exit(1)
 
     D = {"meta": {"data_extracao": datetime.now().isoformat()}}
@@ -161,41 +176,29 @@ def main():
                EXTRACT(YEAR FROM data_disponibilizacao)::int AS y,
                EXTRACT(MONTH FROM data_disponibilizacao)::int AS m,
                COUNT(*) AS vol,
-               COALESCE(SUM({VCONV}), 0) AS val,
-               ROUND(AVG(score_interesse)::numeric, 1) AS score_medio,
-               ROUND(AVG(EXTRACT(EPOCH FROM (CURRENT_DATE - data_disponibilizacao)) / 86400)::numeric, 0) AS dias_medio
+               COALESCE(SUM({VCONV}), 0) AS val
         FROM djen_precatorio
-        WHERE fase_pjus IS NOT NULL AND fase_pjus != ''
+        WHERE fase_pjus IS NOT NULL
           AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '12 months'
         GROUP BY fase_pjus, y, m ORDER BY fase, y, m
     """, "pipeline_mensal")
 
-    D["oportunidades"] = q(conn, f"""
-        SELECT data, trib, score, fase, acao, ente_devedor,
-               valor, beneficiarios, advogados, resumo
-        FROM (
-            SELECT data_disponibilizacao AS data,
-                   sigla_tribunal AS trib,
-                   score_interesse AS score,
-                   fase_pjus AS fase,
-                   acao_pjus AS acao,
-                   ente_devedor_ia AS ente_devedor,
-                   valor_face AS valor,
-                   beneficiarios_ia AS beneficiarios,
-                   advogados_ia AS advogados,
-                   resumo_ia AS resumo,
-                   ROW_NUMBER() OVER (
-                       PARTITION BY ente_devedor_ia
-                       ORDER BY ({VCONV}) DESC NULLS LAST, score_interesse DESC
-                   ) AS rn
-            FROM djen_precatorio
-            WHERE score_interesse >= 3
-              AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
-              AND ente_devedor_ia IS NOT NULL
-              AND ente_devedor_ia != ''
-        ) ranked
-        WHERE rn <= 3
-        ORDER BY score DESC, ({VCONV}) DESC NULLS LAST
+    # ORIGINAL simple oportunidades query — no ROW_NUMBER, no subquery
+    D["oportunidades"] = q(conn, """
+        SELECT data_disponibilizacao AS data,
+               sigla_tribunal AS trib,
+               score_interesse AS score,
+               fase_pjus AS fase,
+               acao_pjus AS acao,
+               ente_devedor_ia AS ente_devedor,
+               valor_face AS valor,
+               beneficiarios_ia AS beneficiarios,
+               advogados_ia AS advogados,
+               resumo_ia AS resumo
+        FROM djen_precatorio
+        WHERE score_interesse >= 3
+          AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
+        ORDER BY data_disponibilizacao DESC, score_interesse DESC
         LIMIT 500
     """, "oportunidades")
 
@@ -270,7 +273,7 @@ def main():
         GROUP BY sigla_tribunal, y, m ORDER BY trib, y, m
     """, "tendencia_tribunal")
 
-    # Top beneficiarios (extract nome from JSONB objects)
+    # Top beneficiarios — using jsonb_array_elements with ->>'nome' to extract names
     D["top_beneficiarios"] = q(conn, f"""
         SELECT COALESCE(b->>'nome', b::text) AS nome,
                COUNT(*) AS pubs,
@@ -288,7 +291,7 @@ def main():
         ORDER BY pubs DESC LIMIT 50
     """, "top_beneficiarios")
 
-    # Top advogados (extract nome from JSONB objects)
+    # Top advogados — using jsonb_array_elements with ->>'nome' to extract names
     D["top_advogados"] = q(conn, f"""
         SELECT COALESCE(a->>'nome', a::text) AS nome,
                COUNT(*) AS pubs,
@@ -306,7 +309,7 @@ def main():
         ORDER BY pubs DESC LIMIT 50
     """, "top_advogados")
 
-    # ── AMAPÁ ──
+    # ── AMAPÁ DETALHADO ──
     print("\n--- AMAPA ---")
 
     D["amapa_precatorio"] = q(conn, f"""
@@ -337,18 +340,15 @@ def main():
     conn.close()
     D["erros"] = ERROS
 
-    # Save
+    print("\n--- SALVANDO ---")
     path = os.path.join(OUTPUT_DIR, "data", "dados_argus.json")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(D, f, ensure_ascii=False, indent=2, default=serialize)
-    size = os.path.getsize(path) / 1024
-    print(f"\nSalvo: {path} ({size:.1f} KB)")
-    print(f"Concluido! {len(ERROS)} erros.")
+    save(D, path)
+
+    print(f"\nConcluido! {len(ERROS)} erros.")
     if ERROS:
         for e in ERROS:
             print(f"  - {e}")
-
+    print()
 
 if __name__ == "__main__":
     main()

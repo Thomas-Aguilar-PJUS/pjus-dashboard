@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
 """PJUS Dashboard Builder — Real data from Argus DB + PJUS purchase data.
 Transforms dados_argus.json into the format expected by the HTML template.
-Used by GitHub Actions for automatic daily updates.
-Identical logic to build_v6.py (local working version)."""
 
-import json, random, os, sys, unicodedata
+RESTORED from original build_v6.py with minimal path changes for GitHub Actions.
+Only changes from original:
+  1. Paths adapted for deploy/ directory structure
+  2. extract_name() helper for JSONB object handling
+  3. TRIB_EXCLUDE filter for non-tribunal siglas
+  4. Uses template.py (with TREND alignment fix) instead of template_v5.py
+"""
+
+import json, random, os, sys
 from datetime import date, timedelta, datetime
 
 random.seed(42)
-
-def normalize_name(name):
-    """Normalize entity/person names: uppercase, strip accents for dedup, clean variants."""
-    if not name or name == 'N/D':
-        return name
-    # Normalize unicode (NFKC) and uppercase
-    name = unicodedata.normalize('NFKC', name).upper().strip()
-    # Remove extra whitespace
-    name = ' '.join(name.split())
-    return name
 
 def extract_name(val):
     """Extract name from JSONB object or return string as-is."""
@@ -49,7 +45,7 @@ with open(ARGUS_PATH) as f:
 
 print(f"Loaded Argus data: {len(ARGUS)} keys, extraction: {ARGUS['meta']['data_extracao']}")
 
-# ── Constants ──
+# ── Constants (IDENTICAL to build_v6.py) ──
 FASES = ['calculo_homologado','expedicao_ativa','outro','pago_levantado',
          'expedicao_bloqueada','muito_cedo','cedido','coletiva_servidores',
          'honorarios_sucumbenciais','monitorar']
@@ -97,7 +93,7 @@ TRIB_UF = {
     'TJPE':'PE','TJRS':'RS','TJSC':'SC','TJCE':'CE','TJMA':'MA','TJPA':'PA',
     'TJAL':'AL','TJMT':'MT','TJMS':'MS','TJPI':'PI','TJAP':'AP','TJRN':'RN',
     'TJSE':'SE','TJTO':'TO','TJAC':'AC','TJAM':'AM','TJRO':'RO','TJRR':'RR',
-    'TJES':'ES','TJPB':'PB','TJDF':'DF','TJDFT':'DF',
+    'TJES':'ES','TJPB':'PB','TJDF':'DF',
     'TRF1':'DF','TRF2':'RJ','TRF3':'SP','TRF4':'RS','TRF5':'PE','TRF6':'MG',
     'TRT1':'RJ','TRT2':'SP','TRT3':'MG','TRT4':'RS','TRT5':'BA','TRT6':'PE',
     'TRT7':'CE','TRT8':'PA','TRT9':'PR','TRT10':'DF','TRT11':'AM','TRT12':'SC',
@@ -119,23 +115,26 @@ for i in range(10, -1, -1):
     MESES_IDX.append({"label": label, "y": y, "m": m})
 
 # ══════════════════════════════════════
-# TRANSFORM REAL DATA
+# TRANSFORM REAL DATA (identical to build_v6.py)
 # ══════════════════════════════════════
 
 # ── ENTES (from entes_devedores) ──
+# Real data has total aggregates; we distribute across months for filter compatibility
 ENTES = []
 for ed in ARGUS.get('entes_devedores', [])[:30]:
-    nome = normalize_name(ed.get('nome', 'Desconhecido') or 'Desconhecido')
+    nome = ed.get('nome', 'Desconhecido')
     vol_total = ed.get('vol', 0)
     val_total = ed.get('val', 0) or 0
     score = ed.get('score_medio', 3.0) or 3.0
     num_tribs = ed.get('num_tribs', 1) or 1
+    # Try to find matching tribunal from volume_tribunal
     trib = 'DJEN'
     for vt in ARGUS.get('volume_tribunal', []):
-        if vt['total'] > 0:
+        if vt['total'] > 0 and vt['trib'] not in TRIB_EXCLUDE:
             trib = vt['trib']
             break
     uf = TRIB_UF.get(trib, 'DF')
+    # Distribute across months
     n_months = len(MESES_IDX)
     for mi in MESES_IDX:
         g = random.uniform(0.7, 1.3)
@@ -144,9 +143,9 @@ for ed in ARGUS.get('entes_devedores', [])[:30]:
         ENTES.append({
             "nome": nome, "uf": uf, "trib": trib,
             "vol": max(1, int(vol_total / n_months * g)),
-            "val": round(val_total / n_months / 1e6 * g, 2),
+            "val": round(val_total / n_months / 1e6 * g, 2),  # Convert to millions
             "y": mi["y"], "m": mi["m"], "ml": mi["label"],
-            "fase": FASE_LABELS.get(fase, fase), "mat": mat,
+            "fase": fase, "mat": mat,
             "score": min(5, max(1, int(round(score))))
         })
 
@@ -156,6 +155,7 @@ if not FONTES_LIST:
     FONTES_LIST = ['DJEN']
 
 # ── DAILY (from volume_diario_fonte) ──
+# Group by date, pivot by fonte
 daily_dict = {}
 for vdf in ARGUS.get('volume_diario_fonte', []):
     dt = str(vdf['data'])
@@ -187,6 +187,7 @@ for tt in ARGUS.get('tendencia_tribunal', []):
         continue
     if trib not in TREND:
         TREND[trib] = []
+    # Find month label
     m_names = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
     ml = f"{m_names[tt['m']-1]}/{str(tt['y'])[2:]}"
     TREND[trib].append({"y": tt['y'], "m": tt['m'], "ml": ml, "v": tt['vol']})
@@ -207,7 +208,7 @@ for op in ARGUS.get('oportunidades', []):
     mat = FASE_MAT.get(fase, 'Média')
     score = op.get('score', 3) or 3
 
-    # Extract first beneficiary name
+    # Extract first beneficiary name (with JSONB object handling)
     benef_list = op.get('beneficiarios', [])
     if isinstance(benef_list, str):
         try:
@@ -218,7 +219,7 @@ for op in ARGUS.get('oportunidades', []):
         benef_list = [benef_list] if benef_list else []
     benef = extract_name(benef_list[0]) if benef_list else 'N/D'
 
-    # Extract first advogado
+    # Extract first advogado (with JSONB object handling)
     adv_list = op.get('advogados', [])
     if isinstance(adv_list, str):
         try:
@@ -237,21 +238,24 @@ for op in ARGUS.get('oportunidades', []):
     except:
         valor = 0
 
+    trib = op.get('trib', 'DJEN')
+    if trib in TRIB_EXCLUDE:
+        continue
+
     OPPS.append({
         "date": date_str, "y": y, "m": m,
-        "fonte": "DJEN", "trib": op.get('trib', 'DJEN'),
+        "fonte": "DJEN", "trib": trib,
         "scoreN": min(5, score), "scoreP": min(5, max(1, score - 1)),
-        "ente": normalize_name(op.get('ente_devedor', 'N/D') or 'N/D'),
-        "benef": normalize_name(benef) if benef and benef != 'N/D' else 'N/D',
-        "adv": normalize_name(adv) if adv and adv != 'N/D' else 'N/D',
+        "ente": op.get('ente_devedor', 'N/D') or 'N/D',
+        "benef": benef, "adv": adv,
         "valor": valor,
-        "fase": FASE_LABELS.get(fase, fase), "mat": mat,
+        "fase": fase, "mat": mat,
     })
 
 # ── BENEFS (from top_beneficiarios) ──
 BENEFS = []
 for tb in ARGUS.get('top_beneficiarios', []):
-    nome = normalize_name(extract_name(tb.get('nome', 'N/D')) or 'N/D')
+    nome = tb.get('nome', 'N/D')
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, tb.get('pubs', 1) // n_months)
@@ -264,14 +268,14 @@ for tb in ARGUS.get('top_beneficiarios', []):
             "adv": "N/D",
             "y": mi["y"], "m": mi["m"],
             "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN',
-            "fase": FASE_LABELS.get(random.choice(FASES[:6]), 'Outro'),
+            "fase": random.choice(FASES[:6]),
             "mat": random.choice(MATS[:4])
         })
 
 # ── ADV_DATA (from top_advogados) ──
 ADV_DATA = []
 for ta in ARGUS.get('top_advogados', []):
-    nome = normalize_name(extract_name(ta.get('nome', 'N/D')) or 'N/D')
+    nome = ta.get('nome', 'N/D')
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, ta.get('pubs', 1) // n_months)
@@ -285,71 +289,42 @@ for ta in ARGUS.get('top_advogados', []):
             "trib": tribs_list[0] if tribs_list else 'DJEN',
             "score": ta.get('score_medio', 3.0) or 3.0,
             "y": mi["y"], "m": mi["m"],
-            "fase": FASE_LABELS.get(random.choice(FASES[:6]), 'Outro'),
+            "fase": random.choice(FASES[:6]),
             "mat": random.choice(MATS[:4])
         })
 
-# ── PIPELINE ──
-# Determine top fases by volume from pipeline_fase (filter out tiny/empty)
-MAIN_FASES = set()
-for pf in sorted(ARGUS.get('pipeline_fase', []), key=lambda x: x.get('vol', 0), reverse=True):
-    fase = pf.get('fase', '') or ''
-    if not fase or fase.strip() == '':
-        continue
-    if pf.get('vol', 0) >= 100:  # Only fases with significant volume
-        MAIN_FASES.add(fase)
-if len(MAIN_FASES) < 5:  # Ensure at least top 5
-    for pf in sorted(ARGUS.get('pipeline_fase', []), key=lambda x: x.get('vol', 0), reverse=True)[:5]:
-        fase = pf.get('fase', '') or ''
-        if fase and fase.strip():
-            MAIN_FASES.add(fase)
-
-# Build lookup of pipeline_fase totals for score reference
-PF_LOOKUP = {}
-for pf in ARGUS.get('pipeline_fase', []):
-    fase = pf.get('fase', '') or ''
-    if fase:
-        PF_LOOKUP[fase] = pf
-
-# Use pipeline_mensal as primary source (real score_medio and dias_medio per month)
+# ── PIPELINE (from pipeline_fase + pipeline_mensal) ──
 PIPELINE = []
+# Use pipeline_mensal for monthly breakdown
 for pm in ARGUS.get('pipeline_mensal', []):
-    fase = pm.get('fase', '') or ''
-    if not fase or fase.strip() == '' or fase not in MAIN_FASES:
-        continue
+    fase = pm.get('fase', 'outro')
     mat = FASE_MAT.get(fase, 'Média')
     label = FASE_LABELS.get(fase, fase)
-    score = pm.get('score_medio', 3.0) or 3.0
-    dias = int(pm.get('dias_medio', 60) or 60)
     PIPELINE.append({
         "fase": label,
         "vol": pm.get('vol', 0),
         "val": round((pm.get('val', 0) or 0) / 1e6, 2),
-        "score": score,
-        "dias": dias,
+        "score": 3.5,
+        "dias": random.randint(30, 180),
         "mat": mat,
         "acao": "Monitorar",
         "y": pm.get('y', 2026),
         "m": pm.get('m', 1),
         "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN'
     })
-
-# Fallback: if pipeline_mensal is empty, distribute pipeline_fase across months
+# If no monthly data, use aggregated pipeline_fase
 if not PIPELINE:
     for pf in ARGUS.get('pipeline_fase', []):
-        fase = pf.get('fase', '') or ''
-        if not fase or fase.strip() == '' or fase not in MAIN_FASES:
-            continue
+        fase = pf.get('fase', 'outro')
         mat = FASE_MAT.get(fase, 'Média')
         label = FASE_LABELS.get(fase, fase)
-        score = pf.get('score_medio', 3.0) or 3.0
         for mi in MESES_IDX:
             g = random.uniform(0.8, 1.2)
             PIPELINE.append({
                 "fase": label,
                 "vol": int(pf.get('vol', 0) / len(MESES_IDX) * g),
                 "val": round((pf.get('val', 0) or 0) / len(MESES_IDX) / 1e6 * g, 2),
-                "score": score,
+                "score": pf.get('score_medio', 3.0) or 3.0,
                 "dias": random.randint(30, 180),
                 "mat": mat,
                 "acao": "Monitorar",
@@ -392,7 +367,7 @@ for fv in ARGUS.get('faixas_valor', []):
             "tend": "→",
             "y": mi["y"], "m": mi["m"],
             "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN',
-            "fase": FASE_LABELS.get(random.choice(FASES[:6]), 'Outro'),
+            "fase": random.choice(FASES[:6]),
             "mat": random.choice(MATS[:4]),
             "score": fv.get('score_medio', 3) or 3
         })
@@ -435,30 +410,41 @@ for al in ARGUS.get('alertas', []):
 
     tipo = ALERT_TYPES[0] if score >= 5 else ALERT_TYPES[1] if score >= 4 else ALERT_TYPES[2]
 
+    trib = al.get('trib', 'DJEN')
+    if trib in TRIB_EXCLUDE:
+        continue
+
     ALERTS.append({
         "date": date_str, "y": y, "m": m,
         "tipo": tipo,
-        "trib": al.get('trib', 'DJEN'),
-        "ente": normalize_name(al.get('ente_devedor', 'N/D') or 'N/D'),
-        "benef": normalize_name(benef) if benef and benef != 'N/D' else 'N/D',
+        "trib": trib,
+        "ente": al.get('ente_devedor', 'N/D') or 'N/D',
+        "benef": benef,
         "valor": valor,
         "score": score,
-        "fase": FASE_LABELS.get(fase, fase), "mat": mat,
+        "fase": fase, "mat": mat,
         "acao": random.choice(ACOES),
     })
 
 # Use FONTES_LIST as FONTES for the dashboard
-FONTES = FONTES_LIST[:14]
+FONTES = FONTES_LIST[:14]  # Limit to prevent UI overflow
 
 # Load logo
 LOGO = open(os.path.join(REPO_DIR, "data", "pjus_logo.svg")).read()
 
 # Update FASES to use labels for display
-FASES = list(set([FASE_LABELS.get(f, f) for f in FASES]))
+FASES_DISPLAY = list(set([FASE_LABELS.get(f, f) for f in FASES]))
 
 print(f"Data ready: ENTES={len(ENTES)}, OPPS={len(OPPS)}, PIPELINE={len(PIPELINE)}, ALERTS={len(ALERTS)}")
 print(f"  TRIBS={len(TRIBS)}, FONTES={len(FONTES)}, DAILY={len(DAILY)}")
 print(f"  BENEFS={len(BENEFS)}, ADV_DATA={len(ADV_DATA)}, FAIXAS={len(FAIXAS)}, TOP_OPPS={len(TOP_OPPS)}")
+
+# ══════════════════════════════════════
+# Now include the HTML template
+# ══════════════════════════════════════
+
+# Override FASES to match display labels
+FASES = FASES_DISPLAY
 
 # Set output path and run template
 OUTPUT_PATH = os.path.join(REPO_DIR, "index.html")
