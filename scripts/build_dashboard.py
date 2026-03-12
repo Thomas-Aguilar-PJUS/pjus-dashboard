@@ -279,30 +279,73 @@ for ta in ARGUS.get('top_advogados', []):
             "mat": random.choice(MATS[:4])
         })
 
-# ── PIPELINE (from pipeline_fase, distributed across months) ──
-# Always use pipeline_fase with distribution for consistent visualization
-# This avoids mixing contexts from sparse pipeline_mensal (only 2 months of data)
-PIPELINE = []
-for pf in ARGUS.get('pipeline_fase', []):
+# ── PIPELINE ──
+# Determine top fases by volume from pipeline_fase (filter out tiny/empty)
+MAIN_FASES = set()
+for pf in sorted(ARGUS.get('pipeline_fase', []), key=lambda x: x.get('vol', 0), reverse=True):
     fase = pf.get('fase', '') or ''
     if not fase or fase.strip() == '':
-        continue  # Skip records with empty fase
+        continue
+    if pf.get('vol', 0) >= 100:  # Only fases with significant volume
+        MAIN_FASES.add(fase)
+if len(MAIN_FASES) < 5:  # Ensure at least top 5
+    for pf in sorted(ARGUS.get('pipeline_fase', []), key=lambda x: x.get('vol', 0), reverse=True)[:5]:
+        fase = pf.get('fase', '') or ''
+        if fase and fase.strip():
+            MAIN_FASES.add(fase)
+
+# Build lookup of pipeline_fase totals for score reference
+PF_LOOKUP = {}
+for pf in ARGUS.get('pipeline_fase', []):
+    fase = pf.get('fase', '') or ''
+    if fase:
+        PF_LOOKUP[fase] = pf
+
+# Use pipeline_mensal as primary source (real score_medio and dias_medio per month)
+PIPELINE = []
+for pm in ARGUS.get('pipeline_mensal', []):
+    fase = pm.get('fase', '') or ''
+    if not fase or fase.strip() == '' or fase not in MAIN_FASES:
+        continue
     mat = FASE_MAT.get(fase, 'Média')
     label = FASE_LABELS.get(fase, fase)
-    score = pf.get('score_medio', 3.0) or 3.0
-    for mi in MESES_IDX:
-        g = random.uniform(0.8, 1.2)
-        PIPELINE.append({
-            "fase": label,
-            "vol": int(pf.get('vol', 0) / len(MESES_IDX) * g),
-            "val": round((pf.get('val', 0) or 0) / len(MESES_IDX) / 1e6 * g, 2),
-            "score": score,
-            "dias": random.randint(30, 180),
-            "mat": mat,
-            "acao": "Monitorar",
-            "y": mi["y"], "m": mi["m"],
-            "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN'
-        })
+    score = pm.get('score_medio', 3.0) or 3.0
+    dias = int(pm.get('dias_medio', 60) or 60)
+    PIPELINE.append({
+        "fase": label,
+        "vol": pm.get('vol', 0),
+        "val": round((pm.get('val', 0) or 0) / 1e6, 2),
+        "score": score,
+        "dias": dias,
+        "mat": mat,
+        "acao": "Monitorar",
+        "y": pm.get('y', 2026),
+        "m": pm.get('m', 1),
+        "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN'
+    })
+
+# Fallback: if pipeline_mensal is empty, distribute pipeline_fase across months
+if not PIPELINE:
+    for pf in ARGUS.get('pipeline_fase', []):
+        fase = pf.get('fase', '') or ''
+        if not fase or fase.strip() == '' or fase not in MAIN_FASES:
+            continue
+        mat = FASE_MAT.get(fase, 'Média')
+        label = FASE_LABELS.get(fase, fase)
+        score = pf.get('score_medio', 3.0) or 3.0
+        for mi in MESES_IDX:
+            g = random.uniform(0.8, 1.2)
+            PIPELINE.append({
+                "fase": label,
+                "vol": int(pf.get('vol', 0) / len(MESES_IDX) * g),
+                "val": round((pf.get('val', 0) or 0) / len(MESES_IDX) / 1e6 * g, 2),
+                "score": score,
+                "dias": random.randint(30, 180),
+                "mat": mat,
+                "acao": "Monitorar",
+                "y": mi["y"], "m": mi["m"],
+                "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN'
+            })
 
 # ── TOP_OPPS (derived from high-score opportunities) ──
 TOP_OPPS = []
