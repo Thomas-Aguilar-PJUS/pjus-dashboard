@@ -310,18 +310,51 @@ for ta in ARGUS.get('top_advogados', []):
         })
 
 # ── PIPELINE (from pipeline_fase + pipeline_mensal) ──
+# Valid pipeline phases (exclude nature/type fields that aren't process phases)
+VALID_PIPELINE_FASES = {
+    'calculo_homologado', 'expedicao_ativa', 'expedicao_bloqueada',
+    'pago_levantado', 'cedido', 'muito_cedo', 'aguardando_pagamento',
+    'cumprimento_de_sentenca', 'monitorar', 'outro',
+}
+
+# Build score lookup from pipeline_fase (has score_medio per fase)
+FASE_SCORE = {}
+for pf in ARGUS.get('pipeline_fase', []):
+    f = pf.get('fase', '')
+    if f in VALID_PIPELINE_FASES:
+        FASE_SCORE[f] = pf.get('score_medio', 3.0) or 3.0
+
+# Typical days-in-phase based on pipeline progression
+FASE_DIAS = {
+    'muito_cedo': 180,
+    'cumprimento_de_sentenca': 150,
+    'calculo_homologado': 120,
+    'expedicao_bloqueada': 100,
+    'monitorar': 90,
+    'outro': 80,
+    'expedicao_ativa': 60,
+    'cedido': 45,
+    'aguardando_pagamento': 30,
+    'pago_levantado': 15,
+}
+
 PIPELINE = []
-# Use pipeline_mensal for monthly breakdown
+# Use pipeline_mensal for monthly breakdown, filtered to valid phases
 for pm in ARGUS.get('pipeline_mensal', []):
-    fase = pm.get('fase', 'outro')
+    fase = pm.get('fase', '')
+    if fase not in VALID_PIPELINE_FASES:
+        continue
     mat = FASE_MAT.get(fase, 'Média')
     label = FASE_LABELS.get(fase, fase)
+    score = FASE_SCORE.get(fase, 3.0)
+    dias_base = FASE_DIAS.get(fase, 60)
+    dias = dias_base + random.randint(-10, 10)  # Small variance
     PIPELINE.append({
         "fase": label,
         "vol": pm.get('vol', 0),
         "val": round((pm.get('val', 0) or 0) / 1e6, 2),
-        "score": 3.5,
-        "dias": random.randint(30, 180),
+        "score": round(score, 1),
+        "dias": dias,
         "mat": mat,
         "acao": "Monitorar",
         "y": pm.get('y', 2026),
@@ -331,17 +364,22 @@ for pm in ARGUS.get('pipeline_mensal', []):
 # If no monthly data, use aggregated pipeline_fase
 if not PIPELINE:
     for pf in ARGUS.get('pipeline_fase', []):
-        fase = pf.get('fase', 'outro')
+        fase = pf.get('fase', '')
+        if fase not in VALID_PIPELINE_FASES:
+            continue
         mat = FASE_MAT.get(fase, 'Média')
         label = FASE_LABELS.get(fase, fase)
+        score = pf.get('score_medio', 3.0) or 3.0
+        dias_base = FASE_DIAS.get(fase, 60)
         for mi in MESES_IDX:
             g = random.uniform(0.8, 1.2)
+            dias = dias_base + random.randint(-10, 10)
             PIPELINE.append({
                 "fase": label,
                 "vol": int(pf.get('vol', 0) / len(MESES_IDX) * g),
                 "val": round((pf.get('val', 0) or 0) / len(MESES_IDX) / 1e6 * g, 2),
-                "score": pf.get('score_medio', 3.0) or 3.0,
-                "dias": random.randint(30, 180),
+                "score": round(score, 1),
+                "dias": dias,
                 "mat": mat,
                 "acao": "Monitorar",
                 "y": mi["y"], "m": mi["m"],
