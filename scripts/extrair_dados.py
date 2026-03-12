@@ -170,54 +170,33 @@ def main():
         GROUP BY fase_pjus, y, m ORDER BY fase, y, m
     """, "pipeline_mensal")
 
-    D["oportunidades"] = q(conn, """
-        (SELECT data_disponibilizacao AS data,
-               sigla_tribunal AS trib,
-               score_interesse AS score,
-               fase_pjus AS fase,
-               acao_pjus AS acao,
-               ente_devedor_ia AS ente_devedor,
-               valor_face AS valor,
-               beneficiarios_ia AS beneficiarios,
-               advogados_ia AS advogados,
-               resumo_ia AS resumo
-        FROM djen_precatorio
-        WHERE score_interesse = 5
-          AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
-        ORDER BY data_disponibilizacao DESC
-        LIMIT 150)
-        UNION ALL
-        (SELECT data_disponibilizacao AS data,
-               sigla_tribunal AS trib,
-               score_interesse AS score,
-               fase_pjus AS fase,
-               acao_pjus AS acao,
-               ente_devedor_ia AS ente_devedor,
-               valor_face AS valor,
-               beneficiarios_ia AS beneficiarios,
-               advogados_ia AS advogados,
-               resumo_ia AS resumo
-        FROM djen_precatorio
-        WHERE score_interesse = 4
-          AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
-        ORDER BY data_disponibilizacao DESC
-        LIMIT 150)
-        UNION ALL
-        (SELECT data_disponibilizacao AS data,
-               sigla_tribunal AS trib,
-               score_interesse AS score,
-               fase_pjus AS fase,
-               acao_pjus AS acao,
-               ente_devedor_ia AS ente_devedor,
-               valor_face AS valor,
-               beneficiarios_ia AS beneficiarios,
-               advogados_ia AS advogados,
-               resumo_ia AS resumo
-        FROM djen_precatorio
-        WHERE score_interesse = 3
-          AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
-        ORDER BY data_disponibilizacao DESC
-        LIMIT 200)
+    D["oportunidades"] = q(conn, f"""
+        SELECT data, trib, score, fase, acao, ente_devedor,
+               valor, beneficiarios, advogados, resumo
+        FROM (
+            SELECT data_disponibilizacao AS data,
+                   sigla_tribunal AS trib,
+                   score_interesse AS score,
+                   fase_pjus AS fase,
+                   acao_pjus AS acao,
+                   ente_devedor_ia AS ente_devedor,
+                   valor_face AS valor,
+                   beneficiarios_ia AS beneficiarios,
+                   advogados_ia AS advogados,
+                   resumo_ia AS resumo,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY ente_devedor_ia
+                       ORDER BY ({VCONV}) DESC NULLS LAST, score_interesse DESC
+                   ) AS rn
+            FROM djen_precatorio
+            WHERE score_interesse >= 3
+              AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '3 months'
+              AND ente_devedor_ia IS NOT NULL
+              AND ente_devedor_ia != ''
+        ) ranked
+        WHERE rn <= 3
+        ORDER BY score DESC, ({VCONV}) DESC NULLS LAST
+        LIMIT 500
     """, "oportunidades")
 
     D["alertas"] = q(conn, f"""

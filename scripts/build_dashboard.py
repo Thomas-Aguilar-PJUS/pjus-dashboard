@@ -4,10 +4,20 @@ Transforms dados_argus.json into the format expected by the HTML template.
 Used by GitHub Actions for automatic daily updates.
 Identical logic to build_v6.py (local working version)."""
 
-import json, random, os, sys
+import json, random, os, sys, unicodedata
 from datetime import date, timedelta, datetime
 
 random.seed(42)
+
+def normalize_name(name):
+    """Normalize entity/person names: uppercase, strip accents for dedup, clean variants."""
+    if not name or name == 'N/D':
+        return name
+    # Normalize unicode (NFKC) and uppercase
+    name = unicodedata.normalize('NFKC', name).upper().strip()
+    # Remove extra whitespace
+    name = ' '.join(name.split())
+    return name
 
 def extract_name(val):
     """Extract name from JSONB object or return string as-is."""
@@ -115,7 +125,7 @@ for i in range(10, -1, -1):
 # ── ENTES (from entes_devedores) ──
 ENTES = []
 for ed in ARGUS.get('entes_devedores', [])[:30]:
-    nome = (ed.get('nome', 'Desconhecido') or 'Desconhecido').upper()
+    nome = normalize_name(ed.get('nome', 'Desconhecido') or 'Desconhecido')
     vol_total = ed.get('vol', 0)
     val_total = ed.get('val', 0) or 0
     score = ed.get('score_medio', 3.0) or 3.0
@@ -231,9 +241,9 @@ for op in ARGUS.get('oportunidades', []):
         "date": date_str, "y": y, "m": m,
         "fonte": "DJEN", "trib": op.get('trib', 'DJEN'),
         "scoreN": min(5, score), "scoreP": min(5, max(1, score - 1)),
-        "ente": (op.get('ente_devedor', 'N/D') or 'N/D').upper(),
-        "benef": (benef or 'N/D').upper() if benef and benef != 'N/D' else 'N/D',
-        "adv": (adv or 'N/D').upper() if adv and adv != 'N/D' else 'N/D',
+        "ente": normalize_name(op.get('ente_devedor', 'N/D') or 'N/D'),
+        "benef": normalize_name(benef) if benef and benef != 'N/D' else 'N/D',
+        "adv": normalize_name(adv) if adv and adv != 'N/D' else 'N/D',
         "valor": valor,
         "fase": FASE_LABELS.get(fase, fase), "mat": mat,
     })
@@ -241,7 +251,7 @@ for op in ARGUS.get('oportunidades', []):
 # ── BENEFS (from top_beneficiarios) ──
 BENEFS = []
 for tb in ARGUS.get('top_beneficiarios', []):
-    nome = (extract_name(tb.get('nome', 'N/D')) or 'N/D').upper()
+    nome = normalize_name(extract_name(tb.get('nome', 'N/D')) or 'N/D')
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, tb.get('pubs', 1) // n_months)
@@ -261,7 +271,7 @@ for tb in ARGUS.get('top_beneficiarios', []):
 # ── ADV_DATA (from top_advogados) ──
 ADV_DATA = []
 for ta in ARGUS.get('top_advogados', []):
-    nome = (extract_name(ta.get('nome', 'N/D')) or 'N/D').upper()
+    nome = normalize_name(extract_name(ta.get('nome', 'N/D')) or 'N/D')
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, ta.get('pubs', 1) // n_months)
@@ -429,8 +439,8 @@ for al in ARGUS.get('alertas', []):
         "date": date_str, "y": y, "m": m,
         "tipo": tipo,
         "trib": al.get('trib', 'DJEN'),
-        "ente": (al.get('ente_devedor', 'N/D') or 'N/D').upper(),
-        "benef": (benef or 'N/D').upper() if benef and benef != 'N/D' else 'N/D',
+        "ente": normalize_name(al.get('ente_devedor', 'N/D') or 'N/D'),
+        "benef": normalize_name(benef) if benef and benef != 'N/D' else 'N/D',
         "valor": valor,
         "score": score,
         "fase": FASE_LABELS.get(fase, fase), "mat": mat,
