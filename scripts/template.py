@@ -626,7 +626,7 @@ function rIntel(){{
 
   const fmi=gfmi();
   const trendTribs=fT==='all'?TRIBS.slice(0,6):TRIBS.filter(t=>_m(fT,t)).slice(0,8);
-  dc('cTr');const ds=trendTribs.map((t,i)=>({{label:t,data:TREND[t]?TREND[t].filter(r=>(fY==='all'||_m(fY,r.y))&&(fM==='all'||_m(fM,r.m))).map(r=>r.v):[],borderColor:C10[i%10],backgroundColor:'transparent',tension:.3,borderWidth:2,pointRadius:2,pointBackgroundColor:C10[i%10]}}));
+  dc('cTr');const ds=trendTribs.map((t,i)=>{{const tData=TREND[t]?TREND[t].filter(r=>(fY==='all'||_m(fY,r.y))&&(fM==='all'||_m(fM,r.m))):[];const aligned=fmi.map(m=>{{const e=tData.find(r=>r.y===m.y&&r.m===m.m);return e?e.v:null}});return{{label:t,data:aligned,borderColor:C10[i%10],backgroundColor:'transparent',tension:.3,borderWidth:2,pointRadius:2,pointBackgroundColor:C10[i%10],spanGaps:true}}}});
   ch['cTr']=new Chart(document.getElementById('cTr'),{{type:'line',data:{{labels:fmi.map(m=>m.label),datasets:ds}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:true,position:'top',labels:{{font:{{size:9}},usePointStyle:true,pointStyleWidth:6,padding:6}}}}}},scales:{{y:{{grid:{{color:'rgba(224,231,245,.4)'}}}},x:{{grid:{{display:false}}}}}}}}}});
 
   dc('cDa');const topF=activeFontes.slice(0,5);const dDS=topF.map((f,i)=>({{label:f,data:fd.map(r=>r[f]||0),backgroundColor:C10[i]+'77',borderColor:C10[i],borderWidth:1}}));

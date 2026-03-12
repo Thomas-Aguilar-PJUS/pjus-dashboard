@@ -259,34 +259,40 @@ def main():
         GROUP BY sigla_tribunal, y, m ORDER BY trib, y, m
     """, "tendencia_tribunal")
 
-    # Top beneficiarios
+    # Top beneficiarios (extract nome from JSONB objects)
     D["top_beneficiarios"] = q(conn, f"""
-        SELECT b AS nome,
+        SELECT COALESCE(b->>'nome', b::text) AS nome,
                COUNT(*) AS pubs,
                COALESCE(SUM({VCONV}), 0) AS valor_total,
                ROUND(AVG(score_interesse)::numeric, 1) AS score_medio,
                COUNT(DISTINCT sigla_tribunal) AS num_tribs
         FROM djen_precatorio,
-             LATERAL jsonb_array_elements_text(beneficiarios_ia) AS b
+             LATERAL jsonb_array_elements(beneficiarios_ia) AS b
         WHERE beneficiarios_ia IS NOT NULL
           AND jsonb_array_length(beneficiarios_ia) > 0
           AND score_interesse >= 3
-        GROUP BY b ORDER BY pubs DESC LIMIT 50
+        GROUP BY COALESCE(b->>'nome', b::text)
+        HAVING COALESCE(b->>'nome', b::text) IS NOT NULL
+           AND COALESCE(b->>'nome', b::text) != ''
+        ORDER BY pubs DESC LIMIT 50
     """, "top_beneficiarios")
 
-    # Top advogados
+    # Top advogados (extract nome from JSONB objects)
     D["top_advogados"] = q(conn, f"""
-        SELECT a AS nome,
+        SELECT COALESCE(a->>'nome', a::text) AS nome,
                COUNT(*) AS pubs,
                COALESCE(SUM({VCONV}), 0) AS valor_total,
                ROUND(AVG(score_interesse)::numeric, 1) AS score_medio,
                COUNT(DISTINCT sigla_tribunal) AS num_tribs
         FROM djen_precatorio,
-             LATERAL jsonb_array_elements_text(advogados_ia) AS a
+             LATERAL jsonb_array_elements(advogados_ia) AS a
         WHERE advogados_ia IS NOT NULL
           AND jsonb_array_length(advogados_ia) > 0
           AND score_interesse >= 3
-        GROUP BY a ORDER BY pubs DESC LIMIT 50
+        GROUP BY COALESCE(a->>'nome', a::text)
+        HAVING COALESCE(a->>'nome', a::text) IS NOT NULL
+           AND COALESCE(a->>'nome', a::text) != ''
+        ORDER BY pubs DESC LIMIT 50
     """, "top_advogados")
 
     # ── AMAPÁ ──

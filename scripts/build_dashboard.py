@@ -279,58 +279,30 @@ for ta in ARGUS.get('top_advogados', []):
             "mat": random.choice(MATS[:4])
         })
 
-# ── PIPELINE (from pipeline_fase + pipeline_mensal) ──
-# Build score lookup from pipeline_fase (fallback for older data without score_medio)
-FASE_SCORE = {}
-for pf in ARGUS.get('pipeline_fase', []):
-    FASE_SCORE[pf.get('fase', '')] = pf.get('score_medio', 3.0) or 3.0
-
+# ── PIPELINE (from pipeline_fase, distributed across months) ──
+# Always use pipeline_fase with distribution for consistent visualization
+# This avoids mixing contexts from sparse pipeline_mensal (only 2 months of data)
 PIPELINE = []
-for pm in ARGUS.get('pipeline_mensal', []):
-    fase = pm.get('fase', '') or ''
+for pf in ARGUS.get('pipeline_fase', []):
+    fase = pf.get('fase', '') or ''
     if not fase or fase.strip() == '':
         continue  # Skip records with empty fase
     mat = FASE_MAT.get(fase, 'Média')
     label = FASE_LABELS.get(fase, fase)
-    # Use real score_medio from query (or fallback to pipeline_fase lookup)
-    score = pm.get('score_medio') or FASE_SCORE.get(fase, 3.0)
-    score = round(float(score), 1) if score else 3.0
-    # Use real dias_medio from query (or estimate from maturidade)
-    dias = pm.get('dias_medio')
-    if dias:
-        dias = int(float(dias))
-    else:
-        dias = {'Muito Alta': 30, 'Alta': 60, 'Média': 100, 'Média-Baixa': 130, 'Baixa': 160}.get(mat, 100)
-    PIPELINE.append({
-        "fase": label,
-        "vol": pm.get('vol', 0),
-        "val": round((pm.get('val', 0) or 0) / 1e6, 2),
-        "score": score,
-        "dias": dias,
-        "mat": mat,
-        "acao": "Monitorar",
-        "y": pm.get('y', 2026),
-        "m": pm.get('m', 1),
-        "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN'
-    })
-if not PIPELINE:
-    for pf in ARGUS.get('pipeline_fase', []):
-        fase = pf.get('fase', 'outro')
-        mat = FASE_MAT.get(fase, 'Média')
-        label = FASE_LABELS.get(fase, fase)
-        for mi in MESES_IDX:
-            g = random.uniform(0.8, 1.2)
-            PIPELINE.append({
-                "fase": label,
-                "vol": int(pf.get('vol', 0) / len(MESES_IDX) * g),
-                "val": round((pf.get('val', 0) or 0) / len(MESES_IDX) / 1e6 * g, 2),
-                "score": pf.get('score_medio', 3.0) or 3.0,
-                "dias": random.randint(30, 180),
-                "mat": mat,
-                "acao": "Monitorar",
-                "y": mi["y"], "m": mi["m"],
-                "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN'
-            })
+    score = pf.get('score_medio', 3.0) or 3.0
+    for mi in MESES_IDX:
+        g = random.uniform(0.8, 1.2)
+        PIPELINE.append({
+            "fase": label,
+            "vol": int(pf.get('vol', 0) / len(MESES_IDX) * g),
+            "val": round((pf.get('val', 0) or 0) / len(MESES_IDX) / 1e6 * g, 2),
+            "score": score,
+            "dias": random.randint(30, 180),
+            "mat": mat,
+            "acao": "Monitorar",
+            "y": mi["y"], "m": mi["m"],
+            "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN'
+        })
 
 # ── TOP_OPPS (derived from high-score opportunities) ──
 TOP_OPPS = []
