@@ -1023,7 +1023,27 @@ function rPerf(){
     return ccM.t;
   }
   let ccHTML='',cfHTML='';
-  if(mAtv){
+  const negAtivo=fl.n!=='-1';
+  if(negAtivo){
+    // Quando negociador filtrado, calcular conversão a partir dos dados filtrados (negs já filtra por fl.n)
+    const cfLabel=mAtv?MO[mI-1]:'YTD 26';
+    const cAprN=tC, cRepN=tRp;
+    const denomFN=cAprN+cRepN;
+    const convFN=denomFN>0?(cAprN/denomFN*100):0;
+    const cfColN=convFN>=50?'var(--green)':convFN>=30?'var(--yellow)':'var(--red)';
+    cfHTML=`<div class="kc ko"><div class="kc-label">${IC.conversao} CONVERSÃO FINALIZADOS — ${cfLabel}</div><div class="kc-val" style="color:${cfColN}">${convFN.toFixed(1)}%</div><div class="kc-sub">${cAprN} aprovadas / ${denomFN} finalizadas | Qtd. Operações</div></div>`;
+    // Conv CC: usar filterRW para contabilizar movimentações do negociador
+    let negOps=filterRW();
+    if(mAtv) negOps=negOps.filter(r=>r[15]===mI);
+    const nCad=negOps.length;
+    const nApr=negOps.filter(r=>r[0]===1).length;
+    const nRep=negOps.filter(r=>r[0]===2).length;
+    const nAnd=negOps.filter(r=>r[0]===0).length;
+    const denomCCN=nCad;
+    const convCCN=denomCCN>0?(nApr/denomCCN*100):0;
+    const ccColN=convCCN>=50?'var(--green)':convCCN>=30?'var(--yellow)':'var(--red)';
+    ccHTML=`<div class="kc kb"><div class="kc-label">${IC.conversao} CONVERSÃO CONTA CORRENTE — ${cfLabel}</div><div class="kc-val" style="color:${ccColN}">${convCCN.toFixed(1)}%</div><div class="kc-sub">${nApr} aprovadas / ${denomCCN} total operações | Qtd. Operações</div></div>`;
+  } else if(mAtv){
     const cc=getCCData(mI-1);
     const cEI=cc[0],cCad=cc[1],cApr=cc[2],cRep=cc[3],cEA=cc[4];
     const denomCC=cEI+cCad-cEA;
@@ -1143,6 +1163,12 @@ function rPerf(){
   let rnIdxs=allRN.map((_,i)=>i);
   if(fl.r!=='t') rnIdxs=rnIdxs.filter(i=>i===parseInt(fl.r));
   if(fl.s==='m') rnIdxs=[];// Mid-Market não tem cards regionais A-D
+  // Quando negociador filtrado, mostrar somente a regional dele
+  if(negAtivo && negs.length>0){
+    const negReg=negs[0][2]; // Regional name from negs data
+    const negRegIdx=allRN.indexOf(negReg);
+    if(negRegIdx>=0) rnIdxs=[negRegIdx]; else rnIdxs=[];
+  }
   const mesAtivo=fl.m!=='-1';
   const mLabel=mesAtivo?MO[parseInt(fl.m)-1]:'YTD';
   let rh='';
@@ -1151,7 +1177,14 @@ function rPerf(){
   rnIdxs.forEach(i=>{const r=allRN[i];
     let rApr,rRep,rAnd,receita;
     let regOps=filterRW().filter(x=>x[2]===i);
-    if(mesAtivo){
+    if(negAtivo){
+      // Quando negociador filtrado, usar sempre filterRW (já filtra por fl.n)
+      if(mesAtivo) regOps=regOps.filter(x=>x[15]===mInt);
+      rApr=regOps.filter(x=>x[0]===1).length;
+      rRep=regOps.filter(x=>x[0]===2).length;
+      rAnd=regOps.filter(x=>x[0]===0).length;
+      receita=regOps.filter(x=>x[0]===1).reduce((a,x)=>a+x[10]+x[11]+x[12],0);
+    } else if(mesAtivo){
       // Usar dados da conta corrente do Excel
       const ccR=D.cc[mInt-1].r[r];
       if(ccR){
@@ -1166,19 +1199,33 @@ function rPerf(){
     }
     const cv=(rApr+rRep)>0?(rApr/(rApr+rRep)*100):0;
     const cvCol=cv>=50?'var(--green)':cv>=30?'var(--yellow)':'var(--red)';
-    // Conv CC e Finalizados por regional (dados do Excel)
+    // Conv CC e Finalizados por regional
     let ccRegHTML='';
-    const ccReg=mesAtivo?(D.cc[mInt-1].r[r]||null):null;
-    if(mesAtivo && ccReg){
-      const rvEI=ccReg[5],rvCad=ccReg[6],rvApr=ccReg[7],rvRep=ccReg[8],rvEA=ccReg[9];
-      const rDen=rvEI+rvCad-rvEA;
-      const rCC=rDen>0?(rvApr/rDen*100):0;
-      const rCCcol=rCC>=50?'var(--green)':rCC>=30?'var(--yellow)':'var(--red)';
-      const rDF=rvApr+rvRep;
-      const rCF=rDF>0?(rvApr/rDF*100):0;
-      const rCFcol=rCF>=50?'var(--green)':rCF>=30?'var(--yellow)':'var(--red)';
-      ccRegHTML=`<div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Conta Corrente</div><div style="font-size:15px;font-weight:800;color:${rCCcol};margin-top:2px">${rCC.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Finalizados</div><div style="font-size:15px;font-weight:800;color:${rCFcol};margin-top:2px">${rCF.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div></div>`;
-    } else if(!mesAtivo) {
+    if(negAtivo){
+      // Quando negociador filtrado, calcular a partir de filterRW
+      const nrOps=regOps; // já filtrado por negociador e regional
+      const nrApr=nrOps.filter(x=>x[0]===1).length;
+      const nrRep=nrOps.filter(x=>x[0]===2).length;
+      const nrTotal=nrOps.length;
+      const nrCC=nrTotal>0?(nrApr/nrTotal*100):0;
+      const nrCCcol=nrCC>=50?'var(--green)':nrCC>=30?'var(--yellow)':'var(--red)';
+      const nrDF=nrApr+nrRep;
+      const nrCF=nrDF>0?(nrApr/nrDF*100):0;
+      const nrCFcol=nrCF>=50?'var(--green)':nrCF>=30?'var(--yellow)':'var(--red)';
+      ccRegHTML=`<div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Conta Corrente</div><div style="font-size:15px;font-weight:800;color:${nrCCcol};margin-top:2px">${nrCC.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Qtd. Operações</div></div><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Finalizados</div><div style="font-size:15px;font-weight:800;color:${nrCFcol};margin-top:2px">${nrCF.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Qtd. Operações</div></div></div>`;
+    } else if(mesAtivo) {
+      const ccReg=D.cc[mInt-1].r[r]||null;
+      if(ccReg){
+        const rvEI=ccReg[5],rvCad=ccReg[6],rvApr=ccReg[7],rvRep=ccReg[8],rvEA=ccReg[9];
+        const rDen=rvEI+rvCad-rvEA;
+        const rCC=rDen>0?(rvApr/rDen*100):0;
+        const rCCcol=rCC>=50?'var(--green)':rCC>=30?'var(--yellow)':'var(--red)';
+        const rDF=rvApr+rvRep;
+        const rCF=rDF>0?(rvApr/rDF*100):0;
+        const rCFcol=rCF>=50?'var(--green)':rCF>=30?'var(--yellow)':'var(--red)';
+        ccRegHTML=`<div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Conta Corrente</div><div style="font-size:15px;font-weight:800;color:${rCCcol};margin-top:2px">${rCC.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Finalizados</div><div style="font-size:15px;font-weight:800;color:${rCFcol};margin-top:2px">${rCF.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div></div>`;
+      }
+    } else {
       // YTD: aggregate all 3 months from CC data
       let tEI=0,tCad=0,tApr=0,tRep=0,tEA=0;
       for(let m=0;m<3;m++){const rd=D.cc[m].r[r];if(rd){if(m===0)tEI+=rd[5];tCad+=rd[6];tApr+=rd[7];tRep+=rd[8];if(m===2)tEA=rd[9];}}
