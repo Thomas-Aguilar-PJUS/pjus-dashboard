@@ -256,7 +256,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
     <div class="cd"><h3 id="hCCReg">Conversão Conta Corrente por Regional — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Base: Volume Líquido | Pago / (EI + Cadastrado − Em Andamento)</div><div class="cw" style="height:260px"><canvas id="cRegPerf"></canvas></div></div>
   </div>
   <div class="st">Produção Diária — Pagos & Líquido a Receber</div>
-  <div class="cd" style="margin-bottom:16px"><h3 id="hPagDia">Produção Diária de Pagos — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Barras: valor pago por dia | Linha: acumulado | Referência: pipeline ativo (líquido a receber)</div><div class="cw" style="height:340px"><canvas id="cPagDia"></canvas></div></div>
+  <div class="cd" style="margin-bottom:16px"><h3 id="hPagDia">Produção Diária de Pagos — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Barras: valor pago por dia | Linha: acumulado | Referência: meta de produção</div><div class="cw" style="height:340px"><canvas id="cPagDia"></canvas></div></div>
   <div class="st">Acompanhamento Diário — Volume de Propostas & Ticket Médio</div>
   <div class="row2">
     <div class="cd"><h3 id="hVolDia">Volume Diário de Propostas — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Quantidade de operações cadastradas por dia útil</div><div class="cw" style="height:300px"><canvas id="cVolDia"></canvas></div></div>
@@ -732,8 +732,11 @@ function rExec(){
       else{cumAcc+=d[2]/1e6;}
       dpCum.push(cumAcc);
     });
-    // Pipeline (líquido a receber) como linha de referência
-    const pipelineVal=allAndOps.reduce((a,r)=>a+r[14],0)/1e6;
+    // Meta de Produção como linha de referência
+    const metaSet=gm();
+    let metaVal=0;
+    if(execMes>0){metaVal=metaSet.m.slice(0,execMes).reduce((a,v)=>a+v,0)/1e6;}
+    else{const lastMes=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):3;metaVal=metaSet.m.slice(0,lastMes).reduce((a,v)=>a+v,0)/1e6;}
     const rLabelDP=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
     const periodLabelDP=execMes>0?MO[execMes-1]+'/26':'YTD 26';
     document.getElementById('hPagDia').textContent='Produção Diária de Pagos — '+periodLabelDP+rLabelDP;
@@ -741,7 +744,7 @@ function rExec(){
     ch['cPagDia']=new Chart(document.getElementById('cPagDia'),{type:'bar',data:{labels:dpLabels,datasets:[
       {label:'Valor Pago/dia (R$M)',data:dpVal,backgroundColor:'rgba(0,166,140,.65)',borderColor:'#00A68C',borderWidth:1,borderRadius:4,yAxisID:'y'},
       {label:'Acumulado (R$M)',data:dpCum,type:'line',borderColor:'#0074FF',backgroundColor:'rgba(0,116,255,.08)',pointRadius:0,borderWidth:2.5,tension:.3,fill:true,yAxisID:'y1'},
-      {label:'Pipeline Ativo (R$M)',data:Array(dpLabels.length).fill(pipelineVal),type:'line',borderColor:'#EF4444',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false,yAxisID:'y1'}
+      {label:'Meta Produção (R$M)',data:Array(dpLabels.length).fill(metaVal),type:'line',borderColor:'#EF4444',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false,yAxisID:'y1'}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>{const v=typeof c.raw==='number'?c.raw:0;return c.dataset.label+': R$ '+v.toFixed(2)+'M'}}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'R$ Milhões/dia',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,title:{display:true,text:'R$ Milhões acumulado',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(0)+'M'},grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
   }
 
