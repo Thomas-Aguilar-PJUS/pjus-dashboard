@@ -617,7 +617,7 @@ function rExec(){
   const andCount=andOps.length;
   // Pipeline SEMPRE usa todas as operações em andamento (não filtra por mês)
   const allAndOps=allOps.filter(r=>r[0]===0);
-  const pipeVal=allAndOps.reduce((a,r)=>a+r[3],0);
+  const pipeVal=allAndOps.reduce((a,r)=>a+r[14],0);
   const pipeCount=allAndOps.length;
   // Conversão: usar D.cc (conta corrente) para alinhar com aba Performance
   function getExecCC(mi){const ccM=D.cc[mi];if(!ccM)return[0,0,0,0,0,0,0,0,0,0];if(fl.r!=='t'){const rn=RN[parseInt(fl.r)];return ccM.r[rn]||[0,0,0,0,0,0,0,0,0,0];}if(fl.s==='v'){const sum=[0,0,0,0,0,0,0,0,0,0];['Regional A','Regional B','Regional C','Regional D'].forEach(rn=>{const rd=ccM.r[rn];if(rd)rd.forEach((v,j)=>sum[j]+=v);});return sum;}if(fl.s==='m'){return ccM.r['Mid-Market']||[0,0,0,0,0,0,0,0,0,0];}return ccM.t;}
@@ -982,10 +982,10 @@ function rFunil(){
   if(fl.fm && fl.fm!=='-1') funilData=funilData.filter(r=>r[15]===parseInt(fl.fm));
 
   const tF=funilData.length;
-  const tFv=funilData.reduce((a,r)=>a+r[3],0);
+  const tFv=funilData.reduce((a,r)=>a+r[14],0);
   const ticketMedio=tF>0?(tFv/tF):0;
   const tP=funilData.filter(r=>r[7]===1).length;
-  const tPv=funilData.filter(r=>r[7]===1).reduce((a,r)=>a+r[3],0);
+  const tPv=funilData.filter(r=>r[7]===1).reduce((a,r)=>a+r[14],0);
 
   let allFiltered=filterRW();
   const allApr=allFiltered.filter(r=>r[0]===1).length;
@@ -1005,12 +1005,12 @@ function rFunil(){
 
   const funilInsights=[];
   const etapaGroups={};
-  funilData.forEach(r=>{const e=ET[r[4]];if(!etapaGroups[e])etapaGroups[e]={count:0,val:0,pend:0};etapaGroups[e].count++;etapaGroups[e].val+=r[3];if(r[7])etapaGroups[e].pend++});
+  funilData.forEach(r=>{const e=ET[r[4]];if(!etapaGroups[e])etapaGroups[e]={count:0,val:0,pend:0};etapaGroups[e].count++;etapaGroups[e].val+=r[14];if(r[7])etapaGroups[e].pend++});
   const topEtapa=Object.entries(etapaGroups).sort((a,b)=>b[1].count-a[1].count)[0];
   if(topEtapa) funilInsights.push({type:'info',text:`Maior concentração: ${topEtapa[0]} com ${topEtapa[1].count} operações (${F(topEtapa[1].val)}) — possível gargalo operacional`});
   
-  const highValPend=funilData.filter(r=>r[7]===1 && r[3]>1e6).sort((a,b)=>b[3]-a[3]);
-  if(highValPend.length>0) funilInsights.push({type:'warn',text:`${highValPend.length} operações pendentes com valor > R$ 1M — total de ${F(highValPend.reduce((a,r)=>a+r[3],0))} em risco`});
+  const highValPend=funilData.filter(r=>r[7]===1 && r[14]>1e6).sort((a,b)=>b[14]-a[14]);
+  if(highValPend.length>0) funilInsights.push({type:'warn',text:`${highValPend.length} operações pendentes com valor > R$ 1M — total de ${F(highValPend.reduce((a,r)=>a+r[14],0))} em risco`});
   
   let repOps=filterRW(2);
   const motRegCount={};
@@ -1027,7 +1027,7 @@ function rFunil(){
 
   dc('cFN');
   const funEtapas={};
-  funilData.forEach(r=>{const e=ET[r[4]];if(!funEtapas[e])funEtapas[e]={count:0,val:0};funEtapas[e].count++;funEtapas[e].val+=r[3]});
+  funilData.forEach(r=>{const e=ET[r[4]];if(!funEtapas[e])funEtapas[e]={count:0,val:0};funEtapas[e].count++;funEtapas[e].val+=r[14]});
   const etapaOrdem=['Documentos preliminares','Conferência inicial','Avaliação do ativo','Providências jurídicas','Cálculo','Parecer do titular','Conferência final','Parecer jurídico','Confecção de documentos','Assinatura','Protocolo de cessão','Homologação','Pagamento'];
   const funSorted=Object.entries(funEtapas).sort((a,b)=>{const ia=etapaOrdem.indexOf(a[0]);const ib=etapaOrdem.indexOf(b[0]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
   const fc=['#0074FF','#6366f1','#0E2F5D','#a855f7','#c084fc','#00A68C','#14b8a6','#eab308','#f97316','#ef4444'];
@@ -1042,7 +1042,7 @@ function rFunil(){
   ch['cAT']=new Chart(document.getElementById('cAT'),{type:'bar',data:{labels:ativSorted.map(a=>a[0]),datasets:[{data:ativSorted.map(a=>a[1]),backgroundColor:'rgba(249,115,22,.55)',borderColor:'#f97316',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:false}},scales:{x:{beginAtZero:true,title:{display:true,text:'Quantidade'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
 
   const pendByReg={};
-  funilData.filter(r=>r[7]===1&&r[2]>=0&&r[2]<=3).forEach(r=>{const reg=RN[r[2]];if(!pendByReg[reg])pendByReg[reg]={count:0,val:0};pendByReg[reg].count++;pendByReg[reg].val+=r[3]});
+  funilData.filter(r=>r[7]===1&&r[2]>=0&&r[2]<=3).forEach(r=>{const reg=RN[r[2]];if(!pendByReg[reg])pendByReg[reg]={count:0,val:0};pendByReg[reg].count++;pendByReg[reg].val+=r[14]});
   const tPtotal=Object.values(pendByReg).reduce((a,p)=>a+p.count,0)||1;
   let ph='<table><thead><tr><th>Regional</th><th style="text-align:right">Quantidade</th><th style="text-align:right">Valor Líquido a Receber</th><th>% Total</th></tr></thead><tbody>';
   Object.entries(pendByReg).sort((a,b)=>b[1].count-a[1].count).forEach(([reg,p])=>{const pc=(p.count/tPtotal*100);ph+=`<tr><td><strong>${reg}</strong></td><td style="text-align:right">${p.count}</td><td style="text-align:right">${F(p.val)}</td><td><div class="pb" style="width:120px"><div class="pf" style="width:${pc}%;background:var(--orange)"></div></div> ${pc.toFixed(0)}%</td></tr>`});
