@@ -282,10 +282,15 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
     <div class="cd"><h3 id="hTend">Tendência Valor Líquido Pago Mensal — YTD 26</h3><div class="cw" style="height:260px"><canvas id="cTend"></canvas></div><div id="varBadge" style="text-align:center"></div></div>
     <div class="cd"><h3 id="hCCReg">Conversão Conta Corrente por Regional — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Base: Volume Líquido | Pago / (EI + Cadastrado − Em Andamento)</div><div class="cw" style="height:260px"><canvas id="cRegPerf"></canvas></div></div>
   </div>
-  <div class="st">Produção Diária — Pagos & Líquido a Receber</div>
+  <div class="st" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap">Produção Diária — Pagos & Líquido a Receber
+<div style="display:flex;align-items:center;gap:8px">
+<span class="filter-label" style="font-size:10px">Semana:</span>
+<select class="fsel" id="weekFilter" onchange="fl.wk=this.value;rExec()" style="font-size:11px;padding:4px 8px"><option value="-1">Todas</option></select>
+</div></div>
   <div id="dpKpiRow" class="krow" style="grid-template-columns:repeat(2,1fr)"></div>
   <div class="cd" style="margin-bottom:16px"><h3 id="hPagDia">Produção Diária de Pagos — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Barras: valor pago por dia | Linha: acumulado | Referência: meta de produção</div><div class="cw" style="height:340px"><canvas id="cPagDia"></canvas></div></div>
   <div class="st">Acompanhamento Diário — Volume de Propostas & Ticket Médio</div>
+<div id="dyKpiRow" class="krow" style="grid-template-columns:repeat(3,1fr)"></div>
   <div class="row2">
     <div class="cd"><h3 id="hVolDia">Volume Diário de Propostas — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Quantidade de operações cadastradas por dia útil</div><div class="cw" style="height:300px"><canvas id="cVolDia"></canvas></div></div>
     <div class="cd"><h3 id="hTickDia">Ticket Médio Diário — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Valor projetado médio por operação cadastrada</div><div class="cw" style="height:300px"><canvas id="cTickDia"></canvas></div></div>
@@ -422,7 +427,7 @@ const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez
 const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
 
 
-let ch={},at='exec',fl={s:'t',r:'t',n:'-1',m:'-1',em:'-1',fm:'-1',fe:'-1',dm:'-1'};
+let ch={},at='exec',fl={s:'t',r:'t',n:'-1',m:'-1',em:'-1',fm:'-1',fe:'-1',dm:'-1',wk:'-1'};
 // cf = cross-filter state per tab: {exec:{type,val,label}, perf:{...}, funil:{...}}
 const cf={exec:{active:false},perf:{active:false},funil:{active:false}};
 
@@ -760,14 +765,41 @@ function rExec(){
   if(typeof DP!=='undefined' && DP.length>0){
     const rFiltDP=fl.r!=='t'?parseInt(fl.r):-1;
     const dpFiltered=execMes>0?DP.filter(d=>parseInt(d[0].split('-')[1])===execMes):DP;
-    const dpLabels=dpFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
-    const dpVal=dpFiltered.map(d=>{
+    // Week filter
+    const wkSel=document.getElementById('weekFilter');
+    if(wkSel){
+      const weeks={};
+      dpFiltered.forEach(d=>{
+        const dt=new Date(d[0]);
+        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
+        const wkNum=Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7);
+        const mon=dt.getMonth()+1;
+        const monday=new Date(dt);monday.setDate(dt.getDate()-((dt.getDay()+6)%7));
+        const friday=new Date(monday);friday.setDate(monday.getDate()+4);
+        const label='S'+wkNum+' ('+String(monday.getDate()).padStart(2,'0')+'/'+String(monday.getMonth()+1).padStart(2,'0')+' - '+String(friday.getDate()).padStart(2,'0')+'/'+String(friday.getMonth()+1).padStart(2,'0')+')';
+        if(!weeks[wkNum])weeks[wkNum]={label,dates:[]};
+        weeks[wkNum].dates.push(d[0]);
+      });
+      const curWk=wkSel.value;
+      wkSel.innerHTML='<option value="-1">Todas</option>'+Object.entries(weeks).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).map(([k,v])=>`<option value="${k}" ${k===curWk?'selected':''}>${v.label}</option>`).join('');
+    }
+    let dpWeekFiltered=dpFiltered;
+    if(fl.wk && fl.wk!=='-1'){
+      const wkNum=parseInt(fl.wk);
+      dpWeekFiltered=dpFiltered.filter(d=>{
+        const dt=new Date(d[0]);
+        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
+        return Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum;
+      });
+    }
+    const dpLabels=dpWeekFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dpVal=dpWeekFiltered.map(d=>{
       if(rFiltDP>=0){const rr=d[4][String(rFiltDP)];return rr?rr[1]/1e6:0;}
       return d[2]/1e6;
     });
     // Acumulado
     let dpCum=[];let cumAcc=0;
-    dpFiltered.forEach(d=>{
+    dpWeekFiltered.forEach(d=>{
       if(rFiltDP>=0){const rr=d[4][String(rFiltDP)];cumAcc+=rr?rr[1]/1e6:0;}
       else{cumAcc+=d[2]/1e6;}
       dpCum.push(cumAcc);
@@ -822,24 +854,44 @@ function rExec(){
       {label:'Acumulado (R$M)',data:dpCum,type:'line',borderColor:'#0074FF',backgroundColor:'rgba(0,116,255,.08)',pointRadius:0,borderWidth:2.5,tension:.3,fill:true,yAxisID:'y1'},
       {label:'Meta Produção (R$M)',data:Array(dpLabels.length).fill(metaVal),type:'line',borderColor:'#EF4444',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false,yAxisID:'y1'}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>{const v=typeof c.raw==='number'?c.raw:0;return c.dataset.label+': R$ '+v.toFixed(2)+'M'}}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'R$ Milhões/dia',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,title:{display:true,text:'R$ Milhões acumulado',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(0)+'M'},grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
-  } else { const dpKpiClr=document.getElementById('dpKpiRow');if(dpKpiClr)dpKpiClr.innerHTML=''; }
+  } else { const dpKpiClr=document.getElementById('dpKpiRow');if(dpKpiClr)dpKpiClr.innerHTML='';const dyKpiClr=document.getElementById('dyKpiRow');if(dyKpiClr)dyKpiClr.innerHTML=''; }
 
   // ===== GRÁFICOS DIÁRIOS: Volume & Ticket Médio (aba Executivo) =====
   if(typeof DY!=='undefined' && DY.length>0){
     const rFilt=fl.r!=='t'?parseInt(fl.r):-1;
     const dyFiltered=execMes>0?DY.filter(d=>parseInt(d[0].split('-')[1])===execMes):DY;
-    const dyLabels=dyFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
-    const dyVol=dyFiltered.map(d=>{
+    let dyWeekData=dyFiltered;
+    if(fl.wk && fl.wk!=='-1'){
+      const wkNum=parseInt(fl.wk);
+      dyWeekData=dyFiltered.filter(d=>{
+        const dt=new Date(d[0]);
+        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
+        return Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum;
+      });
+    }
+    const dyLabels=dyWeekData.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dyVol=dyWeekData.map(d=>{
       if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[0]:0;}
       return d[1];
     });
-    const dyVal=dyFiltered.map(d=>{
+    const dyVal=dyWeekData.map(d=>{
       if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[1]:0;}
       return d[2];
     });
-    const dyTicket=dyFiltered.map((d,i)=>dyVol[i]>0?(dyVal[i]/dyVol[i]/1e3):0);
+    const dyTicket=dyWeekData.map((d,i)=>dyVol[i]>0?(dyVal[i]/dyVol[i]/1e3):0);
     const avgVol=dyVol.length>0?(dyVol.reduce((a,b)=>a+b,0)/dyVol.length):0;
     const avgTicket=dyTicket.filter(v=>v>0).length>0?(dyTicket.reduce((a,b)=>a+b,0)/dyTicket.filter(v=>v>0).length):0;
+    const totalDyVol=dyVol.reduce((a,b)=>a+b,0);
+    const totalDyVal=dyVal.reduce((a,b)=>a+b,0);
+    const numDU=dyVol.length;
+    const avgDailyVal=numDU>0?(totalDyVal/numDU):0;
+    const avgDailyTicket=totalDyVol>0?(totalDyVal/totalDyVol):0;
+    const dyKpiEl=document.getElementById('dyKpiRow');
+    if(dyKpiEl){dyKpiEl.innerHTML=`
+      <div class="kc kg"><div class="kc-label">${IC.receita} PROPOSTAS ACEITAS ACUMULADAS</div><div class="kc-val" style="color:var(--green)">R$ ${(totalDyVal/1e6).toFixed(1)}M</div><div class="kc-sub">${totalDyVol} propostas | ${numDU} dias úteis</div></div>
+      <div class="kc" style="border-top:4px solid var(--accent)"><div class="kc-label">${IC.ticket} VOLUME MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--accent)">R$ ${(avgDailyVal/1e6).toFixed(2)}M</div><div class="kc-sub">Volume líquido médio por dia útil</div></div>
+      <div class="kc" style="border-top:4px solid var(--accent)"><div class="kc-label">${IC.ticket} TICKET MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--accent)">R$ ${(avgDailyTicket/1e3).toFixed(0)}K</div><div class="kc-sub">Valor médio por proposta aceita</div></div>
+    `;}
     const rLabel=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
     const periodLabel=execMes>0?MO[execMes-1]+'/26':'YTD 26';
     document.getElementById('hVolDia').textContent='Volume Diário de Propostas — '+periodLabel+rLabel;
@@ -1403,10 +1455,15 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
     <div class="cd"><h3 id="hTend">Tendência Valor Líquido Pago Mensal — YTD 26</h3><div class="cw" style="height:260px"><canvas id="cTend"></canvas></div><div id="varBadge" style="text-align:center"></div></div>
     <div class="cd"><h3 id="hCCReg">Conversão Conta Corrente por Regional — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Base: Volume Líquido | Pago / (EI + Cadastrado − Em Andamento)</div><div class="cw" style="height:260px"><canvas id="cRegPerf"></canvas></div></div>
   </div>
-  <div class="st">Produção Diária — Pagos & Líquido a Receber</div>
+  <div class="st" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap">Produção Diária — Pagos & Líquido a Receber
+<div style="display:flex;align-items:center;gap:8px">
+<span class="filter-label" style="font-size:10px">Semana:</span>
+<select class="fsel" id="weekFilter" onchange="fl.wk=this.value;rExec()" style="font-size:11px;padding:4px 8px"><option value="-1">Todas</option></select>
+</div></div>
   <div id="dpKpiRow" class="krow" style="grid-template-columns:repeat(2,1fr)"></div>
   <div class="cd" style="margin-bottom:16px"><h3 id="hPagDia">Produção Diária de Pagos — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Barras: valor pago por dia | Linha: acumulado | Referência: meta de produção</div><div class="cw" style="height:340px"><canvas id="cPagDia"></canvas></div></div>
   <div class="st">Acompanhamento Diário — Volume de Propostas & Ticket Médio</div>
+<div id="dyKpiRow" class="krow" style="grid-template-columns:repeat(3,1fr)"></div>
   <div class="row2">
     <div class="cd"><h3 id="hVolDia">Volume Diário de Propostas — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Quantidade de operações cadastradas por dia útil</div><div class="cw" style="height:300px"><canvas id="cVolDia"></canvas></div></div>
     <div class="cd"><h3 id="hTickDia">Ticket Médio Diário — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Valor projetado médio por operação cadastrada</div><div class="cw" style="height:300px"><canvas id="cTickDia"></canvas></div></div>
@@ -1543,7 +1600,7 @@ const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez
 const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
 
 
-let ch={},at='exec',fl={s:'t',r:'t',n:'-1',m:'-1',em:'-1',fm:'-1',fe:'-1',dm:'-1'};
+let ch={},at='exec',fl={s:'t',r:'t',n:'-1',m:'-1',em:'-1',fm:'-1',fe:'-1',dm:'-1',wk:'-1'};
 // cf = cross-filter state per tab: {exec:{type,val,label}, perf:{...}, funil:{...}}
 const cf={exec:{active:false},perf:{active:false},funil:{active:false}};
 
@@ -1854,14 +1911,41 @@ function rExec(){
   if(typeof DP!=='undefined' && DP.length>0){
     const rFiltDP=fl.r!=='t'?parseInt(fl.r):-1;
     const dpFiltered=execMes>0?DP.filter(d=>parseInt(d[0].split('-')[1])===execMes):DP;
-    const dpLabels=dpFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
-    const dpVal=dpFiltered.map(d=>{
+    // Week filter
+    const wkSel=document.getElementById('weekFilter');
+    if(wkSel){
+      const weeks={};
+      dpFiltered.forEach(d=>{
+        const dt=new Date(d[0]);
+        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
+        const wkNum=Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7);
+        const mon=dt.getMonth()+1;
+        const monday=new Date(dt);monday.setDate(dt.getDate()-((dt.getDay()+6)%7));
+        const friday=new Date(monday);friday.setDate(monday.getDate()+4);
+        const label='S'+wkNum+' ('+String(monday.getDate()).padStart(2,'0')+'/'+String(monday.getMonth()+1).padStart(2,'0')+' - '+String(friday.getDate()).padStart(2,'0')+'/'+String(friday.getMonth()+1).padStart(2,'0')+')';
+        if(!weeks[wkNum])weeks[wkNum]={label,dates:[]};
+        weeks[wkNum].dates.push(d[0]);
+      });
+      const curWk=wkSel.value;
+      wkSel.innerHTML='<option value="-1">Todas</option>'+Object.entries(weeks).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).map(([k,v])=>`<option value="${k}" ${k===curWk?'selected':''}>${v.label}</option>`).join('');
+    }
+    let dpWeekFiltered=dpFiltered;
+    if(fl.wk && fl.wk!=='-1'){
+      const wkNum=parseInt(fl.wk);
+      dpWeekFiltered=dpFiltered.filter(d=>{
+        const dt=new Date(d[0]);
+        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
+        return Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum;
+      });
+    }
+    const dpLabels=dpWeekFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dpVal=dpWeekFiltered.map(d=>{
       if(rFiltDP>=0){const rr=d[4][String(rFiltDP)];return rr?rr[1]/1e6:0;}
       return d[2]/1e6;
     });
     // Acumulado
     let dpCum=[];let cumAcc=0;
-    dpFiltered.forEach(d=>{
+    dpWeekFiltered.forEach(d=>{
       if(rFiltDP>=0){const rr=d[4][String(rFiltDP)];cumAcc+=rr?rr[1]/1e6:0;}
       else{cumAcc+=d[2]/1e6;}
       dpCum.push(cumAcc);
@@ -1916,24 +2000,44 @@ function rExec(){
       {label:'Acumulado (R$M)',data:dpCum,type:'line',borderColor:'#0074FF',backgroundColor:'rgba(0,116,255,.08)',pointRadius:0,borderWidth:2.5,tension:.3,fill:true,yAxisID:'y1'},
       {label:'Meta Produção (R$M)',data:Array(dpLabels.length).fill(metaVal),type:'line',borderColor:'#EF4444',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false,yAxisID:'y1'}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>{const v=typeof c.raw==='number'?c.raw:0;return c.dataset.label+': R$ '+v.toFixed(2)+'M'}}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'R$ Milhões/dia',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,title:{display:true,text:'R$ Milhões acumulado',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(0)+'M'},grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
-  } else { const dpKpiClr=document.getElementById('dpKpiRow');if(dpKpiClr)dpKpiClr.innerHTML=''; }
+  } else { const dpKpiClr=document.getElementById('dpKpiRow');if(dpKpiClr)dpKpiClr.innerHTML='';const dyKpiClr=document.getElementById('dyKpiRow');if(dyKpiClr)dyKpiClr.innerHTML=''; }
 
   // ===== GRÁFICOS DIÁRIOS: Volume & Ticket Médio (aba Executivo) =====
   if(typeof DY!=='undefined' && DY.length>0){
     const rFilt=fl.r!=='t'?parseInt(fl.r):-1;
     const dyFiltered=execMes>0?DY.filter(d=>parseInt(d[0].split('-')[1])===execMes):DY;
-    const dyLabels=dyFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
-    const dyVol=dyFiltered.map(d=>{
+    let dyWeekData=dyFiltered;
+    if(fl.wk && fl.wk!=='-1'){
+      const wkNum=parseInt(fl.wk);
+      dyWeekData=dyFiltered.filter(d=>{
+        const dt=new Date(d[0]);
+        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
+        return Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum;
+      });
+    }
+    const dyLabels=dyWeekData.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dyVol=dyWeekData.map(d=>{
       if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[0]:0;}
       return d[1];
     });
-    const dyVal=dyFiltered.map(d=>{
+    const dyVal=dyWeekData.map(d=>{
       if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[1]:0;}
       return d[2];
     });
-    const dyTicket=dyFiltered.map((d,i)=>dyVol[i]>0?(dyVal[i]/dyVol[i]/1e3):0);
+    const dyTicket=dyWeekData.map((d,i)=>dyVol[i]>0?(dyVal[i]/dyVol[i]/1e3):0);
     const avgVol=dyVol.length>0?(dyVol.reduce((a,b)=>a+b,0)/dyVol.length):0;
     const avgTicket=dyTicket.filter(v=>v>0).length>0?(dyTicket.reduce((a,b)=>a+b,0)/dyTicket.filter(v=>v>0).length):0;
+    const totalDyVol=dyVol.reduce((a,b)=>a+b,0);
+    const totalDyVal=dyVal.reduce((a,b)=>a+b,0);
+    const numDU=dyVol.length;
+    const avgDailyVal=numDU>0?(totalDyVal/numDU):0;
+    const avgDailyTicket=totalDyVol>0?(totalDyVal/totalDyVol):0;
+    const dyKpiEl=document.getElementById('dyKpiRow');
+    if(dyKpiEl){dyKpiEl.innerHTML=`
+      <div class="kc kg"><div class="kc-label">${IC.receita} PROPOSTAS ACEITAS ACUMULADAS</div><div class="kc-val" style="color:var(--green)">R$ ${(totalDyVal/1e6).toFixed(1)}M</div><div class="kc-sub">${totalDyVol} propostas | ${numDU} dias úteis</div></div>
+      <div class="kc" style="border-top:4px solid var(--accent)"><div class="kc-label">${IC.ticket} VOLUME MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--accent)">R$ ${(avgDailyVal/1e6).toFixed(2)}M</div><div class="kc-sub">Volume líquido médio por dia útil</div></div>
+      <div class="kc" style="border-top:4px solid var(--accent)"><div class="kc-label">${IC.ticket} TICKET MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--accent)">R$ ${(avgDailyTicket/1e3).toFixed(0)}K</div><div class="kc-sub">Valor médio por proposta aceita</div></div>
+    `;}
     const rLabel=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
     const periodLabel=execMes>0?MO[execMes-1]+'/26':'YTD 26';
     document.getElementById('hVolDia').textContent='Volume Diário de Propostas — '+periodLabel+rLabel;
