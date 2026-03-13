@@ -448,6 +448,7 @@ document.addEventListener('click',function(){{document.querySelectorAll('.ms-dro
 const ch={{}};function dc(id){{if(ch[id]){{ch[id].destroy();delete ch[id]}}}}
 function Fv(v){{return 'R$ '+v.toLocaleString('pt-BR',{{minimumFractionDigits:1,maximumFractionDigits:1}})+'M'}}
 function Fr(v){{return 'R$ '+v.toLocaleString('pt-BR',{{maximumFractionDigits:0}})}}
+function Fva(v){{return v>0?Fr(v):'<span style="color:var(--text4);font-style:italic">A apurar</span>'}}
 function Fn(v){{return v.toLocaleString('pt-BR')}}
 function sC(s){{return s>=5?'s5':s>=4?'s4':s>=3?'s3':s>=2?'s2':'s1'}}
 function rC(i){{return i===0?'r1':i===1?'r2':i===2?'r3':'rx'}}
@@ -663,14 +664,14 @@ function rProsp(){{
   const bS=Object.values(bA).sort((a,b)=>b.pubs-a.pubs);
   h='<table><thead><tr><th>#</th><th>Beneficiário</th><th>Pub.</th><th>Tribs</th><th>Valor</th><th>Score</th><th>Adv. Princ.</th><th>Prio.</th></tr></thead><tbody>';
   bS.slice(0,20).forEach((b,i)=>{{const avg=b.scores.reduce((a,s)=>a+s,0)/b.scores.length;const ta=Object.entries(b.adv).sort((a,c)=>c[1]-a[1])[0][0];const pr=b.pubs>=15?'ALTA':b.pubs>=8?'MÉDIA':'BAIXA';const pc=pr==='ALTA'?'p-max':pr==='MÉDIA'?'p-alta':'p-media';
-    h+=`<tr><td><span class="rn ${{rC(i)}}">${{i+1}}</span></td><td style="font-weight:600">${{b.nome}}</td><td>${{b.pubs}}</td><td>${{b.tribs.size}}</td><td style="font-weight:600">${{Fr(b.valor)}}</td><td><span class="score-pill ${{sC(Math.round(avg))}}">${{avg.toFixed(1)}}</span></td><td style="color:var(--text3);font-size:9px">${{ta}}</td><td><span class="prio-badge ${{pc}}">${{pr}}</span></td></tr>`}});
+    h+=`<tr><td><span class="rn ${{rC(i)}}">${{i+1}}</span></td><td style="font-weight:600">${{b.nome}}</td><td>${{b.pubs}}</td><td>${{b.tribs.size}}</td><td style="font-weight:600">${{Fva(b.valor)}}</td><td><span class="score-pill ${{sC(Math.round(avg))}}">${{avg.toFixed(1)}}</span></td><td style="color:var(--text3);font-size:9px">${{ta}}</td><td><span class="prio-badge ${{pc}}">${{pr}}</span></td></tr>`}});
   document.getElementById('tB').innerHTML=h+'</tbody></table>';
 
   const fa=gf(ADV_DATA);const aA={{}};fa.forEach(a=>{{if(!aA[a.nome])aA[a.nome]={{nome:a.nome,pubs:0,benefs:0,valor:0,tribs:new Set(),scores:[]}};aA[a.nome].pubs+=a.pubs;aA[a.nome].benefs+=a.benefs;aA[a.nome].valor+=a.valor;if(a.tribs)a.tribs.forEach(t=>aA[a.nome].tribs.add(t));aA[a.nome].scores.push(a.score)}});
   const aS=Object.values(aA).sort((a,b)=>b.pubs-a.pubs);
   h='<table><thead><tr><th>#</th><th>Advogado</th><th>Pub.</th><th>Benef.</th><th>Valor</th><th>Tribunais</th><th>Score</th><th>Potencial</th></tr></thead><tbody>';
   aS.forEach((a,i)=>{{const avg=a.scores.reduce((s,v)=>s+v,0)/a.scores.length;const pot=a.pubs>=60?'ALTO':a.pubs>=30?'MÉDIO':'BAIXO';const pc=pot==='ALTO'?'p-max':pot==='MÉDIO'?'p-alta':'p-media';
-    h+=`<tr><td><span class="rn ${{rC(i)}}">${{i+1}}</span></td><td style="font-weight:600">${{a.nome}}</td><td>${{a.pubs}}</td><td>${{a.benefs}}</td><td style="font-weight:600">${{Fr(a.valor)}}</td><td style="font-size:8px;color:var(--text3)">${{[...a.tribs].join(',')}}</td><td><span class="score-pill ${{sC(Math.round(avg))}}">${{avg.toFixed(1)}}</span></td><td><span class="prio-badge ${{pc}}">${{pot}}</span></td></tr>`}});
+    h+=`<tr><td><span class="rn ${{rC(i)}}">${{i+1}}</span></td><td style="font-weight:600">${{a.nome}}</td><td>${{a.pubs}}</td><td>${{a.benefs}}</td><td style="font-weight:600">${{Fva(a.valor)}}</td><td style="font-size:8px;color:var(--text3)">${{[...a.tribs].join(',')}}</td><td><span class="score-pill ${{sC(Math.round(avg))}}">${{avg.toFixed(1)}}</span></td><td><span class="prio-badge ${{pc}}">${{pot}}</span></td></tr>`}});
   document.getElementById('tA').innerHTML=h+'</tbody></table>';
 }}
 

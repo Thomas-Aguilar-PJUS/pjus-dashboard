@@ -272,16 +272,21 @@ OPPS = sorted(seen_opps.values(), key=lambda x: (x['y'], x['m']), reverse=True)
 BENEFS = []
 for tb in ARGUS.get('top_beneficiarios', []):
     nome = extract_name(tb.get('nome', 'N/D'))
+    adv_name = extract_name(tb.get('advogado_principal', 'N/D')) if tb.get('advogado_principal') else 'N/D'
+    oab = tb.get('oab_principal', '') or ''
+    adv_label = f"{adv_name} ({oab})" if oab else adv_name
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, tb.get('pubs', 1) // n_months)
+        raw_val = (tb.get('valor_total', 0) or 0) / n_months
         BENEFS.append({
             "nome": nome,
             "pubs": pubs,
             "tribs": tb.get('num_tribs', 1) or 1,
-            "valor": round((tb.get('valor_total', 0) or 0) / n_months, 0),
+            "valor": round(raw_val, 0),
+            "valor_label": f"R$ {raw_val:,.0f}".replace(",", ".") if raw_val > 0 else "A apurar",
             "score": tb.get('score_medio', 3.0) or 3.0,
-            "adv": "N/D",
+            "adv": adv_label,
             "y": mi["y"], "m": mi["m"],
             "trib": random.choice(TRIBS[:5]) if TRIBS else 'DJEN',
             "fase": random.choice(FASES[:6]),
@@ -292,15 +297,19 @@ for tb in ARGUS.get('top_beneficiarios', []):
 ADV_DATA = []
 for ta in ARGUS.get('top_advogados', []):
     nome = extract_name(ta.get('nome', 'N/D'))
+    oab = ta.get('oab', '') or ''
+    nome_label = f"{nome} ({oab})" if oab else nome
     for mi in MESES_IDX:
         n_months = len(MESES_IDX)
         pubs = max(1, ta.get('pubs', 1) // n_months)
+        raw_val = (ta.get('valor_total', 0) or 0) / n_months
         tribs_list = random.sample(TRIBS[:8], min(ta.get('num_tribs', 1) or 1, len(TRIBS[:8])))
         ADV_DATA.append({
-            "nome": nome,
+            "nome": nome_label,
             "pubs": pubs,
             "benefs": random.randint(1, 5),
-            "valor": round((ta.get('valor_total', 0) or 0) / n_months, 0),
+            "valor": round(raw_val, 0),
+            "valor_label": f"R$ {raw_val:,.0f}".replace(",", ".") if raw_val > 0 else "A apurar",
             "tribs": tribs_list,
             "trib": tribs_list[0] if tribs_list else 'DJEN',
             "score": ta.get('score_medio', 3.0) or 3.0,
