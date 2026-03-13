@@ -285,11 +285,15 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
   <div class="st" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap">Produção Diária — Pagos & Líquido a Receber
 <div style="display:flex;align-items:center;gap:8px">
 <span class="filter-label" style="font-size:10px">Semana:</span>
-<select class="fsel" id="weekFilter" onchange="fl.wk=this.value;rExec()" style="font-size:11px;padding:4px 8px"><option value="-1">Todas</option></select>
+<select class="fsel" id="weekFilter" onchange="syncWeek(this.value)" style="font-size:11px;padding:4px 8px"><option value="-1">Todas</option></select>
 </div></div>
   <div id="dpKpiRow" class="krow" style="grid-template-columns:repeat(2,1fr)"></div>
   <div class="cd" style="margin-bottom:16px"><h3 id="hPagDia">Produção Diária de Pagos — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Barras: valor pago por dia | Linha: acumulado | Referência: meta de produção</div><div class="cw" style="height:340px"><canvas id="cPagDia"></canvas></div></div>
-  <div class="st">Acompanhamento Diário — Volume de Propostas & Ticket Médio</div>
+  <div class="st" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap">Acompanhamento Diário — Volume de Propostas & Ticket Médio
+<div style="display:flex;align-items:center;gap:8px">
+<span class="filter-label" style="font-size:10px">Semana:</span>
+<select class="fsel" id="weekFilter2" onchange="syncWeek(this.value)" style="font-size:11px;padding:4px 8px"><option value="-1">Todas</option></select>
+</div></div>
 <div id="dyKpiRow" class="krow" style="grid-template-columns:repeat(3,1fr)"></div>
   <div class="row2">
     <div class="cd"><h3 id="hVolDia">Volume Diário de Propostas — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Quantidade de operações cadastradas por dia útil</div><div class="cw" style="height:300px"><canvas id="cVolDia"></canvas></div></div>
@@ -436,6 +440,15 @@ function setExecMes(btn){
   document.querySelectorAll('.filter-btn[data-em]').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   rr();
+}
+
+function syncWeek(val){
+  fl.wk=val;
+  const wf1=document.getElementById('weekFilter');
+  const wf2=document.getElementById('weekFilter2');
+  if(wf1)wf1.value=val;
+  if(wf2)wf2.value=val;
+  rExec();
 }
 
 function setCF(tab,type,val,label){
@@ -780,8 +793,11 @@ function rExec(){
         if(!weeks[wkNum])weeks[wkNum]={label,dates:[]};
         weeks[wkNum].dates.push(d[0]);
       });
-      const curWk=wkSel.value;
-      wkSel.innerHTML='<option value="-1">Todas</option>'+Object.entries(weeks).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).map(([k,v])=>`<option value="${k}" ${k===curWk?'selected':''}>${v.label}</option>`).join('');
+      const curWk=fl.wk||'-1';
+      const wkOpts='<option value="-1">Todas</option>'+Object.entries(weeks).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).map(([k,v])=>`<option value="${k}" ${k===curWk?'selected':''}>${v.label}</option>`).join('');
+      wkSel.innerHTML=wkOpts;
+      const wkSel2=document.getElementById('weekFilter2');
+      if(wkSel2)wkSel2.innerHTML=wkOpts;
     }
     let dpWeekFiltered=dpFiltered;
     if(fl.wk && fl.wk!=='-1'){
