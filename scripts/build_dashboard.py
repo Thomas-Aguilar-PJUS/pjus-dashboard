@@ -32,7 +32,7 @@ def extract_name(val):
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.join(SCRIPT_DIR, "..")
 
-with open(os.path.join(REPO_DIR, "data", "pjus_data.json")) as f:
+with open(os.path.join(REPO_DIR, "data", "pjus_data.json"), encoding="utf-8") as f:
     PJUS = json.load(f)
 
 ARGUS_PATH = os.path.join(REPO_DIR, "data", "dados_argus.json")
@@ -40,7 +40,7 @@ if not os.path.exists(ARGUS_PATH):
     print(f"ERROR: {ARGUS_PATH} not found. Run extrair_dados.py first.")
     sys.exit(1)
 
-with open(ARGUS_PATH) as f:
+with open(ARGUS_PATH, encoding="utf-8") as f:
     ARGUS = json.load(f)
 
 print(f"Loaded Argus data: {len(ARGUS)} keys, extraction: {ARGUS['meta']['data_extracao']}")
@@ -492,7 +492,7 @@ for al in ARGUS.get('alertas', []):
 FONTES = FONTES_LIST[:14]  # Limit to prevent UI overflow
 
 # Load logo
-LOGO = open(os.path.join(REPO_DIR, "data", "pjus_logo.svg")).read()
+LOGO = open(os.path.join(REPO_DIR, "data", "pjus_logo.svg"), encoding="utf-8").read()
 
 # Update FASES to use labels for display
 FASES_DISPLAY = list(set([FASE_LABELS.get(f, f) for f in FASES]))
@@ -510,5 +510,5 @@ FASES = FASES_DISPLAY
 
 # Set output path and run template
 OUTPUT_PATH = os.path.join(REPO_DIR, "index.html")
-exec(open(os.path.join(SCRIPT_DIR, "template.py")).read())
+exec(open(os.path.join(SCRIPT_DIR, "template.py"), encoding="utf-8").read())
 print(f"Dashboard written to {OUTPUT_PATH}")
