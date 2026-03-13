@@ -11,6 +11,7 @@ import json
 import os
 import sys
 import traceback
+import math
 from datetime import datetime
 
 try:
@@ -273,9 +274,9 @@ def main():
         GROUP BY sigla_tribunal, y, m ORDER BY trib, y, m
     """, "tendencia_tribunal")
 
-    # Top beneficiarios — using jsonb_array_elements with ->>'nome' to extract names
-    # Filter: only beneficiaries with valid valor_face (valor_total > 0)
-    D["top_beneficiarios"] = q(conn, f"""
+    # Top beneficiarios — hybrid ranking: valor + volume
+    # Merges top-30-by-valor + top-30-by-pubs, ranked by composite score
+    BENEF_BASE = f"""
         SELECT COALESCE(b->>'nome', b::text) AS nome,
                COUNT(*) AS pubs,
                COALESCE(SUM({VCONV}), 0) AS valor_total,
@@ -289,14 +290,55 @@ def main():
         GROUP BY COALESCE(b->>'nome', b::text)
         HAVING COALESCE(b->>'nome', b::text) IS NOT NULL
            AND COALESCE(b->>'nome', b::text) != ''
-           AND COALESCE(SUM({VCONV}), 0) > 0
-        ORDER BY valor_total DESC, pubs DESC LIMIT 50
-    """, "top_beneficiarios")
+           AND LENGTH(COALESCE(b->>'nome', b::text)) > 3
+    """
+    benef_by_val = q(conn, BENEF_BASE + f" AND COALESCE(SUM({VCONV}), 0) > 0 ORDER BY valor_total DESC LIMIT 30", "benef_by_valor")
+    benef_by_pub = q(conn, BENEF_BASE + " ORDER BY pubs DESC LIMIT 30", "benef_by_pubs")
 
-    # Top advogados — using jsonb_array_elements with ->>'nome' to extract names
-    # Filter: only advogados with valid valor_face (valor_total > 0)
-    D["top_advogados"] = q(conn, f"""
+    benef_merged = {}
+    for b in (benef_by_val or []):
+        benef_merged[b['nome']] = b
+    for b in (benef_by_pub or []):
+        if b['nome'] not in benef_merged:
+            benef_merged[b['nome']] = b
+
+    for b in benef_merged.values():
+        val = float(b.get('valor_total') or 0)
+        pubs = int(b.get('pubs') or 1)
+        b['_score'] = (math.log10(val + 1) * 10 if val > 0 else 0) + math.log10(pubs + 1) * 5
+
+    benef_sorted = sorted(benef_merged.values(), key=lambda x: -x['_score'])[:50]
+
+    # Get advogado principal for each beneficiario
+    print("  [benef_advogados]...", end=" ", flush=True)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    for b in benef_sorted:
+        try:
+            cur.execute("""
+                SELECT COALESCE(a->>'nome', '') AS adv_nome, a->>'oab' AS adv_oab, COUNT(*) AS n
+                FROM djen_precatorio dp,
+                     LATERAL jsonb_array_elements(dp.beneficiarios_ia) AS b2,
+                     LATERAL jsonb_array_elements(dp.advogados_ia) AS a
+                WHERE COALESCE(b2->>'nome', b2::text) = %s
+                  AND dp.advogados_ia IS NOT NULL AND jsonb_array_length(dp.advogados_ia) > 0
+                GROUP BY COALESCE(a->>'nome', ''), a->>'oab'
+                ORDER BY n DESC LIMIT 1
+            """, (b['nome'],))
+            row = cur.fetchone()
+            b['advogado_principal'] = row['adv_nome'] if row and row['adv_nome'] else None
+            b['oab_principal'] = row['adv_oab'] if row else None
+        except Exception:
+            b['advogado_principal'] = None
+            b['oab_principal'] = None
+    for b in benef_sorted:
+        b.pop('_score', None)
+    print(f"{len(benef_sorted)} OK")
+    D["top_beneficiarios"] = benef_sorted
+
+    # Top advogados — hybrid ranking: valor + volume
+    ADV_BASE = f"""
         SELECT COALESCE(a->>'nome', a::text) AS nome,
+               a->>'oab' AS oab,
                COUNT(*) AS pubs,
                COALESCE(SUM({VCONV}), 0) AS valor_total,
                ROUND(AVG(score_interesse)::numeric, 1) AS score_medio,
@@ -306,12 +348,31 @@ def main():
         WHERE advogados_ia IS NOT NULL
           AND jsonb_array_length(advogados_ia) > 0
           AND score_interesse >= 3
-        GROUP BY COALESCE(a->>'nome', a::text)
+        GROUP BY COALESCE(a->>'nome', a::text), a->>'oab'
         HAVING COALESCE(a->>'nome', a::text) IS NOT NULL
            AND COALESCE(a->>'nome', a::text) != ''
-           AND COALESCE(SUM({VCONV}), 0) > 0
-        ORDER BY valor_total DESC, pubs DESC LIMIT 50
-    """, "top_advogados")
+           AND LENGTH(COALESCE(a->>'nome', a::text)) > 3
+    """
+    adv_by_val = q(conn, ADV_BASE + f" AND COALESCE(SUM({VCONV}), 0) > 0 ORDER BY valor_total DESC LIMIT 30", "adv_by_valor")
+    adv_by_pub = q(conn, ADV_BASE + " ORDER BY pubs DESC LIMIT 30", "adv_by_pubs")
+
+    adv_merged = {}
+    for a in (adv_by_val or []):
+        adv_merged[a['nome']] = a
+    for a in (adv_by_pub or []):
+        if a['nome'] not in adv_merged:
+            adv_merged[a['nome']] = a
+
+    for a in adv_merged.values():
+        val = float(a.get('valor_total') or 0)
+        pubs = int(a.get('pubs') or 1)
+        a['_score'] = (math.log10(val + 1) * 10 if val > 0 else 0) + math.log10(pubs + 1) * 5
+
+    adv_sorted = sorted(adv_merged.values(), key=lambda x: -x['_score'])[:50]
+    adv_sorted = [a for a in adv_sorted if a.get('nome') and 'null' not in str(a['nome']).lower()]
+    for a in adv_sorted:
+        a.pop('_score', None)
+    D["top_advogados"] = adv_sorted
 
     # ── AMAPÁ DETALHADO ──
     print("\n--- AMAPA ---")
