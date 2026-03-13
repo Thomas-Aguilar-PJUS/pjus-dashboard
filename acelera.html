@@ -330,6 +330,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
     <div class="cd"><h3>Top 10 — Taxa Conversão</h3><div class="sub">Mínimo 5 operações</div><div class="cw" style="height:320px"><canvas id="cTC"></canvas></div></div>
   </div>
   <div class="st">Acompanhamento Diário — Volume de Propostas Aceita & Ticket Médio</div>
+  <div id="dyKpiRow2" class="krow" style="grid-template-columns:repeat(4,1fr)"></div>
   <div class="row2">
     <div class="cd"><h3 id="hVolDia2">Volume Diário de Propostas — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Quantidade de operações cadastradas por dia útil</div><div class="cw" style="height:300px"><canvas id="cVolDia2"></canvas></div></div>
     <div class="cd"><h3 id="hTickDia2">Ticket Médio Diário — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Valor projetado médio por operação cadastrada</div><div class="cw" style="height:300px"><canvas id="cTickDia2"></canvas></div></div>
@@ -689,11 +690,11 @@ function rExec(){
 
   document.getElementById('kpi1').innerHTML=`
     <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO — ${kpiLabel}</div><div class="kc-val" style="color:var(--green)">${execMes>0?F(receitaFiltered):F(rY)}</div><div class="kc-sub">Volume líquido ${execMes>0?'pago no período':'a receber YTD'}</div></div>
-    <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${pipeCount} operações em andamento | Volume projetado</div></div>
-    <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES APROVADAS — ${kpiLabel}</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
+    <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO PAGO — ${kpiLabel}</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
+    <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES PAGAS — ${kpiLabel}</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
+    <div class="kc kr"><div class="kc-label">${IC.reprovado} OPERAÇÕES REPROVADAS — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${ccRep}</div><div class="kc-sub">${(ccApr+ccRep)>0?(ccRep/(ccApr+ccRep)*100).toFixed(1):0}% do total fechado | Conta Corrente</div></div>
     <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">${ccApr} aprovadas / ${ccApr+ccRep} finalizadas | Conta Corrente</div></div>
-    <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO — ${kpiLabel}</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
-    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${ccRep}</div><div class="kc-sub">${(ccApr+ccRep)>0?(ccRep/(ccApr+ccRep)*100).toFixed(1):0}% do total fechado | Conta Corrente</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${pipeCount} operações em andamento | Volume projetado</div></div>
   `;
 
   // Meta card: highlight selected month
@@ -942,9 +943,9 @@ function rExec(){
     const avgDailyQtd=numDU>0?(totalDyVol/numDU):0;
     if(dyKpiEl){dyKpiEl.innerHTML=`
       <div class="kc kg"><div class="kc-label">${IC.receita} PROPOSTAS ACEITAS ACUMULADAS</div><div class="kc-val" style="color:var(--green)">R$ ${(totalDyVal/1e6).toFixed(1)}M</div><div class="kc-sub">${totalDyVol} propostas | ${numDU} dias úteis</div></div>
-      <div class="kc" style="border-top:4px solid var(--accent)"><div class="kc-label">${IC.conversao} MÉDIA PROPOSTAS/DIA ÚTIL</div><div class="kc-val" style="color:var(--accent)">${avgDailyQtd.toFixed(1)}</div><div class="kc-sub">Quantidade média de propostas aceitas por dia útil</div></div>
-      <div class="kc" style="border-top:4px solid var(--accent)"><div class="kc-label">${IC.ticket} VOLUME MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--accent)">R$ ${(avgDailyVal/1e6).toFixed(2)}M</div><div class="kc-sub">Volume líquido médio por dia útil</div></div>
-      <div class="kc" style="border-top:4px solid var(--accent)"><div class="kc-label">${IC.ticket} TICKET MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--accent)">R$ ${(avgDailyTicket/1e3).toFixed(0)}K</div><div class="kc-sub">Valor médio por proposta aceita</div></div>
+      <div class="kc kb"><div class="kc-label">${IC.conversao} MÉDIA PROPOSTAS/DIA ÚTIL</div><div class="kc-val" style="color:var(--blue)">${avgDailyQtd.toFixed(1)}</div><div class="kc-sub">Quantidade média de propostas aceitas por dia útil</div></div>
+      <div class="kc ky"><div class="kc-label">${IC.ticket} VOLUME MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--yellow)">R$ ${(avgDailyVal/1e6).toFixed(2)}M</div><div class="kc-sub">Volume líquido médio por dia útil</div></div>
+      <div class="kc kp"><div class="kc-label">${IC.ticket} TICKET MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--purple)">R$ ${(avgDailyTicket/1e3).toFixed(0)}K</div><div class="kc-sub">Valor médio por proposta aceita</div></div>
     `;}
     const rLabel=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
     const periodLabel=execMes>0?MO[execMes-1]+'/26':'YTD 26';
@@ -1094,25 +1095,45 @@ function rPerf(){
   ch['cTC']=new Chart(document.getElementById('cTC'),{type:'bar',data:{labels:cn.map(n=>n[0]),datasets:[{data:cn.map(n=>typeof n[11]==='number'?n[11]:parseFloat(n[11])),backgroundColor:cTCbg,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const name=cn[els[0].index][0];const ni=NG.indexOf(name);if(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni){clearCF('perf');}else{setCF('perf','neg',ni,name);}}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%',title:t=>(t[0].label+' (clique para filtrar)')}}},scales:{x:{beginAtZero:true,max:100,title:{display:true,text:'Conversão (%)'},ticks:{callback:v=>v+'%'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
   document.getElementById('cTC').style.cursor='pointer';
 
-  // ===== GRÁFICOS DIÁRIOS na aba Performance (com filtro de mês) =====
+  // ===== GRÁFICOS DIÁRIOS na aba Performance (com filtro de mês e negociador) =====
   if(typeof DY!=='undefined' && DY.length>0){
     let dyF2=DY;
     if(mAtv){const mStr=String(mI).padStart(2,'0');dyF2=DY.filter(d=>d[0].substring(5,7)===mStr);}
     const rF2=fl.r!=='t'?parseInt(fl.r):-1;
+    const nF2=fl.n!=='-1'?parseInt(fl.n):-1;
     const dyL2=dyF2.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
-    const dyV2=dyF2.map(d=>{if(rF2>=0){const rr=d[3][String(rF2)];return rr?rr[0]:0;}return d[1];});
-    const dyA2=dyF2.map(d=>{if(rF2>=0){const rr=d[3][String(rF2)];return rr?rr[1]:0;}return d[2];});
+    const dyV2=dyF2.map(d=>{
+      if(nF2>=0){const nn=d[4]?d[4][String(nF2)]:null;return nn?nn[0]:0;}
+      if(rF2>=0){const rr=d[3][String(rF2)];return rr?rr[0]:0;}return d[1];});
+    const dyA2=dyF2.map(d=>{
+      if(nF2>=0){const nn=d[4]?d[4][String(nF2)]:null;return nn?nn[1]:0;}
+      if(rF2>=0){const rr=d[3][String(rF2)];return rr?rr[1]:0;}return d[2];});
     const dyT2=dyF2.map((d,i)=>dyV2[i]>0?(dyA2[i]/dyV2[i]/1e3):0);
     const aV2=dyV2.length>0?(dyV2.reduce((a,b)=>a+b,0)/dyV2.length):0;
     const aT2=dyT2.filter(v=>v>0).length>0?(dyT2.reduce((a,b)=>a+b,0)/dyT2.filter(v=>v>0).length):0;
     const dL2=mAtv?MO[mI-1]+'/26':'YTD 26';
     const rL2=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
-    document.getElementById('hVolDia2').textContent='Volume Diário de Propostas — '+dL2+rL2;
-    document.getElementById('hTickDia2').textContent='Ticket Médio Diário — '+dL2+rL2;
+    const nL2=nF2>=0?' — '+NG[nF2]:'';
+    document.getElementById('hVolDia2').textContent='Volume Diário de Propostas — '+dL2+rL2+nL2;
+    document.getElementById('hTickDia2').textContent='Ticket Médio Diário — '+dL2+rL2+nL2;
     dc('cVolDia2');
     ch['cVolDia2']=new Chart(document.getElementById('cVolDia2'),{type:'bar',data:{labels:dyL2,datasets:[{label:'Propostas/dia',data:dyV2,backgroundColor:'rgba(0,116,255,.6)',borderColor:'#0074FF',borderWidth:1,borderRadius:4},{label:'Média',data:Array(dyV2.length).fill(aV2),type:'line',borderColor:'#EF4444',borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.datasetIndex===0?c.raw+' operações':'Média: '+c.raw.toFixed(1)}}},scales:{y:{beginAtZero:true,title:{display:true,text:'Qtd. Operações',font:{size:10}},ticks:{font:{size:9}},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
     dc('cTickDia2');
     ch['cTickDia2']=new Chart(document.getElementById('cTickDia2'),{type:'bar',data:{labels:dyL2,datasets:[{label:'Ticket Médio (R$ mil)',data:dyT2,backgroundColor:dyT2.map(v=>v>=aT2?'rgba(0,166,140,.6)':'rgba(234,179,8,.6)'),borderColor:dyT2.map(v=>v>=aT2?'#00A68C':'#EAB308'),borderWidth:1,borderRadius:4},{label:'Média',data:Array(dyT2.length).fill(aT2),type:'line',borderColor:'#EF4444',borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.datasetIndex===0?'R$ '+(c.raw*1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'Média: R$ '+(c.raw*1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}},scales:{y:{beginAtZero:true,title:{display:true,text:'R$ mil',font:{size:10}},ticks:{callback:v=>'R$ '+v.toFixed(0)+'K',font:{size:9}},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
+    // KPI cards for Acompanhamento Diário in Performance tab
+    const totalDyV2=dyV2.reduce((a,b)=>a+b,0);
+    const totalDyA2=dyA2.reduce((a,b)=>a+b,0);
+    const numDU2=dyV2.filter(v=>v>0).length||dyV2.length;
+    const avgDailyQtd2=numDU2>0?(totalDyV2/numDU2):0;
+    const avgDailyVal2=numDU2>0?(totalDyA2/numDU2):0;
+    const avgDailyTicket2=totalDyV2>0?(totalDyA2/totalDyV2):0;
+    const dyKpiEl2=document.getElementById('dyKpiRow2');
+    if(dyKpiEl2){dyKpiEl2.innerHTML=`
+      <div class="kc kg"><div class="kc-label">${IC.receita} PROPOSTAS ACEITAS ACUMULADAS</div><div class="kc-val" style="color:var(--green)">R$ ${(totalDyA2/1e6).toFixed(1)}M</div><div class="kc-sub">${totalDyV2} propostas | ${numDU2} dias úteis</div></div>
+      <div class="kc kb"><div class="kc-label">${IC.conversao} MÉDIA PROPOSTAS/DIA ÚTIL</div><div class="kc-val" style="color:var(--blue)">${avgDailyQtd2.toFixed(1)}</div><div class="kc-sub">Quantidade média de propostas aceitas por dia útil</div></div>
+      <div class="kc ky"><div class="kc-label">${IC.ticket} VOLUME MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--yellow)">R$ ${(avgDailyVal2/1e6).toFixed(2)}M</div><div class="kc-sub">Volume líquido médio por dia útil</div></div>
+      <div class="kc kp"><div class="kc-label">${IC.ticket} TICKET MÉDIO DIÁRIO</div><div class="kc-val" style="color:var(--purple)">R$ ${(avgDailyTicket2/1e3).toFixed(0)}K</div><div class="kc-sub">Valor médio por proposta aceita</div></div>
+    `;}
   }
 
   const allRN=RN.slice(0,4);
@@ -1300,9 +1321,9 @@ function rDevolucoes(){
   const countEl=document.getElementById('devCount');
   if(countEl) countEl.textContent=`${repOpsAll.length} devoluções encontradas`;
 
-  let th='<table><thead><tr><th>#</th><th>Op. Titular</th><th>Titular</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Esfera</th><th>Tribunal</th><th>Motivo de Encerramento</th><th style="text-align:right">Valor Líquido Real</th></tr></thead><tbody>';
+  let th='<table><thead><tr><th>#</th><th>Op. Titular</th><th>Titular</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Data Cadastro</th><th>Esfera</th><th>Tribunal</th><th>Motivo de Encerramento</th><th style="text-align:right">Valor Líquido Real</th></tr></thead><tbody>';
   if(repOpsAll.length===0){
-    th+='<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
+    th+='<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
   } else {
     repOpsAll.sort((a,b)=>b[14]-a[14]).forEach((r,i)=>{
       const mot=(MT[r[6]]||'Não informado').replace('Motivo de encerramento: ','');
@@ -1311,6 +1332,7 @@ function rDevolucoes(){
       const opTit=(r.length>17&&r[17])?r[17]:'—';
       const esfera=(r.length>18&&r[18]>=0&&typeof ES!=='undefined'&&ES[r[18]])?ES[r[18]]:'—';
       const tribunal=(r.length>19&&r[19]>=0&&typeof TR!=='undefined'&&TR[r[19]])?TR[r[19]]:'—';
+      const dtCad=(r.length>20&&r[20])?r[20].split('-').reverse().join('/'):'—';
       const motColor=mot==='Não informado'?'color:var(--text4)':'color:var(--red)';
       th+=`<tr>
         <td style="color:var(--text4)">${i+1}</td>
@@ -1320,6 +1342,7 @@ function rDevolucoes(){
         <td>${CO[r[9]]||'—'}</td>
         <td>${RN[r[2]]||'—'}</td>
         <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${r[1]===0?'rgba(99,102,241,.12)':'rgba(0,116,255,.1)'};color:${r[1]===0?'#6366f1':'var(--accent)'};font-weight:600">${seg}</span></td>
+        <td style="font-size:11px;white-space:nowrap">${dtCad}</td>
         <td>${esfera}</td>
         <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${tribunal}">${tribunal}</td>
         <td style="${motColor};font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${mot}">${mot}</td>
@@ -1341,7 +1364,7 @@ function exportDevCSV(){
   if(motSel&&motSel.value!=='-1') repOpsAll=repOpsAll.filter(r=>{const m=MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado';return m===motSel.value;});
   const regSel=document.getElementById('devReg');
   if(regSel&&regSel.value!=='-1') repOpsAll=repOpsAll.filter(r=>r[2]===parseInt(regSel.value));
-  let csv='Op. Titular;Titular;Negociador;Coordenador;Regional;Segmento;Esfera;Tribunal;Motivo de Encerramento;Valor Líquido Real\n';
+  let csv='Op. Titular;Titular;Negociador;Coordenador;Regional;Segmento;Data Cadastro;Esfera;Tribunal;Motivo de Encerramento;Valor Líquido Real\n';
   repOpsAll.sort((a,b)=>b[14]-a[14]).forEach(r=>{
     const mot=(MT[r[6]]||'Não informado').replace('Motivo de encerramento: ','').replace(/;/g,',');
     const seg=r[1]===0?'Mid-Market':'Varejo';
@@ -1349,7 +1372,8 @@ function exportDevCSV(){
     const opTit=(r.length>17&&r[17])?r[17]:'';
     const esfera=(r.length>18&&r[18]>=0&&typeof ES!=='undefined'&&ES[r[18]])?ES[r[18]]:'';
     const tribunal=(r.length>19&&r[19]>=0&&typeof TR!=='undefined'&&TR[r[19]])?TR[r[19]]:'';
-    csv+=`${opTit};${titular};${NG[r[8]]||''};${CO[r[9]]||''};${RN[r[2]]||''};${seg};${esfera};${tribunal};${mot};${r[14].toFixed(2)}\n`;
+    const dtCad=(r.length>20&&r[20])?r[20].split('-').reverse().join('/'):'';
+    csv+=`${opTit};${titular};${NG[r[8]]||''};${CO[r[9]]||''};${RN[r[2]]||''};${seg};${dtCad};${esfera};${tribunal};${mot};${r[14].toFixed(2)}\n`;
   });
   const BOM='\uFEFF';
   const blob=new Blob([BOM+csv],{type:'text/csv;charset=utf-8;'});
