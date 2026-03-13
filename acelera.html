@@ -857,14 +857,38 @@ function rExec(){
     // Ajuste meta para filtro de semana
     let metaAcumFinal=metaAcumData;let duRefFinal=duRef;let diaRefLabel='';
     if(fl.wk && fl.wk!=='-1'){
-      // Quando semana selecionada: meta proporcional aos dias úteis da semana
-      const duSemana=dpWeekFiltered.length;
-      // Meta total do período / dias úteis totais * dias úteis da semana
+      // Contar TODOS os dias úteis (seg-sex) do calendário na semana selecionada
+      // Não apenas dias com pagamento — dias sem pagamento são gap
+      const wkNum=parseInt(fl.wk);
+      // Encontrar seg/sex da semana a partir de qualquer data no dpFiltered
+      let wkMonday=null,wkFriday=null;
+      for(const d of dpFiltered){
+        const dt=new Date(d[0]);
+        const doy=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
+        if(Math.ceil((doy+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum){
+          wkMonday=new Date(dt);wkMonday.setDate(dt.getDate()-((dt.getDay()+6)%7));
+          wkFriday=new Date(wkMonday);wkFriday.setDate(wkMonday.getDate()+4);
+          break;
+        }
+      }
+      let duSemana=5; // padrão seg-sex
+      if(wkMonday){
+        // Limitar ao D-1 se semana corrente
+        const limDate=new Date(2026,mesHoje-1,diaHoje-1);
+        const endDate=wkFriday<=limDate?wkFriday:limDate;
+        duSemana=0;
+        for(let d=new Date(wkMonday);d<=endDate;d.setDate(d.getDate()+1)){
+          const dow=d.getDay();
+          if(dow!==0&&dow!==6)duSemana++;
+        }
+      }
+      // Meta proporcional: meta do período * (dias úteis semana / dias úteis totais período)
       const metaTotalPeriodo=execMes>0?(metaSet.m[execMes-1]||0)/1e6:metaSet.m.slice(0,dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):mesHoje).reduce((a,v)=>a+v,0)/1e6;
       const duTotalPeriodo=execMes>0?duTotal(2026,execMes):(function(){let t=0;const um=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):mesHoje;for(let i=1;i<=um;i++)t+=duTotal(2026,i);return t;})();
       metaAcumFinal=duTotalPeriodo>0?(metaTotalPeriodo*(duSemana/duTotalPeriodo)):0;
       duRefFinal=duSemana;
-      diaRefLabel='semana';
+      const wkLabel=wkMonday?String(wkMonday.getDate()).padStart(2,'0')+'/'+String(wkMonday.getMonth()+1).padStart(2,'0')+' - '+String(wkFriday.getDate()).padStart(2,'0')+'/'+String(wkFriday.getMonth()+1).padStart(2,'0'):'semana';
+      diaRefLabel='S'+wkNum+' ('+wkLabel+')';
     } else {
       diaRefLabel=anoHoje===2026&&((execMes>0&&mesHoje===execMes)||execMes<=0)?'D-1 ('+String(diaHoje-1).padStart(2,'0')+'/'+String(mesHoje).padStart(2,'0')+')':'mês completo';
     }
