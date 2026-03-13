@@ -204,11 +204,11 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
     <div class="sidebar-nav" id="sidebarNav">
       <div class="nav-item active" data-tab="exec" onclick="sw('exec')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        <span>Executivo</span>
+        <span>Resumo Executivo 2026</span>
       </div>
       <div class="nav-item" data-tab="perf" onclick="sw('perf')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        <span>Performance</span>
+        <span>Performance Comercial 2026</span>
       </div>
       <div class="nav-item" data-tab="funil" onclick="sw('funil')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -230,9 +230,9 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
       <div class="header-breadcrumb">
         <span>Início</span>
         <span>/</span>
-        <span id="headerTabName">Visão Executiva</span>
+        <span id="headerTabName">Resumo Executivo 2026</span>
       </div>
-      <h1 class="header-title" id="headerTitle">Visão Executiva</h1>
+      <h1 class="header-title" id="headerTitle">Resumo Executivo 2026</h1>
     </div>
 
     <div class="filter-bar" id="filterBar">
@@ -261,7 +261,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
   <div class="tab-info">
     <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
     <div class="tab-info-body">
-      <div class="tab-info-title">Visão Executiva</div>
+      <div class="tab-info-title">Resumo Executivo 2026</div>
       <div class="tab-info-desc">Panorama estratégico do Projeto Acelera Comercial: acompanhamento de metas anuais e YTD, conversão conta corrente por regional e tendência de receita mensal. Use o filtro de mês para detalhar um período específico ou clique em qualquer barra dos gráficos para filtrar a aba automaticamente.</div>
     </div>
   </div>
@@ -297,7 +297,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
   <div class="tab-info">
     <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
     <div class="tab-info-body">
-      <div class="tab-info-title">Performance Comercial</div>
+      <div class="tab-info-title">Performance Comercial 2026</div>
       <div class="tab-info-desc">Ranking e análise de desempenho individual e por regional. Compare volume pago, taxa de conversão e ticket médio de cada negociador. Filtre por mês para acompanhar resultados período a período — ou clique em uma barra do ranking para destacar aquele negociador em toda a aba.</div>
     </div>
   </div>
@@ -486,7 +486,7 @@ const bc=v=>v>=100?'bg':v>=70?'by':'br';
 function sw(t){
   at=t;
   const tabs=['exec','perf','funil','analitico'];
-  const tabNames=['Visão Executiva','Performance Comercial','Estoque Opera','Analítico Estoque Opera'];
+  const tabNames=['Resumo Executivo 2026','Performance Comercial 2026','Estoque Opera','Analítico Estoque Opera'];
   const tabIdx=tabs.indexOf(t);
   
   // Update content visibility
@@ -1382,7 +1382,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
   <div class="tab-info">
     <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
     <div class="tab-info-body">
-      <div class="tab-info-title">Visão Executiva</div>
+      <div class="tab-info-title">Resumo Executivo 2026</div>
       <div class="tab-info-desc">Panorama estratégico do Projeto Acelera Comercial: acompanhamento de metas anuais e YTD, conversão conta corrente por regional e tendência de receita mensal. Use o filtro de mês para detalhar um período específico ou clique em qualquer barra dos gráficos para filtrar a aba automaticamente.</div>
     </div>
   </div>
@@ -1418,7 +1418,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
   <div class="tab-info">
     <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
     <div class="tab-info-body">
-      <div class="tab-info-title">Performance Comercial</div>
+      <div class="tab-info-title">Performance Comercial 2026</div>
       <div class="tab-info-desc">Ranking e análise de desempenho individual e por regional. Compare volume pago, taxa de conversão e ticket médio de cada negociador. Filtre por mês para acompanhar resultados período a período — ou clique em uma barra do ranking para destacar aquele negociador em toda a aba.</div>
     </div>
   </div>
