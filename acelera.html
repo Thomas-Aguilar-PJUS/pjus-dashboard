@@ -783,10 +783,10 @@ function rExec(){
     if(wkSel){
       const weeks={};
       dpFiltered.forEach(d=>{
-        const dt=new Date(d[0]);
-        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
-        const wkNum=Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7);
-        const mon=dt.getMonth()+1;
+        const p=d[0].split('-');const dt=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+        const jan1=new Date(dt.getFullYear(),0,1);
+        const dayOfYear=Math.floor((dt-jan1)/(86400000));
+        const wkNum=Math.ceil((dayOfYear+jan1.getDay()+1)/7);
         const monday=new Date(dt);monday.setDate(dt.getDate()-((dt.getDay()+6)%7));
         const friday=new Date(monday);friday.setDate(monday.getDate()+4);
         const label='S'+wkNum+' ('+String(monday.getDate()).padStart(2,'0')+'/'+String(monday.getMonth()+1).padStart(2,'0')+' - '+String(friday.getDate()).padStart(2,'0')+'/'+String(friday.getMonth()+1).padStart(2,'0')+')';
@@ -799,14 +799,12 @@ function rExec(){
       const wkSel2=document.getElementById('weekFilter2');
       if(wkSel2)wkSel2.innerHTML=wkOpts;
     }
+    // Função para calcular semana usando datas locais (evita bug de fuso UTC)
+    function dateWkNum(dateStr){const p=dateStr.split('-');const dt=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));const jan1=new Date(dt.getFullYear(),0,1);const doy=Math.floor((dt-jan1)/(86400000));return Math.ceil((doy+jan1.getDay()+1)/7);}
     let dpWeekFiltered=dpFiltered;
     if(fl.wk && fl.wk!=='-1'){
       const wkNum=parseInt(fl.wk);
-      dpWeekFiltered=dpFiltered.filter(d=>{
-        const dt=new Date(d[0]);
-        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
-        return Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum;
-      });
+      dpWeekFiltered=dpFiltered.filter(d=>dateWkNum(d[0])===wkNum);
     }
     const dpLabels=dpWeekFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
     const dpVal=dpWeekFiltered.map(d=>{
@@ -855,40 +853,45 @@ function rExec(){
       }
     }
     // Ajuste meta para filtro de semana
+    // Usa datas locais explícitas (new Date(ano,mes-1,dia)) para evitar problemas de fuso horário
+    // com ISO strings como new Date("2026-03-10") que são UTC
+    function localWkNum(ano,mes,dia){
+      const dt=new Date(ano,mes-1,dia);
+      const jan1=new Date(ano,0,1);
+      const doy=Math.floor((dt-jan1)/(86400000));
+      return Math.ceil((doy+jan1.getDay()+1)/7);
+    }
     let metaAcumFinal=metaAcumData;let duRefFinal=duRef;let diaRefLabel='';
     if(fl.wk && fl.wk!=='-1'){
-      // Contar TODOS os dias úteis (seg-sex) do calendário na semana selecionada
-      // Não apenas dias com pagamento — dias sem pagamento são gap
       const wkNum=parseInt(fl.wk);
-      // Encontrar seg/sex da semana a partir de qualquer data no dpFiltered
-      let wkMonday=null,wkFriday=null;
-      for(const d of dpFiltered){
-        const dt=new Date(d[0]);
-        const doy=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
-        if(Math.ceil((doy+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum){
-          wkMonday=new Date(dt);wkMonday.setDate(dt.getDate()-((dt.getDay()+6)%7));
-          wkFriday=new Date(wkMonday);wkFriday.setDate(wkMonday.getDate()+4);
-          break;
+      // Contar TODOS os dias úteis (seg-sex) do calendário na semana selecionada
+      // Iterar meses relevantes e contar dias úteis que pertencem à semana
+      const mInicio=execMes>0?execMes:1;
+      const mFim=execMes>0?execMes:(dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):mesHoje);
+      let duSemana=0;let wkFirstDay=null,wkLastDay=null;
+      for(let m=mInicio;m<=mFim;m++){
+        const diasNoMes=new Date(2026,m,0).getDate();
+        for(let d=1;d<=diasNoMes;d++){
+          const dt=new Date(2026,m-1,d);
+          const dow=dt.getDay();
+          if(dow===0||dow===6)continue;
+          if(localWkNum(2026,m,d)!==wkNum)continue;
+          // Limitar a D-1 para semana corrente
+          if(anoHoje===2026&&(m>mesHoje||(m===mesHoje&&d>=diaHoje)))continue;
+          duSemana++;
+          if(!wkFirstDay)wkFirstDay={m,d};
+          wkLastDay={m,d};
         }
       }
-      let duSemana=5; // padrão seg-sex
-      if(wkMonday){
-        // Limitar ao D-1 se semana corrente
-        const limDate=new Date(2026,mesHoje-1,diaHoje-1);
-        const endDate=wkFriday<=limDate?wkFriday:limDate;
-        duSemana=0;
-        for(let d=new Date(wkMonday);d<=endDate;d.setDate(d.getDate()+1)){
-          const dow=d.getDay();
-          if(dow!==0&&dow!==6)duSemana++;
-        }
-      }
-      // Meta proporcional: meta do período * (dias úteis semana / dias úteis totais período)
-      const metaTotalPeriodo=execMes>0?(metaSet.m[execMes-1]||0)/1e6:metaSet.m.slice(0,dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):mesHoje).reduce((a,v)=>a+v,0)/1e6;
-      const duTotalPeriodo=execMes>0?duTotal(2026,execMes):(function(){let t=0;const um=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):mesHoje;for(let i=1;i<=um;i++)t+=duTotal(2026,i);return t;})();
+      if(duSemana===0)duSemana=5; // fallback
+      // Meta proporcional: meta do período * (d.u. semana / d.u. totais período)
+      const metaTotalPeriodo=execMes>0?(metaSet.m[execMes-1]||0)/1e6:metaSet.m.slice(0,mFim).reduce((a,v)=>a+v,0)/1e6;
+      const duTotalPeriodo=execMes>0?duTotal(2026,execMes):(function(){let t=0;for(let i=1;i<=mFim;i++)t+=duTotal(2026,i);return t;})();
       metaAcumFinal=duTotalPeriodo>0?(metaTotalPeriodo*(duSemana/duTotalPeriodo)):0;
       duRefFinal=duSemana;
-      const wkLabel=wkMonday?String(wkMonday.getDate()).padStart(2,'0')+'/'+String(wkMonday.getMonth()+1).padStart(2,'0')+' - '+String(wkFriday.getDate()).padStart(2,'0')+'/'+String(wkFriday.getMonth()+1).padStart(2,'0'):'semana';
-      diaRefLabel='S'+wkNum+' ('+wkLabel+')';
+      const fl1=wkFirstDay?String(wkFirstDay.d).padStart(2,'0')+'/'+String(wkFirstDay.m).padStart(2,'0'):'';
+      const fl2=wkLastDay?String(wkLastDay.d).padStart(2,'0')+'/'+String(wkLastDay.m).padStart(2,'0'):'';
+      diaRefLabel='S'+wkNum+(fl1?' ('+fl1+' - '+fl2+')':'');
     } else {
       diaRefLabel=anoHoje===2026&&((execMes>0&&mesHoje===execMes)||execMes<=0)?'D-1 ('+String(diaHoje-1).padStart(2,'0')+'/'+String(mesHoje).padStart(2,'0')+')':'mês completo';
     }
@@ -916,11 +919,7 @@ function rExec(){
     let dyWeekData=dyFiltered;
     if(fl.wk && fl.wk!=='-1'){
       const wkNum=parseInt(fl.wk);
-      dyWeekData=dyFiltered.filter(d=>{
-        const dt=new Date(d[0]);
-        const dayOfYear=Math.floor((dt-new Date(dt.getFullYear(),0,1))/(86400000));
-        return Math.ceil((dayOfYear+new Date(dt.getFullYear(),0,1).getDay()+1)/7)===wkNum;
-      });
+      dyWeekData=dyFiltered.filter(d=>dateWkNum(d[0])===wkNum);
     }
     const dyLabels=dyWeekData.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
     const dyVol=dyWeekData.map(d=>{
