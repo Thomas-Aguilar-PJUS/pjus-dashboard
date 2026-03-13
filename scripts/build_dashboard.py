@@ -46,45 +46,22 @@ with open(ARGUS_PATH, encoding="utf-8") as f:
 print(f"Loaded Argus data: {len(ARGUS)} keys, extraction: {ARGUS['meta']['data_extracao']}")
 
 # ── Constants (IDENTICAL to build_v6.py) ──
-FASES = ['calculo_homologado','expedicao_ativa','outro','pago_levantado',
-         'expedicao_bloqueada','muito_cedo','cedido','coletiva_servidores',
-         'honorarios_sucumbenciais','monitorar']
+FASES = ['calculo_homologado','expedicao_ativa','expedicao_bloqueada',
+         'honorarios_sucumbenciais']
 
 FASE_LABELS = {
     'calculo_homologado': 'Cálculo Homologado',
     'expedicao_ativa': 'Expedição Ativa',
-    'outro': 'Outro',
-    'pago_levantado': 'Pago/Levantado',
     'expedicao_bloqueada': 'Expedição Bloqueada',
-    'muito_cedo': 'Muito Cedo',
-    'cedido': 'Cedido',
-    'coletiva_servidores': 'Coletiva Servidores',
     'honorarios_sucumbenciais': 'Honorários Sucumbenciais',
-    'monitorar': 'Monitorar',
-    'aguardando_pagamento': 'Aguardando Pagamento',
-    'cumprimento_de_sentenca': 'Cumprimento de Sentença',
-    'comum': 'Comum',
-    'nenhum': 'Nenhum',
-    'alimentar': 'Alimentar',
 }
 
 MATS = ['Muito Alta','Alta','Média-Alta','Média','Média-Baixa','Baixa','Muito Baixa']
 FASE_MAT = {
     'calculo_homologado':'Alta',
     'expedicao_ativa':'Muito Alta',
-    'pago_levantado':'Muito Alta',
     'expedicao_bloqueada':'Média',
-    'muito_cedo':'Baixa',
-    'cedido':'Alta',
-    'coletiva_servidores':'Média-Alta',
     'honorarios_sucumbenciais':'Média-Baixa',
-    'monitorar':'Baixa',
-    'outro':'Média',
-    'aguardando_pagamento':'Alta',
-    'cumprimento_de_sentenca':'Média',
-    'comum':'Média-Baixa',
-    'nenhum':'Muito Baixa',
-    'alimentar':'Média',
 }
 
 # Tribunal to UF mapping
@@ -322,8 +299,7 @@ for ta in ARGUS.get('top_advogados', []):
 # Valid pipeline phases (exclude nature/type fields that aren't process phases)
 VALID_PIPELINE_FASES = {
     'calculo_homologado', 'expedicao_ativa', 'expedicao_bloqueada',
-    'pago_levantado', 'cedido', 'muito_cedo', 'aguardando_pagamento',
-    'cumprimento_de_sentenca', 'monitorar', 'outro',
+    'honorarios_sucumbenciais',
 }
 
 # Build score lookup from pipeline_fase (has score_medio per fase)
@@ -335,16 +311,10 @@ for pf in ARGUS.get('pipeline_fase', []):
 
 # Typical days-in-phase based on pipeline progression
 FASE_DIAS = {
-    'muito_cedo': 180,
-    'cumprimento_de_sentenca': 150,
     'calculo_homologado': 120,
     'expedicao_bloqueada': 100,
-    'monitorar': 90,
-    'outro': 80,
     'expedicao_ativa': 60,
-    'cedido': 45,
-    'aguardando_pagamento': 30,
-    'pago_levantado': 15,
+    'honorarios_sucumbenciais': 90,
 }
 
 PIPELINE = []
