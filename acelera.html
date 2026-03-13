@@ -735,7 +735,7 @@ function rExec(){
     // Meta de Produção como linha de referência
     const metaSet=gm();
     let metaVal=0;
-    if(execMes>0){metaVal=metaSet.m.slice(0,execMes).reduce((a,v)=>a+v,0)/1e6;}
+    if(execMes>0){metaVal=(metaSet.m[execMes-1]||0)/1e6;}
     else{const lastMes=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):3;metaVal=metaSet.m.slice(0,lastMes).reduce((a,v)=>a+v,0)/1e6;}
     const rLabelDP=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
     const periodLabelDP=execMes>0?MO[execMes-1]+'/26':'YTD 26';
