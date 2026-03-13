@@ -740,14 +740,32 @@ function rExec(){
     else{const lastMes=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):3;metaVal=metaSet.m.slice(0,lastMes).reduce((a,v)=>a+v,0)/1e6;}
     const rLabelDP=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
     const periodLabelDP=execMes>0?MO[execMes-1]+'/26':'YTD 26';
-    // KPI cards: acumulado + % vs meta
+    // KPI cards: acumulado + % vs meta proporcional até hoje
     const dpAcum=dpCum.length>0?dpCum[dpCum.length-1]:0;
-    const pctMeta=metaVal>0?(dpAcum/metaVal*100):0;
+    const hoje=new Date();const diaHoje=hoje.getDate();const mesHoje=hoje.getMonth()+1;const anoHoje=hoje.getFullYear();
+    let metaAcumData=0;
+    if(execMes>0){
+      // Mês filtrado: meta do mês * (dias corridos / dias totais do mês)
+      const diasMes=new Date(2026,execMes,0).getDate();
+      const diasCorr=mesHoje===execMes&&anoHoje===2026?Math.min(diaHoje,diasMes):diasMes;
+      metaAcumData=((metaSet.m[execMes-1]||0)/1e6)*(diasCorr/diasMes);
+    } else {
+      // YTD: meses completos cheios + mês corrente proporcional
+      const ultimoMes=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):mesHoje;
+      for(let mi=0;mi<ultimoMes;mi++){
+        if(mi<mesHoje-1){metaAcumData+=(metaSet.m[mi]||0)/1e6;}
+        else if(mi===mesHoje-1&&anoHoje===2026){
+          const diasMi=new Date(2026,mi+1,0).getDate();
+          metaAcumData+=((metaSet.m[mi]||0)/1e6)*(diaHoje/diasMi);
+        } else {metaAcumData+=(metaSet.m[mi]||0)/1e6;}
+      }
+    }
+    const pctMeta=metaAcumData>0?(dpAcum/metaAcumData*100):0;
     const pctColor=pctMeta>=80?'var(--green)':pctMeta>=50?'var(--yellow)':'var(--red)';
     const dpKpiEl=document.getElementById('dpKpiRow');
     if(dpKpiEl){dpKpiEl.innerHTML=`
       <div class="kc kg" style="flex:1"><div class="kc-label">${IC.receita} ACUMULADO PAGO — ${periodLabelDP}${rLabelDP}</div><div class="kc-val" style="color:var(--green)">R$ ${dpAcum.toFixed(1)}M</div><div class="kc-sub">Volume líquido pago acumulado no período</div></div>
-      <div class="kc" style="flex:1;border-left:3px solid ${pctColor}"><div class="kc-label">${IC.conversao} META DO PERÍODO — ${periodLabelDP}${rLabelDP}</div><div class="kc-val" style="color:${pctColor}">${pctMeta.toFixed(1)}%</div><div class="kc-sub">R$ ${dpAcum.toFixed(1)}M de R$ ${metaVal.toFixed(1)}M | ${metaVal>0?'Faltam R$ '+(metaVal-dpAcum>0?(metaVal-dpAcum).toFixed(1):'0.0')+'M':'Meta não definida'}</div></div>
+      <div class="kc" style="flex:1;border-left:3px solid ${pctColor}"><div class="kc-label">${IC.conversao} % REALIZADO vs META — ${periodLabelDP}${rLabelDP}</div><div class="kc-val" style="color:${pctColor}">${pctMeta.toFixed(1)}%</div><div class="kc-sub">R$ ${dpAcum.toFixed(1)}M de R$ ${metaAcumData.toFixed(1)}M (meta até dia ${anoHoje===2026?diaHoje:'-'}) | Meta período: R$ ${metaVal.toFixed(1)}M</div></div>
     `;}
     document.getElementById('hPagDia').textContent='Produção Diária de Pagos — '+periodLabelDP+rLabelDP;
     dc('cPagDia');
