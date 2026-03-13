@@ -285,8 +285,8 @@ def main():
         GROUP BY sigla_tribunal, y, m ORDER BY trib, y, m
     """, "tendencia_tribunal")
 
-    # Top beneficiarios — hybrid ranking: valor + volume
-    # Merges top-30-by-valor + top-30-by-pubs, ranked by composite score
+    # Top beneficiarios — hybrid ranking: valor (priority) + volume (complement)
+    # Prioritizes entries with real valor_face data (top-45) + top volume (top-10)
     BENEF_BASE = f"""
         SELECT COALESCE(b->>'nome', b::text) AS nome,
                COUNT(*) AS pubs,
@@ -303,8 +303,8 @@ def main():
            AND COALESCE(b->>'nome', b::text) != ''
            AND LENGTH(COALESCE(b->>'nome', b::text)) > 3
     """
-    benef_by_val = q(conn, BENEF_BASE + f" AND COALESCE(SUM({VCONV}), 0) > 0 ORDER BY valor_total DESC LIMIT 30", "benef_by_valor")
-    benef_by_pub = q(conn, BENEF_BASE + " ORDER BY pubs DESC LIMIT 30", "benef_by_pubs")
+    benef_by_val = q(conn, BENEF_BASE + f" AND COALESCE(SUM({VCONV}), 0) > 0 ORDER BY valor_total DESC LIMIT 45", "benef_by_valor")
+    benef_by_pub = q(conn, BENEF_BASE + " ORDER BY pubs DESC LIMIT 10", "benef_by_pubs")
 
     benef_merged = {}
     for b in (benef_by_val or []):
@@ -313,10 +313,11 @@ def main():
         if b['nome'] not in benef_merged:
             benef_merged[b['nome']] = b
 
+    # Composite score: valor has 3x weight over volume
     for b in benef_merged.values():
         val = float(b.get('valor_total') or 0)
         pubs = int(b.get('pubs') or 1)
-        b['_score'] = (math.log10(val + 1) * 10 if val > 0 else 0) + math.log10(pubs + 1) * 5
+        b['_score'] = (math.log10(val + 1) * 15 if val > 0 else 0) + math.log10(pubs + 1) * 3
 
     benef_sorted = sorted(benef_merged.values(), key=lambda x: -x['_score'])[:50]
 
@@ -346,7 +347,7 @@ def main():
     print(f"{len(benef_sorted)} OK")
     D["top_beneficiarios"] = benef_sorted
 
-    # Top advogados — hybrid ranking: valor + volume
+    # Top advogados — hybrid ranking: valor (priority) + volume (complement)
     ADV_BASE = f"""
         SELECT COALESCE(a->>'nome', a::text) AS nome,
                a->>'oab' AS oab,
@@ -364,8 +365,8 @@ def main():
            AND COALESCE(a->>'nome', a::text) != ''
            AND LENGTH(COALESCE(a->>'nome', a::text)) > 3
     """
-    adv_by_val = q(conn, ADV_BASE + f" AND COALESCE(SUM({VCONV}), 0) > 0 ORDER BY valor_total DESC LIMIT 30", "adv_by_valor")
-    adv_by_pub = q(conn, ADV_BASE + " ORDER BY pubs DESC LIMIT 30", "adv_by_pubs")
+    adv_by_val = q(conn, ADV_BASE + f" AND COALESCE(SUM({VCONV}), 0) > 0 ORDER BY valor_total DESC LIMIT 45", "adv_by_valor")
+    adv_by_pub = q(conn, ADV_BASE + " ORDER BY pubs DESC LIMIT 10", "adv_by_pubs")
 
     adv_merged = {}
     for a in (adv_by_val or []):
@@ -374,10 +375,11 @@ def main():
         if a['nome'] not in adv_merged:
             adv_merged[a['nome']] = a
 
+    # Composite score: valor has 3x weight over volume
     for a in adv_merged.values():
         val = float(a.get('valor_total') or 0)
         pubs = int(a.get('pubs') or 1)
-        a['_score'] = (math.log10(val + 1) * 10 if val > 0 else 0) + math.log10(pubs + 1) * 5
+        a['_score'] = (math.log10(val + 1) * 15 if val > 0 else 0) + math.log10(pubs + 1) * 3
 
     adv_sorted = sorted(adv_merged.values(), key=lambda x: -x['_score'])[:50]
     adv_sorted = [a for a in adv_sorted if a.get('nome') and 'null' not in str(a['nome']).lower()]
