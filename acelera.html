@@ -25,29 +25,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#F5F7FA;--card:#FFFFFF;--border:#E2E8F0;--border2:#CBD5E1;--accent:#0074FF;--green:#00A68C;--blue:#0074FF;--purple:#0E2F5D;--yellow:#F59E0B;--orange:#F97316;--red:#EF4444;--text:#2B313B;--text2:#475569;--text3:#64748B;--text4:#94A3B8}
+html,body{width:100%;height:100%;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0}
+
+/* MAIN LAYOUT */
+.layout-wrapper{display:flex;height:100vh;flex-direction:row}
+.sidebar{width:220px;background-color:#0E2F5D;color:white;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;z-index:900}
+.sidebar-header{padding:24px 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,.15)}
+.sidebar-header h2{font-size:16px;font-weight:700;margin:0 0 4px;letter-spacing:-.5px}
+.sidebar-header p{font-size:11px;color:rgba(255,255,255,.6);margin:0}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0}
+.nav-item{padding:12px 16px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;border-left:3px solid transparent;display:flex;align-items:center;gap:10px;user-select:none}
+.nav-item:hover{background-color:rgba(0,116,255,.12);color:rgba(255,255,255,.9)}
+.nav-item.active{border-left-color:#0074FF;background-color:rgba(0,116,255,.18);color:white;font-weight:600}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;stroke-width:2.5}
+.sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.15);font-size:10px;color:rgba(255,255,255,.5);text-align:center}
+
+/* MAIN CONTENT */
+.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.main-header{padding:20px 32px;background:white;border-bottom:1px solid var(--border);flex-shrink:0}
+.header-breadcrumb{font-size:12px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.header-title{font-size:24px;font-weight:700;color:var(--text);margin:0}
+.filter-bar{padding:16px 32px;background:white;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.filter-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-right:4px}
+.filter-btn{padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s}
+.filter-btn:hover{border-color:var(--accent);color:var(--text2)}
+.filter-btn.active{background:rgba(0,116,255,.08);color:#0074FF;border-color:rgba(0,116,255,.25)}
+.filter-sep{width:1px;height:20px;background:var(--border2);margin:0 4px}
+
+.content-area{flex:1;overflow-y:auto;padding:16px 32px 32px}
+
+/* Hide old elements */
+.hdr{display:none!important}
+.tabs{display:none!important}
+.fbar{display:none!important}
+.ct{padding:0!important;max-width:none!important}
+
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-
-/* HEADER */
-.hdr{padding:20px 32px 12px;background:linear-gradient(135deg,#0E2F5D 0%,#0074FF 100%);color:#fff}
-.hdr h1{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.5px}
-.hdr p{font-size:12px;color:#E2E8F0;margin-top:2px}
-
-/* TABS */
-.tabs{padding:0 32px;display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:0}
-.tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s}
-.tab:hover{color:var(--text2)}
-.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
-
-/* FILTERS */
-.fbar{padding:12px 32px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.fl{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-right:2px}
-.fb{padding:5px 14px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s}
-.fb:hover{border-color:var(--accent);color:var(--text2)}
-.fb.on{background:rgba(0,116,255,.08);color:#0074FF;border-color:rgba(0,116,255,.25)}
-.sep{width:1px;height:20px;background:var(--border2);margin:0 6px}
-
-/* CONTAINER */
-.ct{padding:16px 32px 32px;max-width:1700px;margin:0 auto}
 
 /* KPI ROW */
 .krow{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:20px}
@@ -104,7 +117,7 @@ tr:hover td{background:rgba(0,116,255,.03)}
 .rx{background:var(--border);color:var(--text3)}
 
 /* Dropdown selects */
-.fsel{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;min-width:120px;max-width:200px}
+.fsel{padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;min-width:120px;max-width:200px}
 .fsel:focus{border-color:var(--accent);outline:none}
 
 /* Local filters inside tabs */
@@ -156,7 +169,8 @@ tr:hover td{background:rgba(0,116,255,.03)}
 .dev-wrap table th{position:sticky;top:0;z-index:2}
 
 @media(max-width:1200px){.krow{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:900px){.krow{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.ct{padding:12px 16px}}
+@media(max-width:900px){.krow{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.content-area{padding:12px 16px 32px}.main-header{padding:16px 20px}.filter-bar{padding:12px 20px}}
+@media(max-width:768px){.sidebar{width:60px}.sidebar-header h2,.sidebar-header p{display:none}.sidebar-nav .nav-item span{display:none}.filter-bar{gap:8px}}
 </style>
 </head>
 <body>
@@ -180,56 +194,69 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 
 
 
-<div class="hdr">
-  <div style="display:flex;align-items:center;gap:16px">
-    <svg width="160" height="56" viewBox="0 0 1080 1080" style="flex-shrink:0">
-      <defs><style>.logo-w{fill:#fff}</style></defs>
-      <path class="logo-w" d="M252.83,430.37c4.38-6.57,8.32-13.58,11.83-20.81-24.1-5.7-51.91-8.54-83.24-8.54s-72.94,3.5-110.18,9.2c13.8-.66,27.38-.88,40.74-.88,62.43,0,109.52,7.01,140.85,21.03Z"/>
-      <path class="logo-w" d="M246.26,313.39c-21.47-3.29-43.15-5.04-64.84-4.82-35.49,0-72.94,3.5-110.18,9.2,13.8-.66,27.38-.88,40.74-.88,74.04,0,126.83,9.86,157.06,29.57,0,0,.44.22,.44.44-4.38-11.61-12.05-22.78-23.22-33.3h0v-.22Z"/>
-      <path class="logo-w" d="M384.91,546.68c0-2.63-.44-5.26-.66-7.89-31.32,53.67-92.88,111.71-184,173.92-31.32,21.25-66.15,43.15-104.49,65.28v64.84c192.98-113.69,292.87-215.98,289.14-296.15h0Z"/>
-      <path class="logo-w" d="M256.77,573.19c-32.86,28.26-72.29,57.17-118.72,87.18v64.4c164.94-103.39,250.15-196.27,246.87-270.31-.88-19.5-4.6-37.02-10.51-52.79-6.13,52.35-45.56,109.74-117.63,171.51Z"/>
-      <path class="logo-w" d="M235.3,275.06c42.5,27.38,63.52,60.68,62.43,98.35-1.53,59.36-58.05,120.04-127.49,172.83v63.52c34.17-24.1,63.74-47.53,88.5-70.31l1.53-1.31,3.5-3.29c57.17-53.67,86.74-102.73,87.62-145.89v-5.91c-4.38-96.82-72.72-145.89-203.5-145.89s-72.94,3.5-110.18,9.2c13.8-.66,27.38-.88,40.96-.88,74.04,0,126.83,9.86,157.06,29.57h-.44Z"/>
-      <path class="logo-w" d="M468.59,471.11c0-3.94-.22-7.67-1.1-11.39-.66-2.85-2.19-5.48-4.6-7.45-3.07-2.19-6.35-3.72-9.86-4.6-5.48-1.53-11.17-2.63-16.87-3.29v-5.04h78.86c9.86,0,19.93.22,30.45.66,9.86.44,19.5,2.19,28.7,5.7,8.32,3.07,15.77,8.54,21.25,15.55,5.48,7.01,8.32,17.3,8.32,30.45s-2.85,23-8.76,30.23c-5.91,7.01-13.58,12.49-22.34,15.55-9.64,3.5-19.5,5.26-29.57,5.7-10.73.44-21.03.88-31.1.88h-14.68v97.26h-28.26v-170.2h-.44ZM496.85,532.22h14.02c7.67,0,15.11-.22,22.34-.88,6.79-.44,13.14-1.97,19.5-4.82,5.7-2.63,10.3-6.79,13.58-12.27,3.5-5.48,5.26-13.14,5.26-22.56,0-14.9-4.16-25.41-12.7-31.54-8.32-6.13-19.93-9.2-34.39-9.2-5.04,0-10.3,0-15.33.66-3.72.44-6.57,1.53-8.32,2.85-1.97,1.53-3.07,3.72-3.5,5.91-.44,3.5-.66,7.01-.66,10.51v61.11h0l.22.22Z"/>
-      <path class="logo-w" d="M688.3,587.64c0,5.91-.88,11.83-2.19,17.74-1.53,6.35-4.38,12.27-8.54,17.3-4.38,5.26-10.51,9.64-18.62,13.14s-18.62,5.26-31.76,5.26c-16.65,0-29.57-2.85-38.55-8.76-9.2-5.91-14.02-14.68-14.68-26.5h30.01c.22,2.41.66,4.82,1.53,7.23.88,2.85,2.19,5.48,3.94,7.89,2.19,2.63,4.82,4.82,7.89,6.35,3.29,1.75,7.67,2.41,12.92,2.41,7.67,0,13.58-1.53,17.52-4.82,3.94-3.07,7.01-7.23,8.98-11.83,1.97-4.82,3.07-9.64,3.29-14.9.22-5.26.44-9.86.44-14.02v-110.4c0-5.04-.66-8.98-1.97-11.61-1.31-2.63-3.29-4.6-5.7-6.13-3.07-1.53-6.57-2.41-9.86-2.63-4.16-.44-8.76-.88-14.46-1.53v-5.04l59.8-6.79v147.64h0Z"/>
-      <path class="logo-w" d="M885.66,564.64c0,8.98-.44,18.18-1.1,27.16-.66,8.76-3.29,17.09-7.89,24.53-4.38,7.23-11.61,13.14-21.47,17.74-9.86,4.6-23.66,7.01-41.62,7.01s-30.89-1.97-40.52-6.13c-9.64-4.16-17.09-9.42-22.12-16.21-5.04-7.01-8.1-15.33-9.2-23.88-1.31-9.64-1.97-19.28-1.97-28.91v-92.44c0-5.04-.66-8.98-1.97-11.61-1.31-2.63-3.29-4.82-5.91-6.13-3.07-1.53-6.57-2.41-10.08-2.63-4.16-.44-8.76-.88-14.02-1.53v-5.04l59.8-6.79v125.95c0,5.26.22,11.61.88,19.06.44,7.23,2.19,14.24,5.04,21.03,3.07,6.79,7.67,12.7,13.8,16.87,6.35,4.6,15.11,7.01,26.72,6.79,13.14,0,23.44-1.97,30.45-5.7,7.23-3.72,12.27-8.76,15.55-14.68,3.29-6.13,5.26-12.92,5.7-19.93.44-7.23.88-14.24.88-21.25v-128.14h18.84v124.64h0l.22.22Z"/>
-      <path class="logo-w" d="M1028.48,463.88c-2.63-.88-5.48-2.19-9.2-3.5-3.72-1.31-7.67-2.63-12.27-3.94-4.82-1.31-9.86-2.41-14.68-3.29-5.26-.88-10.73-1.31-16.21-1.31-11.39,0-20.59,2.63-27.6,7.89-7.01,5.26-10.51,12.27-10.51,21.25-.22,7.23,2.63,14.24,7.67,19.28,5.7,5.48,12.27,10.3,19.28,14.02,7.67,4.16,16.21,8.32,25.19,12.05,8.76,3.72,17.3,8.32,25.19,13.58,7.45,4.82,14.02,11.17,19.28,18.4,5.26,7.01,7.67,15.99,7.67,26.72s-2.19,18.62-6.35,25.85c-4.16,7.01-10.08,13.14-16.87,17.52-7.45,4.82-15.77,8.1-24.53,9.86-9.64,1.97-19.28,3.07-29.13,3.07-5.48,0-10.95-.22-16.43-.66-5.48-.44-10.51-1.1-15.11-1.75s-8.76-1.31-12.05-1.97c-2.41-.44-4.6-.88-7.01-1.53v-20.15c3.07,1.31,6.57,2.85,10.51,4.16s8.54,2.85,13.36,4.16c4.82,1.31,9.86,2.41,15.11,3.29s10.73,1.31,15.99,1.31c14.02,0,24.75-3.07,32.64-9.2,7.67-6.13,11.61-15.33,11.61-27.82,0-8.1-2.63-14.9-7.67-20.37-5.48-5.7-11.83-10.73-18.84-14.68-7.89-4.38-15.99-8.54-24.31-12.05-8.54-3.72-16.65-8.1-24.31-13.14-7.23-4.6-13.58-10.73-18.84-17.52-5.04-6.79-7.67-15.11-7.67-25.41,0-15.99,6.13-28.04,18.62-36.58,12.49-8.54,29.13-12.7,50.38-12.7,9.2,0,18.4.44,27.6,1.53,8.1,1.1,14.46,1.97,19.06,3.07v20.37h0l.44.22Z"/>
-    </svg>
-    <div>
-      <h1>Piloto - Projeto Acelera Comercial</h1>
-      <p>Dados consolidados 2026 · Atualizado 13/03/2026</p>
+<div class="layout-wrapper">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>PJUS</h2>
+      <p>Projeto Acelera Comercial</p>
+    </div>
+    <div class="sidebar-nav" id="sidebarNav">
+      <div class="nav-item active" data-tab="exec" onclick="sw('exec')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <span>Executivo</span>
+      </div>
+      <div class="nav-item" data-tab="perf" onclick="sw('perf')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Performance</span>
+      </div>
+      <div class="nav-item" data-tab="funil" onclick="sw('funil')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <span>Funil & Estoque</span>
+      </div>
+      <div class="nav-item" data-tab="analitico" onclick="sw('analitico')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2H8a2 2 0 00-2 2v16"/></svg>
+        <span>Analítico Estoque</span>
+      </div>
+    </div>
+    <div class="sidebar-footer" id="sidebarFooter">
+      Atualizado 13/03/2026
     </div>
   </div>
-</div>
 
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="main-header">
+      <div class="header-breadcrumb">
+        <span>Início</span>
+        <span>/</span>
+        <span id="headerTabName">Visão Executiva</span>
+      </div>
+      <h1 class="header-title" id="headerTitle">Visão Executiva</h1>
+    </div>
 
-<div class="tabs">
-  <button class="tab on" onclick="sw('exec')">Executivo</button>
-  <button class="tab" onclick="sw('perf')">Performance</button>
-  <button class="tab" onclick="sw('funil')">Funil & Estoque</button>
-  <button class="tab" onclick="sw('analitico')">Analítico Estoque</button>
-</div>
+    <div class="filter-bar" id="filterBar">
+      <span class="filter-label">Segmento:</span>
+      <button class="filter-btn active" data-f="s" data-v="t" onclick="ff(this)">Todos</button>
+      <button class="filter-btn" data-f="s" data-v="v" onclick="ff(this)">Varejo</button>
+      <button class="filter-btn" data-f="s" data-v="m" onclick="ff(this)">Mid-Market</button>
+      <div class="filter-sep"></div>
+      <span class="filter-label">Regional:</span>
+      <button class="filter-btn active" data-f="r" data-v="t" onclick="ff(this)">Todas</button>
+      <button class="filter-btn" data-f="r" data-v="0" onclick="ff(this)">Regional A</button>
+      <button class="filter-btn" data-f="r" data-v="1" onclick="ff(this)">Regional B</button>
+      <button class="filter-btn" data-f="r" data-v="2" onclick="ff(this)">Regional C</button>
+      <button class="filter-btn" data-f="r" data-v="3" onclick="ff(this)">Regional D</button>
+      <div class="filter-sep"></div>
+      <span class="filter-label" id="negLabel">Negociador:</span>
+      <select class="fsel" id="negFilter" onchange="fl.n=this.value;rr()" style="display:none">
+        <option value="-1">Todos</option>
+      </select>
+    </div>
 
-<div class="fbar">
-  <span class="fl">Segmento:</span>
-  <button class="fb on" data-f="s" data-v="t" onclick="ff(this)">Todos</button>
-  <button class="fb" data-f="s" data-v="v" onclick="ff(this)">Varejo</button>
-  <button class="fb" data-f="s" data-v="m" onclick="ff(this)">Mid-Market</button>
-  <div class="sep"></div>
-  <span class="fl">Regional:</span>
-  <button class="fb on" data-f="r" data-v="t" onclick="ff(this)">Todas</button>
-  <button class="fb" data-f="r" data-v="0" onclick="ff(this)">Regional A</button>
-  <button class="fb" data-f="r" data-v="1" onclick="ff(this)">Regional B</button>
-  <button class="fb" data-f="r" data-v="2" onclick="ff(this)">Regional C</button>
-  <button class="fb" data-f="r" data-v="3" onclick="ff(this)">Regional D</button>
-  <div class="sep"></div>
-  <span class="fl" id="negLabel">Negociador:</span>
-  <select class="fsel" id="negFilter" onchange="fl.n=this.value;rr()">
-    <option value="-1">Todos</option>
-  </select>
-</div>
-
-<div class="ct">
-<!-- EXECUTIVO -->
+    <div class="content-area" id="contentArea">
+      <div class="ct">
+        <!-- EXECUTIVO -->
 <div id="v-exec">
   <div class="tab-info">
     <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
@@ -458,20 +485,1098 @@ const bc=v=>v>=80?'bg':v>=40?'by':'br';
 // ===== FILTER FUNCTIONS =====
 function sw(t){
   at=t;
+  const tabs=['exec','perf','funil','analitico'];
+  const tabNames=['Visão Executiva','Performance Comercial','Funil & Estoque','Analítico Estoque'];
+  const tabIdx=tabs.indexOf(t);
+  
+  // Update content visibility
   document.querySelectorAll('[id^="v-"]').forEach(e=>e.classList.add('hidden'));
   document.getElementById('v-'+t).classList.remove('hidden');
-  document.querySelectorAll('.tabs .tab').forEach((b,i)=>b.classList.toggle('on',['exec','perf','funil','analitico'][i]===t));
+  
+  // Update sidebar navigation
+  document.querySelectorAll('.nav-item').forEach((item,i)=>item.classList.toggle('active',i===tabIdx));
+  
+  // Update header
+  document.getElementById('headerTabName').textContent=tabNames[tabIdx];
+  document.getElementById('headerTitle').textContent=tabNames[tabIdx];
+  
+  // Show/hide negotiator filter based on tab
   const isExec=t==='exec';
   document.getElementById('negLabel').style.display=isExec?'none':'';
   document.getElementById('negFilter').style.display=isExec?'none':'';
   if(isExec){fl.n='-1';document.getElementById('negFilter').value='-1'}
+  
   populateNegFilter();
   if(t==='funil') populateFunilEtapas();
   if(t==='analitico') populateAnaliticoFilters();
   rr();
 }
+function ff(b){const f=b.dataset.f,v=b.dataset.v;fl[f]=v;document.querySelectorAll(`.filter-btn[data-f="${f}"]`).forEach(x=>x.classList.remove('active'));b.classList.add('active');populateNegFilter();if(at==='funil')populateFunilEtapas();if(at==='analitico')populateAnaliticoFilters();rr()}
+function populateNegFilter(){
+  const sel=document.getElementById('negFilter');
+  const cur=sel.value;
+  let baseRows=RW;
+  if(fl.s==='v') baseRows=baseRows.filter(r=>r[1]===1);
+  if(fl.s==='m') baseRows=baseRows.filter(r=>r[1]===0);
+  let negList=[...new Set(baseRows.map(r=>r[8]))].sort((a,b)=>NG[a].localeCompare(NG[b]));
+  if(fl.r!=='t'){
+    const ri=parseInt(fl.r);
+    negList=negList.filter(ni=>baseRows.some(r=>r[2]===ri && r[8]===ni));
+  }
+  sel.innerHTML='<option value="-1">Todos</option>'+negList.map(ni=>`<option value="${ni}">${NG[ni]}</option>`).join('');
+  sel.value=negList.includes(parseInt(cur))?cur:'-1';
+  fl.n=sel.value;
+}
 
-function ff(b){const f=b.dataset.f,v=b.dataset.v;fl[f]=v;document.querySelectorAll(`.fb[data-f="${f}"]`).forEach(x=>x.classList.remove('on'));b.classList.add('on');populateNegFilter();if(at==='funil')populateFunilEtapas();if(at==='analitico')populateAnaliticoFilters();rr()}
+function populateFunilEtapas(){
+  const sel=document.getElementById('funilEtapa');
+  let base=RW.filter(r=>r[0]===0);
+  if(fl.s==='v') base=base.filter(r=>r[1]===1);
+  if(fl.s==='m') base=base.filter(r=>r[1]===0);
+  if(fl.r!=='t') base=base.filter(r=>r[2]===parseInt(fl.r));
+  const etapaOrdemF=['Documentos preliminares','Conferência inicial','Avaliação do ativo','Providências jurídicas','Cálculo','Parecer do titular','Conferência final','Parecer jurídico','Confecção de documentos','Assinatura','Protocolo de cessão','Homologação','Pagamento'];
+  const etapas=[...new Set(base.map(r=>r[4]))].sort((a,b)=>{const ia=etapaOrdemF.indexOf(ET[a]);const ib=etapaOrdemF.indexOf(ET[b]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
+  sel.innerHTML='<option value="-1">Todas</option>'+etapas.map(ei=>`<option value="${ei}">${ET[ei]}</option>`).join('');
+}
+
+function populateAnaliticoFilters(){
+  let andOps=RW.filter(r=>r[0]===0);
+  if(fl.s==='v') andOps=andOps.filter(r=>r[1]===1);
+  if(fl.s==='m') andOps=andOps.filter(r=>r[1]===0);
+  const regVal=document.getElementById('anaReg').value;
+  let filtered=regVal!=='-1'?andOps.filter(r=>r[2]===parseInt(regVal)):andOps;
+  
+  const coords=[...new Set(filtered.map(r=>r[9]))].filter(c=>c>0).sort((a,b)=>CO[a].localeCompare(CO[b]));
+  const cSel=document.getElementById('anaCoord');
+  cSel.innerHTML='<option value="-1">Todos</option>'+coords.map(ci=>`<option value="${ci}">${CO[ci]}</option>`).join('');
+  
+  const negs=[...new Set(filtered.map(r=>r[8]))].sort((a,b)=>NG[a].localeCompare(NG[b]));
+  const nSel=document.getElementById('anaNeg');
+  nSel.innerHTML='<option value="-1">Todos</option>'+negs.map(ni=>`<option value="${ni}">${NG[ni]}</option>`).join('');
+  
+  const etapaOrdemA=['Documentos preliminares','Conferência inicial','Avaliação do ativo','Providências jurídicas','Cálculo','Parecer do titular','Conferência final','Parecer jurídico','Confecção de documentos','Assinatura','Protocolo de cessão','Homologação','Pagamento'];
+  const etapas=[...new Set(filtered.map(r=>r[4]))].sort((a,b)=>{const ia=etapaOrdemA.indexOf(ET[a]);const ib=etapaOrdemA.indexOf(ET[b]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
+  const eSel=document.getElementById('anaEtapa');
+  eSel.innerHTML='<option value="-1">Todas</option>'+etapas.map(ei=>`<option value="${ei}">${ET[ei]}</option>`).join('');
+}
+
+function filterRW(statusFilter){
+  let rows=RW;
+  if(statusFilter!==undefined) rows=rows.filter(r=>Array.isArray(statusFilter)?statusFilter.includes(r[0]):r[0]===statusFilter);
+  if(fl.s==='v') rows=rows.filter(r=>r[1]===1);
+  if(fl.s==='m') rows=rows.filter(r=>r[1]===0);
+  if(fl.r!=='t') rows=rows.filter(r=>r[2]===parseInt(fl.r));
+  if(fl.n!=='-1') rows=rows.filter(r=>r[8]===parseInt(fl.n));
+  return rows;
+}
+
+function dc(id){if(ch[id]){ch[id].destroy();delete ch[id]}}
+
+function gm(){
+  const s=fl.s,r=fl.r;
+  const regMetaKey={0:'A',1:'B',2:'C',3:'D'};
+  if(r!=='t'){const ri=parseInt(r);const rName=RN[ri];const k=regMetaKey[ri];if(k)return{m:D.meta[k+'m'],r:D.meta[k+'r'],a:D.regs[rName]?D.regs[rName].ma:0,l:rName};return{m:Array(12).fill(0),r:Array(12).fill(0),a:0,l:rName}}
+  if(s==='v')return{m:D.meta.vm,r:D.meta.vr,a:D.meta.va,l:'Varejo'};
+  if(s==='m')return{m:D.meta.mm,r:D.meta.mr,a:D.meta.ma,l:'Mid-Market'};
+  return{m:D.meta.m,r:D.meta.r,a:D.meta.a,l:'Consolidado'};
+}
+
+function gn(){
+  let n=D.neg;
+  const varejoRegs=['Regional A','Regional B','Regional C','Regional D'];
+  if(fl.s==='v') n=n.filter(x=>varejoRegs.includes(x[2]));
+  if(fl.s==='m') n=n.filter(x=>!varejoRegs.includes(x[2]));
+  if(fl.r!=='t')n=n.filter(x=>x[2]===RN[parseInt(fl.r)]);
+  if(fl.n!=='-1'){const name=NG[parseInt(fl.n)];n=n.filter(x=>x[0]===name)}
+  if(at==='perf' && fl.m!=='-1'){
+    const mi=parseInt(fl.m);
+    return calcNegByMonth(mi);
+  }
+  return n.map(x=>{const c=[...x];c[11]=(c[4]+c[5])>0?(c[4]/(c[4]+c[5])*100):0;c[12]=c[11];c[13]=c[4]>0?(c[10]/c[4]):0;return c});
+}
+
+function calcNegByMonth(month){
+  const vi=9+month;// col 10=Jan,11=Fev,12=Mar
+  const base=filterRW();
+  const negMap={};
+  base.forEach(r=>{
+    const isCadastrada = r[15]===month;
+    const temPagamento = r[0]===1 && r[vi]>0;
+    const reprovadoNoMes = r[0]===2 && r[15]===month;
+    if(!isCadastrada && !temPagamento) return;
+    const name=NG[r[8]];
+    if(!negMap[name]) negMap[name]={name,coord:CO[r[9]],reg:RN[r[2]],ops:0,apr:0,rep:0,and:0,total:0,pago:0};
+    const n=negMap[name];
+    if(isCadastrada){
+      n.ops++;
+      if(r[0]===0) n.and++;
+      else if(r[0]===2) n.rep++;
+      // Se cadastrada + aprovada + paga no mês, conta em apr e pago
+      if(temPagamento){n.apr++;n.pago++;n.total+=r[vi];}
+      else if(r[0]===1) n.apr++;// Aprovada mas sem pagamento neste mês
+    } else if(temPagamento){
+      // Paga neste mês mas cadastrada em outro — conta como aprovada paga
+      n.ops++;n.apr++;n.pago++;n.total+=r[vi];
+    }
+  });
+  return Object.values(negMap).map(n=>{
+    const conv=(n.apr+n.rep)>0?(n.apr/(n.apr+n.rep)*100):0;
+    const ticket=n.pago>0?(n.total/n.pago):0;
+    const mv=[0,0,0]; mv[month-1]=n.total;
+    return[n.name,n.coord,n.reg,n.ops,n.apr,n.rep,n.and,mv[0],mv[1],mv[2],n.total,conv,conv,ticket];
+  }).sort((a,b)=>b[10]-a[10]);
+}
+
+// ===== EXECUTIVO TAB =====
+function rExec(){
+  // Meta NÃO filtra por negociador - somente até nível regional
+  const fm=gm();
+  const execMes=fl.em!=='-1'?parseInt(fl.em):-1;
+  const rY=fm.r.slice(0,3).reduce((a,b)=>a+b,0);
+  const mY=fm.m.slice(0,3).reduce((a,b)=>a+b,0);
+  const pY=mY?(rY/mY*100):0;
+  const pA=fm.a?(rY/fm.a*100):0;
+
+  // KPIs filtram por negociador (via filterRW) e por mês se selecionado
+  const allOps=filterRW();
+  let aprOps,repOps,andOps,kpiLabel,receitaFiltered;
+  if(execMes>0){
+    const vi=9+execMes;
+    aprOps=allOps.filter(r=>r[0]===1&&r[vi]>0);
+    repOps=allOps.filter(r=>r[0]===2&&r[15]===execMes);
+    andOps=allOps.filter(r=>r[0]===0&&r[15]===execMes);
+    receitaFiltered=aprOps.reduce((a,r)=>a+r[vi],0);
+    kpiLabel=MO[execMes-1]+'/26';
+  } else {
+    aprOps=allOps.filter(r=>r[0]===1);
+    repOps=allOps.filter(r=>r[0]===2);
+    andOps=allOps.filter(r=>r[0]===0);
+    receitaFiltered=aprOps.reduce((a,r)=>a+r[10]+r[11]+r[12],0);
+    kpiLabel='YTD 26';
+  }
+  const aprCount=aprOps.length;
+  const repCount=repOps.length;
+  const andCount=andOps.length;
+  // Pipeline SEMPRE usa todas as operações em andamento (não filtra por mês)
+  const allAndOps=allOps.filter(r=>r[0]===0);
+  const pipeVal=allAndOps.reduce((a,r)=>a+r[14],0);
+  const pipeCount=allAndOps.length;
+  // Conversão: usar D.cc (conta corrente) para alinhar com aba Performance
+  function getExecCC(mi){const ccM=D.cc[mi];if(!ccM)return[0,0,0,0,0,0,0,0,0,0];if(fl.r!=='t'){const rn=RN[parseInt(fl.r)];return ccM.r[rn]||[0,0,0,0,0,0,0,0,0,0];}if(fl.s==='v'){const sum=[0,0,0,0,0,0,0,0,0,0];['Regional A','Regional B','Regional C','Regional D'].forEach(rn=>{const rd=ccM.r[rn];if(rd)rd.forEach((v,j)=>sum[j]+=v);});return sum;}if(fl.s==='m'){return ccM.r['Mid-Market']||[0,0,0,0,0,0,0,0,0,0];}return ccM.t;}
+  let ccApr=0,ccRep=0;
+  if(execMes>0){const cc=getExecCC(execMes-1);ccApr=cc[2];ccRep=cc[3];}
+  else{for(let mi=0;mi<3;mi++){const cc=getExecCC(mi);ccApr+=cc[2];ccRep+=cc[3];}}
+  const convR=(ccApr+ccRep)>0?(ccApr/(ccApr+ccRep)*100):0;
+  const ticket=aprCount>0?receitaFiltered/aprCount:0;
+
+  document.getElementById('kpi1').innerHTML=`
+    <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO — ${kpiLabel}</div><div class="kc-val" style="color:var(--green)">${execMes>0?F(receitaFiltered):F(rY)}</div><div class="kc-sub">Volume líquido ${execMes>0?'pago no período':'a receber YTD'}</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.pipeline} PIPELINE ATIVO</div><div class="kc-val" style="color:var(--blue)">${F(pipeVal)}</div><div class="kc-sub">${pipeCount} operações em andamento | Volume projetado</div></div>
+    <div class="kc kg"><div class="kc-label">${IC.aprovado} OPERAÇÕES APROVADAS — ${kpiLabel}</div><div class="kc-val">${aprCount}</div><div class="kc-sub">de ${allOps.length} totais | Qtd. de processos</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.conversao} TAXA CONVERSÃO — ${kpiLabel}</div><div class="kc-val">${convR.toFixed(1)}%</div><div class="kc-sub">${ccApr} aprovadas / ${ccApr+ccRep} finalizadas | Conta Corrente</div></div>
+    <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO — ${kpiLabel}</div><div class="kc-val" style="color:var(--yellow)">${F(ticket)}</div><div class="kc-sub">Volume líquido pago / Qtd. aprovadas</div></div>
+    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVAÇÕES — ${kpiLabel}</div><div class="kc-val" style="color:var(--red)">${ccRep}</div><div class="kc-sub">${(ccApr+ccRep)>0?(ccRep/(ccApr+ccRep)*100).toFixed(1):0}% do total fechado | Conta Corrente</div></div>
+  `;
+
+  // Meta card: highlight selected month
+  const metaMesesHtml=fm.r.slice(0,3).map((v,i)=>{
+    const p=fm.m[i]?(v/fm.m[i]*100):0;
+    const isSelected=execMes===(i+1);
+    return`<div style="${isSelected?'background:rgba(0,116,255,.08);border-radius:8px;padding:6px 10px;':''}"><div style="font-weight:700;color:${isSelected?'var(--accent)':'var(--text2)'}">${MO[i]}/26${isSelected?' ◀':''}</div><div>${F(v)}</div><div><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></div></div>`;
+  }).join('');
+  document.getElementById('mc1').innerHTML=`<div class="meta-card"><h3>Meta vs Realizado — ${fm.l}</h3><div class="mg"><div class="mh"><h4>Meta Anual</h4><div class="mr"><span class="lb">Meta Total</span><span class="vl">${F(fm.a)}</span></div><div class="mr"><span class="lb">Realizado YTD</span><span class="vl" style="color:var(--green)">${F(rY)}</span></div><div class="mr"><span class="lb">Atingimento</span><span class="bd ${bc(pA)}">${pA.toFixed(1)}%</span></div><div class="mbar"><div class="mbar-f" style="width:${Math.min(pA,100)}%;background:${pA>=80?'var(--green)':pA>=40?'var(--yellow)':'var(--red)'}"></div></div></div><div class="mh"><h4>Acumulado YTD (Jan — Mar)</h4><div class="mr"><span class="lb">Meta Acumulada</span><span class="vl">${F(mY)}</span></div><div class="mr"><span class="lb">Realizado</span><span class="vl" style="color:var(--green)">${F(rY)}</span></div><div class="mr"><span class="lb">Atingimento</span><span class="bd ${bc(pY)}">${pY.toFixed(1)}%</span></div><div class="mbar"><div class="mbar-f" style="width:${Math.min(pY,100)}%;background:${pY>=80?'var(--green)':pY>=40?'var(--yellow)':'var(--red)'}"></div></div><div style="margin-top:10px;display:flex;gap:16px;font-size:11px;color:var(--text4)">${metaMesesHtml}</div></div></div></div>`;
+
+  // Gauge speedometers
+  document.getElementById('gaugeRow').innerHTML=`
+    <div class="cd" style="flex:1;text-align:center;padding:16px">
+      <h3 style="margin-bottom:4px">Meta Anual</h3>
+      <div style="position:relative;width:180px;height:100px;margin:0 auto">
+        <canvas id="gaugeAnual" width="180" height="100"></canvas>
+        <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:800;color:${pA>=80?'var(--green)':pA>=40?'var(--yellow)':'var(--red)'}">${pA.toFixed(1)}%</div>
+      </div>
+      <div style="font-size:11px;color:var(--text4);margin-top:4px">${F(rY)} de ${F(fm.a)}</div>
+    </div>
+    <div class="cd" style="flex:1;text-align:center;padding:16px">
+      <h3 style="margin-bottom:4px">Meta YTD (Jan–Mar)</h3>
+      <div style="position:relative;width:180px;height:100px;margin:0 auto">
+        <canvas id="gaugeYTD" width="180" height="100"></canvas>
+        <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:800;color:${pY>=80?'var(--green)':pY>=40?'var(--yellow)':'var(--red)'}">${pY.toFixed(1)}%</div>
+      </div>
+      <div style="font-size:11px;color:var(--text4);margin-top:4px">${F(rY)} de ${F(mY)}</div>
+    </div>
+  `;
+  // Render gauge charts
+  function drawGauge(canvasId,pct){
+    const el=document.getElementById(canvasId);if(!el)return;
+    const val=Math.min(pct,100);
+    const color=val>=80?'#00A68C':val>=40?'#eab308':'#ef4444';
+    dc(canvasId);
+    ch[canvasId]=new Chart(el,{type:'doughnut',data:{datasets:[{data:[val,100-val],backgroundColor:[color,'rgba(224,231,245,.3)'],borderWidth:0}]},options:{responsive:false,rotation:-90,circumference:180,cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+  }
+  drawGauge('gaugeAnual',pA);
+  drawGauge('gaugeYTD',pY);
+
+  dc('cTend');
+  const allOpsForTrend=filterRW();
+  const recMFull=[],recLFull=[],recMMonths=[];
+  for(let mi=1;mi<=3;mi++){const vi=9+mi;const tval=allOpsForTrend.filter(r=>r[0]===1&&r[vi]>0).reduce((a,r)=>a+r[vi],0);if(tval>0){recMFull.push(tval);recLFull.push(MO[mi-1]+'/26');recMMonths.push(mi);}}
+  const recM=recMFull,recL=recLFull;
+  const bgTend=recMFull.map((_,i)=>execMes>0?(recMMonths[i]===execMes?'rgba(0,116,255,.85)':'rgba(0,116,255,.08)'):'rgba(0,116,255,.08)');
+  const ptTend=recMFull.map((_,i)=>execMes>0?(recMMonths[i]===execMes?10:4):6);
+  ch['cTend']=new Chart(document.getElementById('cTend'),{type:'line',data:{labels:recL,datasets:[{data:recM.map(v=>v/1e6),borderColor:'var(--accent)',backgroundColor:bgTend,fill:true,tension:.3,pointRadius:ptTend,pointBackgroundColor:'var(--accent)',pointBorderWidth:2,pointBorderColor:'#F5F7FA',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const mi=els[0].index+1;if(execMes===mi){fl.em='-1';document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));document.querySelector('[data-em="-1"]').classList.add('on');}else{fl.em=String(mi);document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));const btn=document.querySelector('[data-em="'+mi+'"]');if(btn)btn.classList.add('on');}rr();}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.raw.toFixed(1)+'M'}}},scales:{y:{title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false}}}}});
+  document.getElementById('cTend').style.cursor='pointer';
+  const lastVar=recM.length>=2?((recM[recM.length-1]-recM[recM.length-2])/recM[recM.length-2]*100):0;
+  document.getElementById('varBadge').innerHTML=lastVar!==0?`<span class="var-badge ${lastVar>=0?'var-up':'var-down'}">${lastVar>=0?'+':''}${lastVar.toFixed(1)}% vs mês anterior</span>`:'';
+  const hTendEl=document.getElementById('hTend');if(hTendEl)hTendEl.textContent='Tendência Valor Líquido Pago Mensal — '+(execMes>0?MO[execMes-1]+'/26':'YTD 26');
+
+  dc('cRegPerf');
+  // Filtrar regionais conforme filtro ativo
+  let regList=RN.slice(0,4).map((rn,i)=>({name:rn,idx:i}));
+  if(fl.r!=='t') regList=regList.filter(x=>x.idx===parseInt(fl.r));
+  if(fl.s==='m') regList=[];
+  const regData=regList.map(({name:rn})=>{
+    let tEI=0,tCad=0,tApr=0,tEA=0;
+    let cEI=0,cCad=0,cApr=0,cEA=0;
+    const mStart=execMes>0?execMes-1:0;const mEnd=execMes>0?execMes-1:2;
+    for(let m=mStart;m<=mEnd;m++){const rd=D.cc[m]&&D.cc[m].r[rn];if(rd){if(m===mStart){tEI+=rd[5];cEI+=rd[0];}tCad+=rd[6];tApr+=rd[7];cCad+=rd[1];cApr+=rd[2];if(m===mEnd){tEA+=rd[9];cEA+=rd[4];}}}
+    const movimentado=execMes>0?tCad:(tEI+tCad-tEA);
+    const cntMov=execMes>0?cCad:(cEI+cCad-cEA);
+    const convCC=cntMov>0?(cApr/cntMov*100):0;
+    return{name:rn,movimentado:movimentado/1e6,pago:tApr/1e6,convCC};
+  });
+  const mesLabelCC=execMes>0?` — ${MO[execMes-1]}/26`:' — YTD 26';
+  const ccRegTitle=fl.r!=='t'?`Conversão Conta Corrente — ${RN[parseInt(fl.r)]}${mesLabelCC}`:`Conversão Conta Corrente por Regional${mesLabelCC}`;
+  const hCCEl=document.getElementById('hCCReg');if(hCCEl)hCCEl.textContent=ccRegTitle;
+  const regBgMov=regData.map(r=>{const ri=RN.indexOf(r.name);return(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri)?'rgba(0,166,140,1)':'rgba(0,166,140,.7)'});
+  const regBgPago=regData.map(r=>{const ri=RN.indexOf(r.name);return(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri)?'rgba(0,116,255,.85)':'rgba(0,116,255,.5)'});
+  ch['cRegPerf']=new Chart(document.getElementById('cRegPerf'),{type:'bar',data:{labels:regData.map(r=>r.name),datasets:[
+    {label:'Est. Movimentado',data:regData.map(r=>r.movimentado),backgroundColor:regBgMov,borderRadius:4,yAxisID:'y'},
+    {label:'Valor Pago',data:regData.map(r=>r.pago),backgroundColor:regBgPago,borderRadius:4,yAxisID:'y'},
+    {label:'Conversão Conta Corrente (%)',data:regData.map(r=>r.convCC),type:'line',borderColor:'#eab308',backgroundColor:'rgba(234,179,8,.1)',pointBackgroundColor:'#eab308',pointRadius:5,borderWidth:2.5,tension:.3,yAxisID:'y1'}
+  ]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const idx=els[0].index;const rName=regData[idx].name;const ri=RN.indexOf(rName);if(cf.exec.active&&cf.exec.type==='reg'&&cf.exec.val==ri){clearCF('exec');}else{setCF('exec','reg',ri,rName);}}},plugins:{legend:{position:'top',align:'end',labels:{font:{size:10}}},title:{display:false},tooltip:{callbacks:{title:t=>(t[0].label+' (clique para filtrar)')}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v+'M'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,max:100,title:{display:true,text:'Conversão (%)'},ticks:{callback:v=>v+'%'},grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  document.getElementById('cRegPerf').style.cursor='pointer';
+
+  // ===== GRÁFICO PRODUÇÃO DIÁRIA DE PAGOS (aba Executivo) =====
+  if(typeof DP!=='undefined' && DP.length>0){
+    const rFiltDP=fl.r!=='t'?parseInt(fl.r):-1;
+    const dpFiltered=execMes>0?DP.filter(d=>parseInt(d[0].split('-')[1])===execMes):DP;
+    const dpLabels=dpFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dpVal=dpFiltered.map(d=>{
+      if(rFiltDP>=0){const rr=d[4][String(rFiltDP)];return rr?rr[1]/1e6:0;}
+      return d[2]/1e6;
+    });
+    // Acumulado
+    let dpCum=[];let cumAcc=0;
+    dpFiltered.forEach(d=>{
+      if(rFiltDP>=0){const rr=d[4][String(rFiltDP)];cumAcc+=rr?rr[1]/1e6:0;}
+      else{cumAcc+=d[2]/1e6;}
+      dpCum.push(cumAcc);
+    });
+    // Meta de Produção como linha de referência
+    const metaSet=gm();
+    let metaVal=0;
+    if(execMes>0){metaVal=(metaSet.m[execMes-1]||0)/1e6;}
+    else{const lastMes=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):3;metaVal=metaSet.m.slice(0,lastMes).reduce((a,v)=>a+v,0)/1e6;}
+    const rLabelDP=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
+    const periodLabelDP=execMes>0?MO[execMes-1]+'/26':'YTD 26';
+    // KPI cards: acumulado + % vs meta acumulativa (dias úteis, D-1)
+    const dpAcum=dpCum.length>0?dpCum[dpCum.length-1]:0;
+    const hoje=new Date();const diaHoje=hoje.getDate();const mesHoje=hoje.getMonth()+1;const anoHoje=hoje.getFullYear();
+    // Função: contar dias úteis (seg-sex) em um mês até o dia N
+    function duMes(ano,mes,ateDia){let du=0;const totalD=new Date(ano,mes,0).getDate();const lim=Math.min(ateDia,totalD);for(let d=1;d<=lim;d++){const dow=new Date(ano,mes-1,d).getDay();if(dow!==0&&dow!==6)du++;}return du;}
+    function duTotal(ano,mes){return duMes(ano,mes,31);}
+    let metaAcumData=0;let duRef=0;let duTotalRef=0;
+    if(execMes>0){
+      const duTot=duTotal(2026,execMes);
+      // D-1: mês corrente usa dias úteis até ontem; mês passado usa todos
+      let duCorr=duTot;
+      if(mesHoje===execMes&&anoHoje===2026){duCorr=duMes(2026,execMes,diaHoje-1);}
+      metaAcumData=((metaSet.m[execMes-1]||0)/1e6)*(duCorr/duTot);
+      duRef=duCorr;duTotalRef=duTot;
+    } else {
+      const ultimoMes=dpFiltered.length>0?parseInt(dpFiltered[dpFiltered.length-1][0].split('-')[1]):mesHoje;
+      for(let mi=0;mi<ultimoMes;mi++){
+        const mNum=mi+1;const duTot=duTotal(2026,mNum);
+        if(mNum<mesHoje||anoHoje!==2026){
+          metaAcumData+=(metaSet.m[mi]||0)/1e6;duRef+=duTot;
+        } else if(mNum===mesHoje&&anoHoje===2026){
+          const duCorr=duMes(2026,mNum,diaHoje-1);
+          metaAcumData+=((metaSet.m[mi]||0)/1e6)*(duCorr/duTot);duRef+=duCorr;
+        }
+        duTotalRef+=duTot;
+      }
+    }
+    const pctMeta=metaAcumData>0?(dpAcum/metaAcumData*100):0;
+    const pctClass=pctMeta>=80?'kg':pctMeta>=50?'ky':'kr';
+    const pctColor=pctMeta>=80?'var(--green)':pctMeta>=50?'var(--yellow)':'var(--red)';
+    const diaRefLabel=anoHoje===2026&&((execMes>0&&mesHoje===execMes)||execMes<=0)?'D-1 ('+String(diaHoje-1).padStart(2,'0')+'/'+String(mesHoje).padStart(2,'0')+')':'mês completo';
+    const dpKpiEl=document.getElementById('dpKpiRow');
+    if(dpKpiEl){dpKpiEl.innerHTML=`
+      <div class="kc kg"><div class="kc-label">${IC.receita} ACUMULADO PAGO — ${periodLabelDP}${rLabelDP}</div><div class="kc-val" style="color:var(--green)">R$ ${dpAcum.toFixed(1)}M</div><div class="kc-sub">Volume líquido pago acumulado no período</div></div>
+      <div class="kc ${pctClass}"><div class="kc-label">${IC.conversao} REALIZADO vs META ACUMULATIVA — ${periodLabelDP}${rLabelDP}</div><div class="kc-val" style="color:${pctColor}">${pctMeta.toFixed(1)}%</div><div class="kc-sub">R$ ${dpAcum.toFixed(1)}M de R$ ${metaAcumData.toFixed(1)}M (${duRef} d.u. até ${diaRefLabel}) | Meta período: R$ ${metaVal.toFixed(1)}M</div></div>
+    `;}
+    document.getElementById('hPagDia').textContent='Produção Diária de Pagos — '+periodLabelDP+rLabelDP;
+    dc('cPagDia');
+    ch['cPagDia']=new Chart(document.getElementById('cPagDia'),{type:'bar',data:{labels:dpLabels,datasets:[
+      {label:'Valor Pago/dia (R$M)',data:dpVal,backgroundColor:'rgba(0,166,140,.65)',borderColor:'#00A68C',borderWidth:1,borderRadius:4,yAxisID:'y'},
+      {label:'Acumulado (R$M)',data:dpCum,type:'line',borderColor:'#0074FF',backgroundColor:'rgba(0,116,255,.08)',pointRadius:0,borderWidth:2.5,tension:.3,fill:true,yAxisID:'y1'},
+      {label:'Meta Produção (R$M)',data:Array(dpLabels.length).fill(metaVal),type:'line',borderColor:'#EF4444',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false,yAxisID:'y1'}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>{const v=typeof c.raw==='number'?c.raw:0;return c.dataset.label+': R$ '+v.toFixed(2)+'M'}}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'R$ Milhões/dia',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(1)+'M'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,title:{display:true,text:'R$ Milhões acumulado',font:{size:10}},ticks:{font:{size:9},callback:v=>'R$'+v.toFixed(0)+'M'},grid:{display:false}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
+  } else { const dpKpiClr=document.getElementById('dpKpiRow');if(dpKpiClr)dpKpiClr.innerHTML=''; }
+
+  // ===== GRÁFICOS DIÁRIOS: Volume & Ticket Médio (aba Executivo) =====
+  if(typeof DY!=='undefined' && DY.length>0){
+    const rFilt=fl.r!=='t'?parseInt(fl.r):-1;
+    const dyFiltered=execMes>0?DY.filter(d=>parseInt(d[0].split('-')[1])===execMes):DY;
+    const dyLabels=dyFiltered.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dyVol=dyFiltered.map(d=>{
+      if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[0]:0;}
+      return d[1];
+    });
+    const dyVal=dyFiltered.map(d=>{
+      if(rFilt>=0){const rr=d[3][String(rFilt)];return rr?rr[1]:0;}
+      return d[2];
+    });
+    const dyTicket=dyFiltered.map((d,i)=>dyVol[i]>0?(dyVal[i]/dyVol[i]/1e3):0);
+    const avgVol=dyVol.length>0?(dyVol.reduce((a,b)=>a+b,0)/dyVol.length):0;
+    const avgTicket=dyTicket.filter(v=>v>0).length>0?(dyTicket.reduce((a,b)=>a+b,0)/dyTicket.filter(v=>v>0).length):0;
+    const rLabel=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
+    const periodLabel=execMes>0?MO[execMes-1]+'/26':'YTD 26';
+    document.getElementById('hVolDia').textContent='Volume Diário de Propostas — '+periodLabel+rLabel;
+    document.getElementById('hTickDia').textContent='Ticket Médio Diário — '+periodLabel+rLabel;
+
+    dc('cVolDia');
+    ch['cVolDia']=new Chart(document.getElementById('cVolDia'),{type:'bar',data:{labels:dyLabels,datasets:[
+      {label:'Propostas/dia',data:dyVol,backgroundColor:'rgba(0,116,255,.6)',borderColor:'#0074FF',borderWidth:1,borderRadius:4},
+      {label:'Média',data:Array(dyVol.length).fill(avgVol),type:'line',borderColor:'#EF4444',borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.datasetIndex===0?c.raw+' operações':'Média: '+c.raw.toFixed(1)}}},scales:{y:{beginAtZero:true,title:{display:true,text:'Qtd. Operações',font:{size:10}},ticks:{font:{size:9}},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
+
+    dc('cTickDia');
+    ch['cTickDia']=new Chart(document.getElementById('cTickDia'),{type:'bar',data:{labels:dyLabels,datasets:[
+      {label:'Ticket Médio (R$ mil)',data:dyTicket,backgroundColor:dyTicket.map(v=>v>=avgTicket?'rgba(0,166,140,.6)':'rgba(234,179,8,.6)'),borderColor:dyTicket.map(v=>v>=avgTicket?'#00A68C':'#EAB308'),borderWidth:1,borderRadius:4},
+      {label:'Média',data:Array(dyTicket.length).fill(avgTicket),type:'line',borderColor:'#EF4444',borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.datasetIndex===0?'R$ '+(c.raw*1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'Média: R$ '+(c.raw*1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}},scales:{y:{beginAtZero:true,title:{display:true,text:'R$ mil',font:{size:10}},ticks:{callback:v=>'R$ '+v.toFixed(0)+'K',font:{size:9}},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
+  }
+
+  const regMetaKeys={0:'A',1:'B',2:'C',3:'D'};
+  const regs=RN.slice(0,4).map((rn,i)=>{
+    const k=regMetaKeys[i];
+    const rd=D.regs[rn]||{c:'',ops:0,apr:0,rep:0,and:0,ma:0,col:'#64748b'};
+    const regOps=allOps.filter(r=>r[2]===i);
+    const rApr=regOps.filter(r=>r[0]===1);
+    const rRep=regOps.filter(r=>r[0]===2).length;
+    const rAnd=regOps.filter(r=>r[0]===0).length;
+    // Usar dados pre-agregados por mês de PAGAMENTO (D.meta.Ar, Br, etc.)
+    const rByMonth=k?D.meta[k+'r']:Array(12).fill(0);
+    return{n:rn,c:rd.c,m:k?D.meta[k+'m']:Array(12).fill(0),r:rByMonth,col:rd.col,apr:rApr.length,rep:rRep,and:rAnd};
+  });
+  // Filtrar regionais: quando uma regional é selecionada, mostrar somente ela
+  const regsFiltered=fl.r!=='t'?regs.filter(x=>x.n===RN[parseInt(fl.r)]):regs;
+  const hRMEl=document.getElementById('hRM');if(hRMEl)hRMEl.innerHTML='Resumo Regional — Meta vs Realizado — '+(execMes>0?MO[execMes-1]+'/26':'YTD 26')+' <span style="font-size:10px;font-weight:400;color:var(--text4)">(Volume Líquido)</span>';
+  let h='<table><thead><tr><th>Regional</th><th>Coord.</th>';
+  if(execMes>0){h+=`<th style="text-align:right">Meta ${MO[execMes-1]}</th><th style="text-align:right">Real ${MO[execMes-1]}</th><th style="text-align:right">%</th>`;}else{for(let i=0;i<3;i++)h+=`<th style="text-align:right">Meta ${MO[i]}</th><th style="text-align:right">Real ${MO[i]}</th><th style="text-align:right">%</th>`;h+='<th style="text-align:right">Meta YTD</th><th style="text-align:right">Real YTD</th><th style="text-align:right">% YTD</th>';}
+  h+='</tr></thead><tbody>';
+  regsFiltered.forEach(x=>{h+='<tr>';h+=`<td><strong style="color:${x.col}">${x.n}</strong></td><td>${x.c}</td>`;if(execMes>0){const mi=execMes-1;const p=x.m[mi]?(x.r[mi]/x.m[mi]*100):0;h+=`<td style="text-align:right">${F(x.m[mi])}</td><td style="text-align:right">${F(x.r[mi])}</td><td style="text-align:right"><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></td>`;}else{const ytR=x.r.slice(0,3).reduce((a,b)=>a+b,0);const ytM=x.m.slice(0,3).reduce((a,b)=>a+b,0);const ytP=ytM?(ytR/ytM*100):0;for(let i=0;i<3;i++){const p=x.m[i]?(x.r[i]/x.m[i]*100):0;h+=`<td style="text-align:right">${F(x.m[i])}</td><td style="text-align:right">${F(x.r[i])}</td><td style="text-align:right"><span class="bd ${bc(p)}">${p.toFixed(0)}%</span></td>`}h+=`<td style="text-align:right">${F(ytM)}</td><td style="text-align:right"><strong>${F(ytR)}</strong></td><td style="text-align:right"><span class="bd ${bc(ytP)}">${ytP.toFixed(0)}%</span></td>`;}h+='</tr>'});
+  h+='</tbody></table>';document.getElementById('tRM').innerHTML=h;
+}
+
+// ===== PERFORMANCE TAB =====
+function rPerf(){
+  const negs=gn();
+  const tA=negs.reduce((a,n)=>a+n[10],0);
+  const tO=negs.reduce((a,n)=>a+n[3],0);
+  const tC=negs.reduce((a,n)=>a+n[4],0);
+  const tRp=negs.reduce((a,n)=>a+n[5],0);
+  const avg=(tC+tRp)>0?(tC/(tC+tRp)*100):0;
+  const top=negs[0]||['—','','',0,0,0,0,0,0,0,0,0,0,0];
+  
+  const perfLabel=fl.m!=='-1'?MO[parseInt(fl.m)-1]:'YTD';
+  // CC[i].t = [cnt_ei, cnt_cad, cnt_apr, cnt_rep, cnt_ea, val_ei, val_cad, val_apr, val_rep, val_ea]
+  // CC[i].r[regName] = mesma estrutura por regional
+  const mAtv=fl.m!=='-1';
+  const mI=mAtv?parseInt(fl.m):0;
+  // Helper: somar dados CC respeitando filtros de regional/segmento
+  function getCCData(monthIdx){
+    const ccM=D.cc[monthIdx];
+    if(fl.r!=='t'){
+      const rName=RN[parseInt(fl.r)];
+      const rd=ccM.r[rName];
+      return rd||[0,0,0,0,0,0,0,0,0,0];
+    }
+    if(fl.s==='v'){
+      const varejoRegs=['Regional A','Regional B','Regional C','Regional D'];
+      const sum=[0,0,0,0,0,0,0,0,0,0];
+      varejoRegs.forEach(rn=>{const rd=ccM.r[rn];if(rd) rd.forEach((v,j)=>sum[j]+=v);});
+      return sum;
+    }
+    if(fl.s==='m'){
+      const rd=ccM.r['Mid-Market'];
+      return rd||[0,0,0,0,0,0,0,0,0,0];
+    }
+    return ccM.t;
+  }
+  let ccHTML='',cfHTML='';
+  if(mAtv){
+    const cc=getCCData(mI-1);
+    const cEI=cc[0],cCad=cc[1],cApr=cc[2],cRep=cc[3],cEA=cc[4];
+    const denomCC=cEI+cCad-cEA;
+    const convCC=denomCC>0?(cApr/denomCC*100):0;
+    const ccCol=convCC>=50?'var(--green)':convCC>=30?'var(--yellow)':'var(--red)';
+    ccHTML=`<div class="kc kb"><div class="kc-label">${IC.conversao} CONVERSÃO CONTA CORRENTE</div><div class="kc-val" style="color:${ccCol}">${convCC.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomCC} movimentadas | Qtd. Operações</div></div>`;
+    const denomF=cApr+cRep;
+    const convF=denomF>0?(cApr/denomF*100):0;
+    const cfCol=convF>=50?'var(--green)':convF>=30?'var(--yellow)':'var(--red)';
+    cfHTML=`<div class="kc ko"><div class="kc-label">${IC.conversao} CONVERSÃO FINALIZADOS</div><div class="kc-val" style="color:${cfCol}">${convF.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomF} finalizadas | Qtd. Operações</div></div>`;
+  } else {
+    // YTD: somar 3 meses respeitando filtros
+    const ytdCC=[0,0,0,0,0,0,0,0,0,0];
+    for(let mi=0;mi<3;mi++){const md=getCCData(mi);md.forEach((v,j)=>ytdCC[j]+=v);}
+    const ccM0=getCCData(0), ccM2=getCCData(2);
+    const cEI=ccM0[0], cCad=ytdCC[1], cApr=ytdCC[2], cRep=ytdCC[3], cEA=ccM2[4];
+    const denomCC=cEI+cCad-cEA;
+    const convCC=denomCC>0?(cApr/denomCC*100):0;
+    const ccCol=convCC>=50?'var(--green)':convCC>=30?'var(--yellow)':'var(--red)';
+    ccHTML=`<div class="kc kb"><div class="kc-label">${IC.conversao} CONVERSÃO CONTA CORRENTE — YTD 26</div><div class="kc-val" style="color:${ccCol}">${convCC.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomCC} movimentadas | Qtd. Operações</div></div>`;
+    const denomF=cApr+cRep;
+    const convF=denomF>0?(cApr/denomF*100):0;
+    const cfCol=convF>=50?'var(--green)':convF>=30?'var(--yellow)':'var(--red)';
+    cfHTML=`<div class="kc ko"><div class="kc-label">${IC.conversao} CONVERSÃO FINALIZADOS — YTD 26</div><div class="kc-val" style="color:${cfCol}">${convF.toFixed(1)}%</div><div class="kc-sub">${cApr} aprovadas / ${denomF} finalizadas | Qtd. Operações</div></div>`;
+  }
+  document.getElementById('kpi2').innerHTML=`
+    <div class="kc kg"><div class="kc-label">${IC.receita} VALOR LÍQUIDO PAGO ${perfLabel}</div><div class="kc-val" style="color:var(--green)">${F(tA)}</div><div class="kc-sub">${tC} contratos aprovados | Volume líquido</div></div>
+    <div class="kc kb"><div class="kc-label">${IC.negociador} NEGOCIADORES ${perfLabel}</div><div class="kc-val">${negs.length}</div><div class="kc-sub">${tO} operações totais | Qtd. de processos</div></div>
+    ${ccHTML}
+    ${cfHTML}
+    <div class="kc kp"><div class="kc-label">${IC.top} TOP NEGOCIADOR</div><div class="kc-val" style="font-size:18px;color:var(--purple)">${top[0]}</div><div class="kc-sub">${F(top[10])} | ${top[11].toFixed?top[11].toFixed(1):top[11]}%</div></div>
+  `;
+
+  const insights=[];
+  negs.forEach(n=>{
+    if(n[3]>=10 && n[11]<30) insights.push({type:'warn',text:`${n[0]} (${n[2]}): ${n[3]} operações com apenas ${typeof n[11]==='number'?n[11].toFixed(1):n[11]}% de conversão — oportunidade de melhoria com acompanhamento`});
+  });
+  negs.filter(n=>n[3]>=5 && n[11]>=50).forEach(n=>{
+    insights.push({type:'good',text:`${n[0]} (${n[2]}): destaque com ${typeof n[11]==='number'?n[11].toFixed(1):n[11]}% de conversão em ${n[3]} operações — modelo de boas práticas`});
+  });
+  RN.slice(0,4).forEach(rn=>{
+    const rNegs=negs.filter(n=>n[2]===rn);
+    if(rNegs.length===0) return;
+    const rApr=rNegs.reduce((a,n)=>a+n[4],0);
+    const rRep=rNegs.reduce((a,n)=>a+n[5],0);
+    const rConv=(rApr+rRep)>0?(rApr/(rApr+rRep)*100):0;
+    if(rConv<avg-5) insights.push({type:'info',text:`${rn}: conversão de ${rConv.toFixed(1)}% está ${(avg-rConv).toFixed(1)}pp abaixo da média geral (${avg.toFixed(1)}%) — avaliar gargalos`});
+  });
+  
+  let insHtml='';
+  const insOrder={good:0,info:1,warn:2};
+  insights.sort((a,b)=>(insOrder[a.type]||1)-(insOrder[b.type]||1));
+  if(insights.length>0){
+    insHtml=`<div class="insights-box"><h3>Indicadores de Oportunidade</h3>${insights.map(i=>`<div class="insight-item"><span class="insight-icon insight-${i.type}">${i.type==='warn'?'!':i.type==='good'?'★':'i'}</span><span>${i.text}</span></div>`).join('')}</div>`;
+  }
+  document.getElementById('insights-perf').innerHTML=insHtml;
+
+  let th='<table><thead><tr><th>#</th><th>Negociador</th><th>Coord.</th><th>Regional</th><th style="text-align:right">Operações</th><th style="text-align:right">Aprovado</th><th style="text-align:right">Reprovado</th><th style="text-align:right">Andamento</th><th style="text-align:right">Valor Líq. Jan</th><th style="text-align:right">Valor Líq. Fev</th><th style="text-align:right">Valor Líq. Mar</th><th style="text-align:right">Total Valor Líquido</th><th style="text-align:right">Conv. Finalizados %</th><th style="text-align:right">Ticket Pago</th></tr></thead><tbody>';
+  negs.forEach((n,i)=>{th+=`<tr><td><span class="rn ${rc(i)}">${i+1}</span></td><td><strong>${n[0]}</strong></td><td>${n[1]}</td><td>${n[2]}</td><td style="text-align:right">${n[3]}</td><td style="text-align:right;color:var(--green)">${n[4]}</td><td style="text-align:right;color:var(--red)">${n[5]}</td><td style="text-align:right;color:var(--blue)">${n[6]}</td><td style="text-align:right">${n[7]>0?F(n[7]):'-'}</td><td style="text-align:right">${n[8]>0?F(n[8]):'-'}</td><td style="text-align:right">${n[9]>0?F(n[9]):'-'}</td><td style="text-align:right"><strong>${F(n[10])}</strong></td><td style="text-align:right"><span class="bd ${n[11]>=50?'bg':n[11]>=30?'by':'br'}">${typeof n[11]==='number'?n[11].toFixed(1):n[11]}%</span></td><td style="text-align:right">${n[13]>0?F(n[13]):'-'}</td></tr>`});
+  th+='</tbody></table>';document.getElementById('tNG').innerHTML=th;
+
+  dc('cTN');const t10=negs.slice(0,10);
+  const cTNbg=t10.map(n=>{const ni=NG.indexOf(n[0]);return(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni)?'rgba(0,166,140,1)':'rgba(0,166,140,.65)'});
+  ch['cTN']=new Chart(document.getElementById('cTN'),{type:'bar',data:{labels:t10.map(n=>n[0]),datasets:[{data:t10.map(n=>n[10]/1e6),backgroundColor:cTNbg,borderColor:'#00A68C',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const name=t10[els[0].index][0];const ni=NG.indexOf(name);if(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni){clearCF('perf');}else{setCF('perf','neg',ni,name);}}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.raw.toFixed(2)+'M',title:t=>(t[0].label+' (clique para filtrar)')}}},scales:{x:{title:{display:true,text:'R$ Milhões'},ticks:{callback:v=>'R$ '+v+'M'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  document.getElementById('cTN').style.cursor='pointer';
+
+  dc('cTC');const cn=negs.filter(n=>n[3]>=5).sort((a,b)=>b[11]-a[11]).slice(0,10);
+  const cTCbg=cn.map(n=>{const ni=NG.indexOf(n[0]);const sel=(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni);return sel?'rgba(0,116,255,.85)':n[11]>=50?'rgba(0,166,140,.65)':n[11]>=30?'rgba(234,179,8,.65)':'rgba(239,68,68,.65)'});
+  ch['cTC']=new Chart(document.getElementById('cTC'),{type:'bar',data:{labels:cn.map(n=>n[0]),datasets:[{data:cn.map(n=>typeof n[11]==='number'?n[11]:parseFloat(n[11])),backgroundColor:cTCbg,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const name=cn[els[0].index][0];const ni=NG.indexOf(name);if(cf.perf.active&&cf.perf.type==='neg'&&cf.perf.val==ni){clearCF('perf');}else{setCF('perf','neg',ni,name);}}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%',title:t=>(t[0].label+' (clique para filtrar)')}}},scales:{x:{beginAtZero:true,max:100,title:{display:true,text:'Conversão (%)'},ticks:{callback:v=>v+'%'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  document.getElementById('cTC').style.cursor='pointer';
+
+  // ===== GRÁFICOS DIÁRIOS na aba Performance (com filtro de mês) =====
+  if(typeof DY!=='undefined' && DY.length>0){
+    let dyF2=DY;
+    if(mAtv){const mStr=String(mI).padStart(2,'0');dyF2=DY.filter(d=>d[0].substring(5,7)===mStr);}
+    const rF2=fl.r!=='t'?parseInt(fl.r):-1;
+    const dyL2=dyF2.map(d=>{const p=d[0].split('-');return p[2]+'/'+p[1]});
+    const dyV2=dyF2.map(d=>{if(rF2>=0){const rr=d[3][String(rF2)];return rr?rr[0]:0;}return d[1];});
+    const dyA2=dyF2.map(d=>{if(rF2>=0){const rr=d[3][String(rF2)];return rr?rr[1]:0;}return d[2];});
+    const dyT2=dyF2.map((d,i)=>dyV2[i]>0?(dyA2[i]/dyV2[i]/1e3):0);
+    const aV2=dyV2.length>0?(dyV2.reduce((a,b)=>a+b,0)/dyV2.length):0;
+    const aT2=dyT2.filter(v=>v>0).length>0?(dyT2.reduce((a,b)=>a+b,0)/dyT2.filter(v=>v>0).length):0;
+    const dL2=mAtv?MO[mI-1]+'/26':'YTD 26';
+    const rL2=fl.r!=='t'?' — '+RN[parseInt(fl.r)]:'';
+    document.getElementById('hVolDia2').textContent='Volume Diário de Propostas — '+dL2+rL2;
+    document.getElementById('hTickDia2').textContent='Ticket Médio Diário — '+dL2+rL2;
+    dc('cVolDia2');
+    ch['cVolDia2']=new Chart(document.getElementById('cVolDia2'),{type:'bar',data:{labels:dyL2,datasets:[{label:'Propostas/dia',data:dyV2,backgroundColor:'rgba(0,116,255,.6)',borderColor:'#0074FF',borderWidth:1,borderRadius:4},{label:'Média',data:Array(dyV2.length).fill(aV2),type:'line',borderColor:'#EF4444',borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.datasetIndex===0?c.raw+' operações':'Média: '+c.raw.toFixed(1)}}},scales:{y:{beginAtZero:true,title:{display:true,text:'Qtd. Operações',font:{size:10}},ticks:{font:{size:9}},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
+    dc('cTickDia2');
+    ch['cTickDia2']=new Chart(document.getElementById('cTickDia2'),{type:'bar',data:{labels:dyL2,datasets:[{label:'Ticket Médio (R$ mil)',data:dyT2,backgroundColor:dyT2.map(v=>v>=aT2?'rgba(0,166,140,.6)':'rgba(234,179,8,.6)'),borderColor:dyT2.map(v=>v>=aT2?'#00A68C':'#EAB308'),borderWidth:1,borderRadius:4},{label:'Média',data:Array(dyT2.length).fill(aT2),type:'line',borderColor:'#EF4444',borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.datasetIndex===0?'R$ '+(c.raw*1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'Média: R$ '+(c.raw*1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}},scales:{y:{beginAtZero:true,title:{display:true,text:'R$ mil',font:{size:10}},ticks:{callback:v=>'R$ '+v.toFixed(0)+'K',font:{size:9}},grid:{color:'rgba(224,231,245,.6)'}},x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45}}}}});
+  }
+
+  const allRN=RN.slice(0,4);
+  const rcl=allRN.map(n=>(D.regs[n]||{col:'#64748b'}).col);
+  const regCoordNames=allRN.map(n=>(D.regs[n]||{c:''}).c);
+  // Filtrar regionais conforme filtros ativos
+  let rnIdxs=allRN.map((_,i)=>i);
+  if(fl.r!=='t') rnIdxs=rnIdxs.filter(i=>i===parseInt(fl.r));
+  if(fl.s==='m') rnIdxs=[];// Mid-Market não tem cards regionais A-D
+  const mesAtivo=fl.m!=='-1';
+  const mLabel=mesAtivo?MO[parseInt(fl.m)-1]:'YTD';
+  let rh='';
+  const mInt=mesAtivo?parseInt(fl.m):0;
+  const viPerf=mesAtivo?(9+mInt):0;
+  rnIdxs.forEach(i=>{const r=allRN[i];
+    let rApr,rRep,rAnd,receita;
+    let regOps=filterRW().filter(x=>x[2]===i);
+    if(mesAtivo){
+      // Usar dados da conta corrente do Excel
+      const ccR=D.cc[mInt-1].r[r];
+      if(ccR){
+        rApr=ccR[2]; rRep=ccR[3]; rAnd=ccR[4];
+        receita=ccR[7]; // Valor Aprovado/Pago do mês
+      } else { rApr=0; rRep=0; rAnd=0; receita=0; }
+    } else {
+      rApr=regOps.filter(x=>x[0]===1).length;
+      rRep=regOps.filter(x=>x[0]===2).length;
+      rAnd=regOps.filter(x=>x[0]===0).length;
+      receita=regOps.filter(x=>x[0]===1).reduce((a,x)=>a+x[10]+x[11]+x[12],0);
+    }
+    const cv=(rApr+rRep)>0?(rApr/(rApr+rRep)*100):0;
+    const cvCol=cv>=50?'var(--green)':cv>=30?'var(--yellow)':'var(--red)';
+    // Conv CC e Finalizados por regional (dados do Excel)
+    let ccRegHTML='';
+    const ccReg=mesAtivo?(D.cc[mInt-1].r[r]||null):null;
+    if(mesAtivo && ccReg){
+      const rvEI=ccReg[5],rvCad=ccReg[6],rvApr=ccReg[7],rvRep=ccReg[8],rvEA=ccReg[9];
+      const rDen=rvEI+rvCad-rvEA;
+      const rCC=rDen>0?(rvApr/rDen*100):0;
+      const rCCcol=rCC>=50?'var(--green)':rCC>=30?'var(--yellow)':'var(--red)';
+      const rDF=rvApr+rvRep;
+      const rCF=rDF>0?(rvApr/rDF*100):0;
+      const rCFcol=rCF>=50?'var(--green)':rCF>=30?'var(--yellow)':'var(--red)';
+      ccRegHTML=`<div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Conta Corrente</div><div style="font-size:15px;font-weight:800;color:${rCCcol};margin-top:2px">${rCC.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Finalizados</div><div style="font-size:15px;font-weight:800;color:${rCFcol};margin-top:2px">${rCF.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div></div>`;
+    } else if(!mesAtivo) {
+      // YTD: aggregate all 3 months from CC data
+      let tEI=0,tCad=0,tApr=0,tRep=0,tEA=0;
+      for(let m=0;m<3;m++){const rd=D.cc[m].r[r];if(rd){if(m===0)tEI+=rd[5];tCad+=rd[6];tApr+=rd[7];tRep+=rd[8];if(m===2)tEA=rd[9];}}
+      const rDen=tEI+tCad-tEA;
+      const rCC=rDen>0?(tApr/rDen*100):0;
+      const rCCcol=rCC>=50?'var(--green)':rCC>=30?'var(--yellow)':'var(--red)';
+      const rDF=tApr+tRep;
+      const rCF=rDF>0?(tApr/rDF*100):0;
+      const rCFcol=rCF>=50?'var(--green)':rCF>=30?'var(--yellow)':'var(--red)';
+      ccRegHTML=`<div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Conta Corrente</div><div style="font-size:15px;font-weight:800;color:${rCCcol};margin-top:2px">${rCC.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div><div style="flex:1;text-align:center"><div style="font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Conv. Finalizados</div><div style="font-size:15px;font-weight:800;color:${rCFcol};margin-top:2px">${rCF.toFixed(1)}%</div><div style="font-size:7px;color:var(--text4)">Vol. Líquido</div></div></div>`;
+    }
+    rh+=`<div class="cd" style="padding:16px;position:relative">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div><div style="font-size:15px;font-weight:800;color:${rcl[i]}">${r}</div><div style="font-size:11px;color:var(--text4)">${regCoordNames[i]}</div></div>
+        <div style="text-align:right"></div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:14px">
+        <div style="text-align:center"><div style="width:50px;height:50px;border-radius:50%;border:3px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--green)">${rApr}</div><div style="font-size:8px;color:var(--text4);margin-top:3px;text-transform:uppercase;letter-spacing:.5px">Aprovadas</div></div>
+        <div style="text-align:center"><div style="width:50px;height:50px;border-radius:50%;border:3px solid var(--red);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--red)">${rRep}</div><div style="font-size:8px;color:var(--text4);margin-top:3px;text-transform:uppercase;letter-spacing:.5px">Reprovadas</div></div>
+        <div style="text-align:center"><div style="width:50px;height:50px;border-radius:50%;border:3px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--blue)">${rAnd}</div><div style="font-size:8px;color:var(--text4);margin-top:3px;text-transform:uppercase;letter-spacing:.5px">Andamento</div></div>
+      </div>
+      <div style="text-align:center;border-top:1px solid var(--border);padding-top:10px">
+        <div style="font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px">Valor Líquido Pago ${mLabel}</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text1);margin-top:2px">R$ ${(receita/1e6).toFixed(1)}M</div>
+      </div>
+      ${ccRegHTML}
+    </div>`;
+  });
+  document.getElementById('tRP').innerHTML=rh;
+}
+
+// ===== FUNIL & ESTOQUE TAB =====
+function rFunil(){
+  const andOps=filterRW(0);
+  let funilData=andOps;
+
+  if(fl.fe && fl.fe!=='-1') funilData=funilData.filter(r=>r[4]===parseInt(fl.fe));
+  if(fl.fm && fl.fm!=='-1') funilData=funilData.filter(r=>r[15]===parseInt(fl.fm));
+
+  const tF=funilData.length;
+  const tFv=funilData.reduce((a,r)=>a+r[14],0);
+  const ticketMedio=tF>0?(tFv/tF):0;
+  const tP=funilData.filter(r=>r[7]===1).length;
+  const tPv=funilData.filter(r=>r[7]===1).reduce((a,r)=>a+r[14],0);
+
+  let allFiltered=filterRW();
+  const allApr=allFiltered.filter(r=>r[0]===1).length;
+  const allRep=allFiltered.filter(r=>r[0]===2).length;
+  const allAnd=allFiltered.filter(r=>r[0]===0).length;
+  const cv=(allApr+allRep)>0?(allApr/(allApr+allRep)*100):0;
+  const entradas=D.cc[0].t[1]+D.cc[1].t[1]+D.cc[2].t[1];
+
+  document.getElementById('kpi3').innerHTML=`
+    <div class="kc kb"><div class="kc-label">${IC.estoque} ESTOQUE ATUAL</div><div class="kc-val">${tF}</div><div class="kc-sub">${F(tFv)} em Valor Líquido a Receber</div></div>
+    <div class="kc kg"><div class="kc-label">${IC.entrada} ENTRADAS YTD</div><div class="kc-val" style="color:var(--green)">${entradas}</div><div class="kc-sub">Cadastradas na esteira | Qtd. de processos</div></div>
+    <div class="kc ky"><div class="kc-label">${IC.conversao} CONVERSÃO ESTEIRA YTD</div><div class="kc-val" style="color:var(--yellow)">${cv.toFixed(1)}%</div><div class="kc-sub">${allApr} aprovadas de ${allApr+allRep} finalizadas | Qtd. de processos</div></div>
+    <div class="kc kp"><div class="kc-label">${IC.ticket} TICKET MÉDIO ANDAMENTO</div><div class="kc-val" style="color:var(--purple)">${F(ticketMedio)}</div><div class="kc-sub">Volume Líquido / Qtd. em andamento</div></div>
+    <div class="kc kr"><div class="kc-label">${IC.reprovado} REPROVADAS YTD</div><div class="kc-val" style="color:var(--red)">${allRep}</div><div class="kc-sub">${(allApr+allRep)>0?((allRep/(allApr+allRep))*100).toFixed(1):'0.0'}% das finalizadas | Qtd. de processos</div></div>
+    <div class="kc ko"><div class="kc-label">${IC.pendencia} PENDÊNCIAS</div><div class="kc-val" style="color:var(--orange)">${tP}</div><div class="kc-sub">${F(tPv)} em Valor Líquido a Receber</div></div>
+  `;
+
+  const funilInsights=[];
+  const etapaGroups={};
+  funilData.forEach(r=>{const e=ET[r[4]];if(!etapaGroups[e])etapaGroups[e]={count:0,val:0,pend:0};etapaGroups[e].count++;etapaGroups[e].val+=r[14];if(r[7])etapaGroups[e].pend++});
+  const topEtapa=Object.entries(etapaGroups).sort((a,b)=>b[1].count-a[1].count)[0];
+  if(topEtapa) funilInsights.push({type:'info',text:`Maior concentração: ${topEtapa[0]} com ${topEtapa[1].count} operações (${F(topEtapa[1].val)}) — possível gargalo operacional`});
+  
+  const highValPend=funilData.filter(r=>r[7]===1 && r[14]>1e6).sort((a,b)=>b[14]-a[14]);
+  if(highValPend.length>0) funilInsights.push({type:'warn',text:`${highValPend.length} operações pendentes com valor > R$ 1M — total de ${F(highValPend.reduce((a,r)=>a+r[14],0))} em risco`});
+  
+  let repOps=filterRW(2);
+  const motRegCount={};
+  repOps.forEach(r=>{const reg=RN[r[2]];const mot=MT[r[6]]||'Não informado';if(!motRegCount[reg])motRegCount[reg]={};if(!motRegCount[reg][mot])motRegCount[reg][mot]=0;motRegCount[reg][mot]++});
+  RN.slice(0,4).forEach(rn=>{if(motRegCount[rn]){const top=Object.entries(motRegCount[rn]).sort((a,b)=>b[1]-a[1])[0];if(top && top[1]>=5) funilInsights.push({type:'warn',text:`${rn}: principal motivo de reprovação é "${top[0].replace('Motivo de encerramento: ','')}" com ${top[1]} ocorrências`})}});
+
+  let insHtml='';
+  const fInsOrder={good:0,info:1,warn:2};
+  funilInsights.sort((a,b)=>(fInsOrder[a.type]||1)-(fInsOrder[b.type]||1));
+  if(funilInsights.length>0){
+    insHtml=`<div class="insights-box"><h3>Indicadores de Oportunidade</h3>${funilInsights.map(i=>`<div class="insight-item"><span class="insight-icon insight-${i.type}">${i.type==='warn'?'!':i.type==='good'?'★':'i'}</span><span>${i.text}</span></div>`).join('')}</div>`;
+  }
+  document.getElementById('insights-funil').innerHTML=insHtml;
+
+  dc('cFN');
+  const funEtapas={};
+  funilData.forEach(r=>{const e=ET[r[4]];if(!funEtapas[e])funEtapas[e]={count:0,val:0};funEtapas[e].count++;funEtapas[e].val+=r[14]});
+  const etapaOrdem=['Documentos preliminares','Conferência inicial','Avaliação do ativo','Providências jurídicas','Cálculo','Parecer do titular','Conferência final','Parecer jurídico','Confecção de documentos','Assinatura','Protocolo de cessão','Homologação','Pagamento'];
+  const funSorted=Object.entries(funEtapas).sort((a,b)=>{const ia=etapaOrdem.indexOf(a[0]);const ib=etapaOrdem.indexOf(b[0]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
+  const fc=['#0074FF','#6366f1','#0E2F5D','#a855f7','#c084fc','#00A68C','#14b8a6','#eab308','#f97316','#ef4444'];
+  const cFNbg=funSorted.map((f,i)=>{const ei=ET.indexOf(f[0]);const sel=(cf.funil.active&&cf.funil.type==='etapa'&&cf.funil.val==ei);return sel?fc[i%fc.length]:fc[i%fc.length].replace(/,\d+(\.\d+)?\)$/,',0.65)')});
+  ch['cFN']=new Chart(document.getElementById('cFN'),{type:'bar',data:{labels:funSorted.map(f=>f[0]),datasets:[{label:'Quantidade',data:funSorted.map(f=>f[1].count),backgroundColor:fc.slice(0,funSorted.length),borderRadius:4,yAxisID:'y'},{label:'Valor Líquido (R$ MM)',data:funSorted.map(f=>f[1].val/1e6),type:'line',borderColor:'var(--accent)',pointBackgroundColor:'var(--accent)',pointRadius:4,tension:.3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0&&els[0].datasetIndex===0){const eName=funSorted[els[0].index][0];const ei=ET.indexOf(eName);if(cf.funil.active&&cf.funil.type==='etapa'&&cf.funil.val==ei){clearCF('funil');}else{setCF('funil','etapa',ei,eName);}}},plugins:{legend:{position:'bottom'},title:{display:false},tooltip:{callbacks:{label:c=>c.datasetIndex===0?c.raw+' operações':'R$ '+c.raw.toFixed(1)+'M',title:t=>(t[0].label+' (clique para filtrar)')}}},scales:{y:{position:'left',beginAtZero:true,title:{display:true,text:'Qtd Operações'},grid:{color:'rgba(224,231,245,.6)'}},y1:{position:'right',beginAtZero:true,title:{display:true,text:'R$ Milhões'},grid:{display:false},ticks:{callback:v=>'R$ '+v+'M'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}}}}});
+  document.getElementById('cFN').style.cursor='pointer';
+
+  dc('cAT');
+  const ativGroups={};
+  funilData.forEach(r=>{const a=AV[r[5]]||'Não informado';if(!ativGroups[a])ativGroups[a]=0;ativGroups[a]++});
+  const ativSorted=Object.entries(ativGroups).filter(a=>a[0]).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  ch['cAT']=new Chart(document.getElementById('cAT'),{type:'bar',data:{labels:ativSorted.map(a=>a[0]),datasets:[{data:ativSorted.map(a=>a[1]),backgroundColor:'rgba(249,115,22,.55)',borderColor:'#f97316',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:false}},scales:{x:{beginAtZero:true,title:{display:true,text:'Quantidade'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  const pendByReg={};
+  funilData.filter(r=>r[7]===1&&r[2]>=0&&r[2]<=3).forEach(r=>{const reg=RN[r[2]];if(!pendByReg[reg])pendByReg[reg]={count:0,val:0};pendByReg[reg].count++;pendByReg[reg].val+=r[14]});
+  const tPtotal=Object.values(pendByReg).reduce((a,p)=>a+p.count,0)||1;
+  let ph='<table><thead><tr><th>Regional</th><th style="text-align:right">Quantidade</th><th style="text-align:right">Valor Líquido a Receber</th><th>% Total</th></tr></thead><tbody>';
+  Object.entries(pendByReg).sort((a,b)=>b[1].count-a[1].count).forEach(([reg,p])=>{const pc=(p.count/tPtotal*100);ph+=`<tr><td><strong>${reg}</strong></td><td style="text-align:right">${p.count}</td><td style="text-align:right">${F(p.val)}</td><td><div class="pb" style="width:120px"><div class="pf" style="width:${pc}%;background:var(--orange)"></div></div> ${pc.toFixed(0)}%</td></tr>`});
+  ph+='</tbody></table>';document.getElementById('tPD').innerHTML=ph;
+
+  dc('cMT');
+  const motGroups={};
+  repOps.forEach(r=>{const m=MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado';if(!motGroups[m])motGroups[m]=0;motGroups[m]++});
+  const motSorted=Object.entries(motGroups).sort((a,b)=>b[1]-a[1]);
+  ch['cMT']=new Chart(document.getElementById('cMT'),{type:'bar',data:{labels:motSorted.map(m=>m[0]),datasets:[{data:motSorted.map(m=>m[1]),backgroundColor:motSorted.map((_,i)=>`rgba(239,68,68,${.85-i*.04})`),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length>0){const mot=motSorted[els[0].index][0];if(cf.funil.active&&cf.funil.type==='dev_mot'&&cf.funil.label===mot){clearCF('funil');}else{window._cfDevMot=mot;setCF('funil','dev_mot',mot,mot);rDevolucoes();}}},plugins:{legend:{display:false},title:{display:false},tooltip:{callbacks:{title:t=>(t[0].label+' (clique para filtrar devoluções)')}}},scales:{x:{beginAtZero:true,title:{display:true,text:'Quantidade'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  document.getElementById('cMT').style.cursor='pointer';
+
+  // Render devolucoes table after funil charts
+  rDevolucoes();
+}
+
+// ===== DEVOLUÇÕES TABLE =====
+function rDevolucoes(){
+  let repOpsAll=filterRW(2);
+  // Apply month filter
+  if(fl.fm && fl.fm!=='-1') repOpsAll=repOpsAll.filter(r=>r[15]===parseInt(fl.fm));
+  // Apply dev_mot cross-filter
+  const cfMot=window._cfDevMot;
+  if(cfMot){repOpsAll=repOpsAll.filter(r=>{const m=MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado';return m===cfMot;});}
+  // Apply dev motivo filter dropdown
+  const motSel=document.getElementById('devMot');
+  if(motSel&&motSel.value!=='-1') repOpsAll=repOpsAll.filter(r=>{const m=MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado';return m===motSel.value;});
+  // Apply dev regional filter
+  const regSel=document.getElementById('devReg');
+  if(regSel&&regSel.value!=='-1') repOpsAll=repOpsAll.filter(r=>r[2]===parseInt(regSel.value));
+
+  // Populate motivo dropdown
+  if(motSel){
+    const curMot=motSel.value;
+    const allMots=[...new Set(filterRW(2).map(r=>MT[r[6]]?MT[r[6]].replace('Motivo de encerramento: ',''):'Não informado'))].sort();
+    motSel.innerHTML='<option value="-1">Todos os motivos</option>'+allMots.map(m=>`<option value="${m}" ${m===curMot?'selected':''}>${m}</option>`).join('');
+  }
+
+  const countEl=document.getElementById('devCount');
+  if(countEl) countEl.textContent=`${repOpsAll.length} devoluções encontradas`;
+
+  let th='<table><thead><tr><th>#</th><th>Op. Titular</th><th>Titular</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th>Segmento</th><th>Esfera</th><th>Tribunal</th><th>Motivo de Encerramento</th><th style="text-align:right">Valor Líquido Real</th></tr></thead><tbody>';
+  if(repOpsAll.length===0){
+    th+='<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--text4)">Nenhuma devolução encontrada com os filtros aplicados.</td></tr>';
+  } else {
+    repOpsAll.sort((a,b)=>b[14]-a[14]).forEach((r,i)=>{
+      const mot=(MT[r[6]]||'Não informado').replace('Motivo de encerramento: ','');
+      const seg=r[1]===0?'Mid-Market':'Varejo';
+      const titular=(r.length>16&&r[16]>=0&&TT&&TT[r[16]])?TT[r[16]]:'—';
+      const opTit=(r.length>17&&r[17])?r[17]:'—';
+      const esfera=(r.length>18&&r[18]>=0&&typeof ES!=='undefined'&&ES[r[18]])?ES[r[18]]:'—';
+      const tribunal=(r.length>19&&r[19]>=0&&typeof TR!=='undefined'&&TR[r[19]])?TR[r[19]]:'—';
+      const motColor=mot==='Não informado'?'color:var(--text4)':'color:var(--red)';
+      th+=`<tr>
+        <td style="color:var(--text4)">${i+1}</td>
+        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--text4)" title="${opTit}">${opTit}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${titular}">${titular}</td>
+        <td><strong>${NG[r[8]]||'—'}</strong></td>
+        <td>${CO[r[9]]||'—'}</td>
+        <td>${RN[r[2]]||'—'}</td>
+        <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${r[1]===0?'rgba(99,102,241,.12)':'rgba(0,116,255,.1)'};color:${r[1]===0?'#6366f1':'var(--accent)'};font-weight:600">${seg}</span></td>
+        <td>${esfera}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${tribunal}">${tribunal}</td>
+        <td style="${motColor};font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${mot}">${mot}</td>
+        <td style="text-align:right;font-weight:600">${F(r[14])}</td>
+      </tr>`;
+    });
+  }
+  th+='</tbody></table>';
+  const tDEV=document.getElementById('tDEV');
+  if(tDEV) tDEV.innerHTML=th;
+}
+
+// ===== ANALÍTICO ESTOQUE TAB =====
+function rAnalitico(){
+  let ops=RW.filter(r=>r[0]===0);
+  
+  const regVal=document.getElementById('anaReg').value;
+  const coordVal=document.getElementById('anaCoord').value;
+  const negVal=document.getElementById('anaNeg').value;
+  const etapaVal=document.getElementById('anaEtapa').value;
+  
+  const pendVal=document.getElementById('anaPend').value;
+
+  if(regVal!=='-1') ops=ops.filter(r=>r[2]===parseInt(regVal));
+  if(coordVal!=='-1') ops=ops.filter(r=>r[9]===parseInt(coordVal));
+  if(negVal!=='-1') ops=ops.filter(r=>r[8]===parseInt(negVal));
+  if(etapaVal!=='-1') ops=ops.filter(r=>r[4]===parseInt(etapaVal));
+  if(pendVal!=='-1') ops=ops.filter(r=>r[7]===parseInt(pendVal));
+  
+  if(fl.s==='v') ops=ops.filter(r=>r[1]===1);
+  if(fl.s==='m') ops=ops.filter(r=>r[1]===0);
+  if(fl.n!=='-1') ops=ops.filter(r=>r[8]===parseInt(fl.n));
+
+  const totalOps=ops.length;
+  const totalVal=ops.reduce((a,r)=>a+r[14],0);
+  const ticketMedio=totalOps>0?(totalVal/totalOps):0;
+  const pendCount=ops.filter(r=>r[7]===1).length;
+  
+  document.getElementById('kpi4').innerHTML=`
+    <div class="kc kb"><div class="kc-label">${IC.operacao} OPERAÇÕES EM ANDAMENTO</div><div class="kc-val">${totalOps}</div><div class="kc-sub">Filtro aplicado</div></div>
+    <div class="kc kg"><div class="kc-label">${IC.valor} VALOR LÍQUIDO REAL</div><div class="kc-val" style="color:var(--green)">${F(totalVal)}</div><div class="kc-sub">Valor Líquido Real do estoque</div></div>
+    <div class="kc ky"><div class="kc-label">${IC.ticket} TICKET MÉDIO</div><div class="kc-val" style="color:var(--yellow)">${F(ticketMedio)}</div><div class="kc-sub">Valor médio por operação</div></div>
+    <div class="kc ko"><div class="kc-label">${IC.pendencia} COM PENDÊNCIA</div><div class="kc-val" style="color:var(--orange)">${pendCount}</div><div class="kc-sub">${totalOps>0?(pendCount/totalOps*100).toFixed(1):0}% do estoque</div></div>
+  `;
+
+  const andIndices=[];
+  let andCount=0;
+  RW.forEach((r,i)=>{if(r[0]===0)andIndices.push({rwIdx:i,anIdx:andCount++})});
+  
+  let th='<table><thead><tr><th>#</th><th>Operação</th><th>Titular</th><th>Ente Devedor</th><th>Data Etapa Atual</th><th>Etapa</th><th>Atividade</th><th>Negociador</th><th>Coordenador</th><th>Regional</th><th style="text-align:right">Valor Líquido Real</th><th>Pend.</th></tr></thead><tbody>';
+
+  let rowNum=0;
+  ops.forEach(r=>{
+    const match=andIndices.find(a=>RW[a.rwIdx]===r);
+    const an=match && AN[match.anIdx]?AN[match.anIdx]:null;
+    rowNum++;
+    const titular=an?TT[an[0]]||'—':'—';
+    const ente=an?EN[an[1]]||'—':'—';
+    const dtEtapa=an?an[2]||'—':'—';
+    const opTit=an&&an[3]?an[3]:'—';
+    const opShort=opTit.length>12?opTit.substring(0,12)+'…':opTit;
+
+    th+=`<tr>
+      <td>${rowNum}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-family:monospace" title="${opTit}">${opShort}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${titular}">${titular}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ente}">${ente}</td>
+      <td>${dtEtapa}</td>
+      <td>${ET[r[4]]||'—'}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${AV[r[5]]||''}">${AV[r[5]]||'—'}</td>
+      <td>${NG[r[8]]||'—'}</td>
+      <td>${CO[r[9]]||'—'}</td>
+      <td>${RN[r[2]]||'—'}</td>
+      <td style="text-align:right">${F(r[14])}</td>
+      <td style="text-align:center">${r[7]?'<span style="color:var(--orange);font-weight:700">Sim</span>':'Não'}</td>
+    </tr>`;
+  });
+  th+='</tbody></table>';
+  document.getElementById('tANA').innerHTML=th;
+  
+  window._anaOps=ops;
+  window._anaIndices=andIndices;
+}
+
+// CSV Export
+function exportCSV(){
+  const ops=window._anaOps||[];
+  const indices=window._anaIndices||[];
+  
+  let csv='Titular;Ente Devedor;Data Etapa;Etapa;Atividade;Negociador;Coordenador;Regional;Segmento;Valor Líquido Real;Pendência\n';
+  ops.forEach(r=>{
+    const match=indices.find(a=>RW[a.rwIdx]===r);
+    const an=match&&AN[match.anIdx]?AN[match.anIdx]:null;
+    const titular=(an?TT[an[0]]||'':'').replace(/;/g,',');
+    const ente=(an?EN[an[1]]||'':'').replace(/;/g,',');
+    const dt=an?an[2]||'':'';
+    csv+=`${titular};${ente};${dt};${ET[r[4]]||''};${AV[r[5]]||''};${NG[r[8]]||''};${CO[r[9]]||''};${RN[r[2]]||''};${r[1]===0?'Mid-Market':'Varejo'};${r[14]};${r[7]?'Sim':'Não'}\n`;
+  });
+  
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  const d=new Date();
+  a.download=`analitico_estoque_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== RENDER DISPATCH =====
+function rr(){
+  if(at==='exec')rExec();
+  else if(at==='perf')rPerf();
+  else if(at==='funil')rFunil();
+  else if(at==='analitico')rAnalitico();
+}
+
+// Initialize
+populateNegFilter();
+rr();
+</script>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PWD_HASH='2b6770f3911236ca17568ad3e5f6cb96d5258e56cfaf960f30891e74261c9ecc';
+async function sha256(msg){const enc=new TextEncoder().encode(msg);const hash=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+async function doLogin(){const pwd=document.getElementById('loginPwd').value;const hash=await sha256(pwd);if(hash===PWD_HASH){sessionStorage.setItem('ac_auth','1');document.getElementById('loginScreen').style.display='none'}else{document.getElementById('loginErr').textContent='Senha incorreta. Tente novamente.';document.getElementById('loginPwd').value='';document.getElementById('loginPwd').focus()}}
+if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMContentLoaded',()=>{const ls=document.getElementById('loginScreen');if(ls)ls.style.display='none'})}
+</script>
+
+
+
+<div id="v-exec">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Visão Executiva</div>
+      <div class="tab-info-desc">Panorama estratégico do Projeto Acelera Comercial: acompanhamento de metas anuais e YTD, conversão conta corrente por regional e tendência de receita mensal. Use o filtro de mês para detalhar um período específico ou clique em qualquer barra dos gráficos para filtrar a aba automaticamente.</div>
+    </div>
+  </div>
+  <div class="local-filters">
+    <span class="fl">Mês:</span>
+    <button class="fb on" data-em="-1" onclick="setExecMes(this)">Todos</button>
+    <button class="fb" data-em="1" onclick="setExecMes(this)">Janeiro</button>
+    <button class="fb" data-em="2" onclick="setExecMes(this)">Fevereiro</button>
+    <button class="fb" data-em="3" onclick="setExecMes(this)">Março</button>
+  </div>
+  <div id="cf-exec" class="cf-active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span class="cf-active-lbl" id="cf-exec-lbl"></span><button class="cf-clear" onclick="clearCF('exec')">✕ Limpar filtro</button></div>
+  <div id="kpi1" class="krow"></div>
+  <div id="gaugeRow" style="display:flex;gap:16px;margin-bottom:16px"></div>
+  <div id="mc1"></div>
+  <div class="st" id="hRM">Resumo Regional — Meta vs Realizado — YTD 26 <span style="font-size:10px;font-weight:400;color:var(--text4)">(Volume Líquido)</span></div>
+  <div class="cd" style="margin-bottom:16px"><div class="tw" id="tRM"></div></div>
+  <div class="row2">
+    <div class="cd"><h3 id="hTend">Tendência Valor Líquido Pago Mensal — YTD 26</h3><div class="cw" style="height:260px"><canvas id="cTend"></canvas></div><div id="varBadge" style="text-align:center"></div></div>
+    <div class="cd"><h3 id="hCCReg">Conversão Conta Corrente por Regional — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Base: Volume Líquido | Pago / (EI + Cadastrado − Em Andamento)</div><div class="cw" style="height:260px"><canvas id="cRegPerf"></canvas></div></div>
+  </div>
+  <div class="st">Produção Diária — Pagos & Líquido a Receber</div>
+  <div id="dpKpiRow" class="krow" style="grid-template-columns:repeat(2,1fr)"></div>
+  <div class="cd" style="margin-bottom:16px"><h3 id="hPagDia">Produção Diária de Pagos — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Barras: valor pago por dia | Linha: acumulado | Referência: meta de produção</div><div class="cw" style="height:340px"><canvas id="cPagDia"></canvas></div></div>
+  <div class="st">Acompanhamento Diário — Volume de Propostas & Ticket Médio</div>
+  <div class="row2">
+    <div class="cd"><h3 id="hVolDia">Volume Diário de Propostas — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Quantidade de operações cadastradas por dia útil</div><div class="cw" style="height:300px"><canvas id="cVolDia"></canvas></div></div>
+    <div class="cd"><h3 id="hTickDia">Ticket Médio Diário — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Valor projetado médio por operação cadastrada</div><div class="cw" style="height:300px"><canvas id="cTickDia"></canvas></div></div>
+  </div>
+</div>
+
+<!-- PERFORMANCE -->
+<div id="v-perf" class="hidden">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Performance Comercial</div>
+      <div class="tab-info-desc">Ranking e análise de desempenho individual e por regional. Compare volume pago, taxa de conversão e ticket médio de cada negociador. Filtre por mês para acompanhar resultados período a período — ou clique em uma barra do ranking para destacar aquele negociador em toda a aba.</div>
+    </div>
+  </div>
+  <div class="local-filters">
+    <span class="fl">Mês:</span>
+    <select class="fsel" id="perfMes" onchange="fl.m=this.value;rr()">
+      <option value="-1">Todos</option>
+      <option value="1">Janeiro</option>
+      <option value="2">Fevereiro</option>
+      <option value="3">Março</option>
+    </select>
+  </div>
+  <div id="cf-perf" class="cf-active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span class="cf-active-lbl" id="cf-perf-lbl"></span><button class="cf-clear" onclick="clearCF('perf')">✕ Limpar filtro</button></div>
+  <div id="kpi2" class="krow" style="grid-template-columns:repeat(5,1fr)"></div>
+  <div class="st">Performance Regional — KPIs YTD</div>
+  <div id="tRP" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px"></div>
+  <div class="st">Ranking de Negociadores — Conv. Finalizados & Valor Líquido Pago YTD</div>
+  <div class="cd" style="margin-bottom:16px"><div class="tw" style="max-height:520px;overflow-y:auto" id="tNG"></div></div>
+  <div class="row2">
+    <div class="cd"><h3>Top 10 — Valor Aprovado</h3><div class="cw" style="height:320px"><canvas id="cTN"></canvas></div></div>
+    <div class="cd"><h3>Top 10 — Taxa Conversão</h3><div class="sub">Mínimo 5 operações</div><div class="cw" style="height:320px"><canvas id="cTC"></canvas></div></div>
+  </div>
+  <div class="st">Acompanhamento Diário — Volume de Propostas & Ticket Médio</div>
+  <div class="row2">
+    <div class="cd"><h3 id="hVolDia2">Volume Diário de Propostas — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Quantidade de operações cadastradas por dia útil</div><div class="cw" style="height:300px"><canvas id="cVolDia2"></canvas></div></div>
+    <div class="cd"><h3 id="hTickDia2">Ticket Médio Diário — YTD 26</h3><div class="sub" style="font-size:10px;color:var(--text4);margin:4px 0 8px">Valor projetado médio por operação cadastrada</div><div class="cw" style="height:300px"><canvas id="cTickDia2"></canvas></div></div>
+  </div>
+  <div id="insights-perf"></div>
+</div>
+
+<!-- FUNIL & ESTOQUE -->
+<div id="v-funil" class="hidden">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 3H2l8 9.46V19l4 2V12.46z"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Funil de Negociação & Estoque</div>
+      <div class="tab-info-desc">Acompanhamento das operações em andamento por etapa do funil, atividades comerciais em aberto, pendências por regional e análise de devoluções (operações reprovadas). Clique nas barras do funil ou nos motivos de encerramento para filtrar a tabela de devoluções abaixo.</div>
+    </div>
+  </div>
+  <div class="local-filters">
+    <span class="fl">Etapa:</span>
+    <select class="fsel" id="funilEtapa" onchange="fl.fe=this.value;rFunil()">
+      <option value="-1">Todas</option>
+    </select>
+    <span class="fl" style="margin-left:8px">Mês Cadastro:</span>
+    <select class="fsel" id="funilMes" onchange="fl.fm=this.value;rFunil()">
+      <option value="-1">Todos</option>
+      <option value="1">Janeiro</option>
+      <option value="2">Fevereiro</option>
+      <option value="3">Março</option>
+    </select>
+  </div>
+  <div id="cf-funil" class="cf-active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span class="cf-active-lbl" id="cf-funil-lbl"></span><button class="cf-clear" onclick="clearCF('funil')">✕ Limpar filtro</button></div>
+  <div id="kpi3" class="krow"></div>
+  <div class="st">Pendências Comerciais por Regional</div>
+  <div class="cd" style="margin-bottom:16px"><div class="tw" id="tPD"></div></div>
+  <div class="row2">
+    <div class="cd"><h3>Funil por Etapa <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar devoluções)</span></h3><div class="cw" style="height:340px"><canvas id="cFN"></canvas></div></div>
+    <div class="cd"><h3>Atividade Atual</h3><div class="cw" style="height:340px"><canvas id="cAT"></canvas></div></div>
+  </div>
+  <div class="st">Motivos de Encerramento <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar tabela abaixo)</span></div>
+  <div class="row1"><div class="cd"><div class="cw" style="height:340px"><canvas id="cMT"></canvas></div></div></div>
+  <div class="st">Tabela Analítica de Devoluções</div>
+  <div class="cd" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--text3)">Filtrar por motivo:</span>
+      <select class="fsel" id="devMot" onchange="rDevolucoes()"><option value="-1">Todos os motivos</option></select>
+      <select class="fsel" id="devReg" onchange="rDevolucoes()"><option value="-1">Todas as regionais</option><option value="0">Regional A</option><option value="1">Regional B</option><option value="2">Regional C</option><option value="3">Regional D</option></select>
+      <span id="devCount" style="font-size:11px;color:var(--text4);margin-left:auto"></span>
+    </div>
+    <div class="dev-wrap" id="tDEV"></div>
+  </div>
+  <div id="insights-funil"></div>
+</div>
+
+<!-- ANALÍTICO ESTOQUE -->
+<div id="v-analitico" class="hidden">
+  <div class="tab-info">
+    <div class="tab-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+    <div class="tab-info-body">
+      <div class="tab-info-title">Analítico de Estoque</div>
+      <div class="tab-info-desc">Visão operacional completa das operações em andamento. Use os filtros de regional, coordenador, negociador, etapa e pendência para identificar operações prioritárias, acompanhar titulares e entes devedores individuais — e exporte os dados para análise via Excel.</div>
+    </div>
+  </div>
+  <div class="local-filters">
+    <span class="fl">Regional:</span>
+    <select class="fsel" id="anaReg" onchange="rAnalitico()">
+      <option value="-1">Todas</option>
+      <option value="0">Regional A</option>
+      <option value="1">Regional B</option>
+      <option value="2">Regional C</option>
+      <option value="3">Regional D</option>
+    </select>
+    <span class="fl" style="margin-left:8px">Coordenador:</span>
+    <select class="fsel" id="anaCoord" onchange="rAnalitico()">
+      <option value="-1">Todos</option>
+    </select>
+    <span class="fl" style="margin-left:8px">Negociador:</span>
+    <select class="fsel" id="anaNeg" onchange="rAnalitico()">
+      <option value="-1">Todos</option>
+    </select>
+    <span class="fl" style="margin-left:8px">Etapa:</span>
+    <select class="fsel" id="anaEtapa" onchange="rAnalitico()">
+      <option value="-1">Todas</option>
+    </select>
+    <span class="fl" style="margin-left:8px">Pendência:</span>
+    <select class="fsel" id="anaPend" onchange="rAnalitico()">
+      <option value="-1">Todos</option>
+      <option value="1">Com Pendência</option>
+      <option value="0">Sem Pendência</option>
+    </select>
+    <button class="btn-export" onclick="exportCSV()" style="margin-left:auto">Exportar Excel</button>
+  </div>
+  <div id="kpi4" class="krow"></div>
+  <div class="cd"><div class="analitico-wrap" id="tANA"></div></div>
+</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
+
+
+let ch={},at='exec',fl={s:'t',r:'t',n:'-1',m:'-1',em:'-1',fm:'-1',fe:'-1',dm:'-1'};
+// cf = cross-filter state per tab: {exec:{type,val,label}, perf:{...}, funil:{...}}
+const cf={exec:{active:false},perf:{active:false},funil:{active:false}};
+
+function setExecMes(btn){
+  fl.em=btn.dataset.em;
+  document.querySelectorAll('[data-em]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  rr();
+}
+
+function setCF(tab,type,val,label){
+  cf[tab]={active:true,type,val,label};
+  const el=document.getElementById('cf-'+tab);
+  const lbl=document.getElementById('cf-'+tab+'-lbl');
+  if(el){el.classList.add('show')}
+  if(lbl){lbl.textContent='Filtro ativo: '+label}
+  if(type==='reg'){fl.r=String(val);document.querySelectorAll('.fb[data-f="r"]').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.fb[data-f="r"][data-v="'+val+'"]').forEach(b=>b.classList.add('on'));populateNegFilter();}
+  if(type==='neg'){fl.n=String(val);const sel=document.getElementById('negFilter');if(sel){sel.value=String(val);}}
+  if(type==='etapa'){fl.fe=String(val);const s=document.getElementById('funilEtapa');if(s)s.value=String(val);}
+  if(type==='dev_mot'){window._cfDevMot=val;rDevolucoes();}
+  rr();
+}
+
+function clearCF(tab){
+  cf[tab]={active:false};
+  const el=document.getElementById('cf-'+tab);
+  if(el)el.classList.remove('show');
+  if(tab==='exec'){fl.r='t';document.querySelectorAll('.fb[data-f="r"]').forEach(b=>b.classList.remove('on'));document.querySelector('.fb[data-f="r"][data-v="t"]').classList.add('on');populateNegFilter();}
+  if(tab==='perf'){fl.n='-1';const sel=document.getElementById('negFilter');if(sel)sel.value='-1';}
+  if(tab==='funil'){fl.fe='-1';const s=document.getElementById('funilEtapa');if(s)s.value='-1';window._cfDevMot=undefined;}
+  rr();
+}
+
+// Chart defaults
+Chart.defaults.color='#64748B';Chart.defaults.borderColor='#E2E8F0';
+Chart.defaults.font.family="'Inter',system-ui,sans-serif";
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+Chart.defaults.plugins.legend.labels.pointStyle='circle';
+
+// Utility functions
+const F=v=>{if(Math.abs(v)>=1e6)return'R$ '+(v/1e6).toFixed(1)+'M';if(Math.abs(v)>=1e3)return'R$ '+(v/1e3).toFixed(0)+'K';return'R$ '+v.toFixed(0)};
+const IC={
+  receita:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+  pipeline:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg>',
+  aprovado:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
+  conversao:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-6.2-8.6M21 3v6h-6"/></svg>',
+  ticket:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  reprovado:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+  negociador:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+  top:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>',
+  estoque:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>',
+  entrada:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>',
+  pendencia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  operacao:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>',
+  valor:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'
+};
+const rc=i=>i<1?'r1':i<2?'r2':i<3?'r3':'rx';
+const bc=v=>v>=80?'bg':v>=40?'by':'br';
+
+// ===== FILTER FUNCTIONS =====
+
 
 function populateNegFilter(){
   const sel=document.getElementById('negFilter');
