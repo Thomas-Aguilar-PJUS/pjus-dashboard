@@ -46,13 +46,19 @@ with open(ARGUS_PATH, encoding="utf-8") as f:
 print(f"Loaded Argus data: {len(ARGUS)} keys, extraction: {ARGUS['meta']['data_extracao']}")
 
 # ── Constants (IDENTICAL to build_v6.py) ──
-FASES = ['calculo_homologado','expedicao_ativa','expedicao_bloqueada',
+FASES = ['calculo_homologado','expedicao_ativa','outro','pago_levantado',
+         'expedicao_bloqueada','muito_cedo','cedido','coletiva_servidores',
          'honorarios_sucumbenciais']
 
 FASE_LABELS = {
     'calculo_homologado': 'Cálculo Homologado',
     'expedicao_ativa': 'Expedição Ativa',
+    'outro': 'Outro',
+    'pago_levantado': 'Pago/Levantado',
     'expedicao_bloqueada': 'Expedição Bloqueada',
+    'muito_cedo': 'Muito Cedo',
+    'cedido': 'Cedido',
+    'coletiva_servidores': 'Coletiva Servidores',
     'honorarios_sucumbenciais': 'Honorários Sucumbenciais',
 }
 
@@ -60,8 +66,13 @@ MATS = ['Muito Alta','Alta','Média-Alta','Média','Média-Baixa','Baixa','Muito
 FASE_MAT = {
     'calculo_homologado':'Alta',
     'expedicao_ativa':'Muito Alta',
+    'pago_levantado':'Muito Alta',
     'expedicao_bloqueada':'Média',
+    'muito_cedo':'Baixa',
+    'cedido':'Alta',
+    'coletiva_servidores':'Média-Alta',
     'honorarios_sucumbenciais':'Média-Baixa',
+    'outro':'Média',
 }
 
 # Tribunal to UF mapping
@@ -296,9 +307,10 @@ for ta in ARGUS.get('top_advogados', []):
         })
 
 # ── PIPELINE (from pipeline_fase + pipeline_mensal) ──
-# Valid pipeline phases (exclude nature/type fields that aren't process phases)
+# Todas as fases reais classificadas pela IA (o score foi criado em função da fase)
 VALID_PIPELINE_FASES = {
-    'calculo_homologado', 'expedicao_ativa', 'expedicao_bloqueada',
+    'calculo_homologado', 'expedicao_ativa', 'outro', 'pago_levantado',
+    'expedicao_bloqueada', 'muito_cedo', 'cedido', 'coletiva_servidores',
     'honorarios_sucumbenciais',
 }
 
@@ -311,10 +323,15 @@ for pf in ARGUS.get('pipeline_fase', []):
 
 # Typical days-in-phase based on pipeline progression
 FASE_DIAS = {
+    'muito_cedo': 180,
     'calculo_homologado': 120,
     'expedicao_bloqueada': 100,
-    'expedicao_ativa': 60,
     'honorarios_sucumbenciais': 90,
+    'outro': 80,
+    'expedicao_ativa': 60,
+    'coletiva_servidores': 50,
+    'cedido': 45,
+    'pago_levantado': 15,
 }
 
 PIPELINE = []

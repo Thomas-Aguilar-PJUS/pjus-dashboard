@@ -162,24 +162,17 @@ def main():
         LIMIT 50
     """, "entes_devedores")
 
-    # Pipeline: only commercially actionable phases
-    # Excluded: 'outro' (classification residue), 'pago_levantado' (already paid, score ~1),
-    # 'cedido' (already assigned, score ~1), 'muito_cedo' (immature, score ~1),
-    # 'coletiva_servidores' (different context), plus rare/invalid phases
-    PIPELINE_FASES = (
-        "'calculo_homologado',"   # Calculation approved — monitor
-        "'expedicao_ativa',"      # Active expedition — hot opportunity
-        "'expedicao_bloqueada',"  # Blocked expedition — investigate
-        "'honorarios_sucumbenciais'"  # Attorney fees — niche
-    )
-
+    # Pipeline: todas as fases reais classificadas pela IA
+    # Inclui todas as 9 fases com volume significativo (>= 30 publicações)
+    # O score_interesse foi criado pela IA em função da fase — respeitar essa premissa
+    # Fases com volume negligível (<30) são agrupadas em 'outro'
     D["pipeline_fase"] = q(conn, f"""
         SELECT fase_pjus AS fase,
                COUNT(*) AS vol,
                COALESCE(SUM({VCONV}), 0) AS val,
                ROUND(AVG(score_interesse)::numeric, 1) AS score_medio
         FROM djen_precatorio
-        WHERE fase_pjus IN ({PIPELINE_FASES})
+        WHERE fase_pjus IS NOT NULL AND fase_pjus <> ''
         GROUP BY fase_pjus ORDER BY vol DESC
     """, "pipeline_fase")
 
@@ -190,7 +183,7 @@ def main():
                COUNT(*) AS vol,
                COALESCE(SUM({VCONV}), 0) AS val
         FROM djen_precatorio
-        WHERE fase_pjus IN ({PIPELINE_FASES})
+        WHERE fase_pjus IS NOT NULL AND fase_pjus <> ''
           AND data_disponibilizacao >= CURRENT_DATE - INTERVAL '12 months'
         GROUP BY fase_pjus, y, m ORDER BY fase, y, m
     """, "pipeline_mensal")
