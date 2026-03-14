@@ -1276,7 +1276,8 @@ function rFunil(){
   const allRep=allFiltered.filter(r=>r[0]===2).length;
   const allAnd=allFiltered.filter(r=>r[0]===0).length;
   const cv=(allApr+allRep)>0?(allApr/(allApr+allRep)*100):0;
-  const entradas=D.cc[0].t[1]+D.cc[1].t[1]+D.cc[2].t[1];
+  // Entradas = total de operações filtradas (todas, não só em andamento)
+  const entradas=allFiltered.length;
 
   document.getElementById('kpi3').innerHTML=`
     <div class="kc kb"><div class="kc-label">${IC.estoque} ESTOQUE ATUAL</div><div class="kc-val">${tF}</div><div class="kc-sub">${F(tFv)} em Valor Líquido a Receber</div></div>
