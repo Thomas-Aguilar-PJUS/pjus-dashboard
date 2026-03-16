@@ -426,7 +426,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 </div>
 </div>
 
-<script src="data.js?v=1773677296"></script>
+<script src="data.js?v=1773680562"></script>
 <script>
 const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
@@ -885,10 +885,35 @@ function rExec(){
         }
       }
       if(duSemana===0)duSemana=5; // fallback
-      // Meta proporcional: meta do período * (d.u. semana / d.u. totais período)
-      const metaTotalPeriodo=execMes>0?(metaSet.m[execMes-1]||0)/1e6:metaSet.m.slice(0,mFim).reduce((a,v)=>a+v,0)/1e6;
-      const duTotalPeriodo=execMes>0?duTotal(2026,execMes):(function(){let t=0;for(let i=1;i<=mFim;i++)t+=duTotal(2026,i);return t;})();
-      metaAcumFinal=duTotalPeriodo>0?(metaTotalPeriodo*(duSemana/duTotalPeriodo)):0;
+      // Meta proporcional: soma (meta_mes / d.u._mes * d.u._semana_no_mes) para cada mês da semana
+      // Isso garante que semanas em meses com metas diferentes usem a meta correta
+      if(execMes>0){
+        // Mês específico filtrado: meta desse mês proporcionalmente
+        const metaMes=(metaSet.m[execMes-1]||0)/1e6;
+        const duMesTotal=duTotal(2026,execMes);
+        metaAcumFinal=duMesTotal>0?(metaMes*(duSemana/duMesTotal)):0;
+      } else {
+        // "Todos": calcular meta proporcional por mês que a semana abrange
+        let metaSum=0;
+        const duPorMes={};
+        for(let m=mInicio;m<=mFim;m++){
+          const diasNoMes2=new Date(2026,m,0).getDate();
+          for(let d2=1;d2<=diasNoMes2;d2++){
+            const dow2=new Date(2026,m-1,d2).getDay();
+            if(dow2===0||dow2===6)continue;
+            if(localWkNum(2026,m,d2)!==wkNum)continue;
+            if(anoHoje===2026&&(m>mesHoje||(m===mesHoje&&d2>=diaHoje)))continue;
+            duPorMes[m]=(duPorMes[m]||0)+1;
+          }
+        }
+        for(const [mStr,duM] of Object.entries(duPorMes)){
+          const mi=parseInt(mStr);
+          const metaMes=(metaSet.m[mi-1]||0)/1e6;
+          const duMesTotal=duTotal(2026,mi);
+          metaSum+=duMesTotal>0?(metaMes*(duM/duMesTotal)):0;
+        }
+        metaAcumFinal=metaSum;
+      }
       duRefFinal=duSemana;
       const fl1=wkFirstDay?String(wkFirstDay.d).padStart(2,'0')+'/'+String(wkFirstDay.m).padStart(2,'0'):'';
       const fl2=wkLastDay?String(wkLastDay.d).padStart(2,'0')+'/'+String(wkLastDay.m).padStart(2,'0'):'';
