@@ -12,7 +12,7 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repo
@@ -26,6 +26,11 @@ jobs:
       - name: Install dependencies
         run: pip install psycopg2-binary
 
+      - name: Update DataJud historical data (last 2 months)
+        run: python scripts/extrair_datajud.py --months 2
+        env:
+          DATAJUD_API_KEY: ${{ secrets.DATAJUD_API_KEY }}
+
       - name: Extract data from Argus DB
         run: python scripts/extrair_dados.py
         env:
@@ -35,6 +40,11 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
+      - name: Merge DataJud + Argus into dashboard JSON
+        run: python scripts/extrair_datajud.py --aggregate --merge data/dados_argus.json --output data/dados_argus.json
+        env:
+          DATAJUD_API_KEY: ${{ secrets.DATAJUD_API_KEY }}
+
       - name: Build dashboard HTML
         run: python scripts/build_dashboard.py
 
@@ -42,7 +52,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.html data/dados_historico.db data/dados_argus.json
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
