@@ -107,7 +107,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}
 th{background:#F8FAFC;padding:9px 12px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#475569;white-space:nowrap;position:sticky;top:0}
 td{padding:8px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
 tr:hover td{background:rgba(0,116,255,.03)}
-.pb{width:80px;height:5px;background:rgba(0,0,0,.05);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.pb{width:120px;height:5px;background:rgba(0,0,0,.05);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
 .pf{height:100%;border-radius:3px}
 .st{font-size:15px;font-weight:700;margin:24px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .rn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;font-size:10px;font-weight:800}
@@ -368,7 +368,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
     <div class="cd"><h3>Funil por Etapa <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar devoluções)</span></h3><div class="cw" style="height:340px"><canvas id="cFN"></canvas></div></div>
     <div class="cd"><h3>Atividade Atual</h3><div class="cw" style="height:340px"><canvas id="cAT"></canvas></div></div>
   </div>
-  <div class="st">Estoque por Etapa</div>
+  <div class="st">Estoque por Etapa <span style="font-size:10px;font-weight:400;color:var(--text4)">(operacoes em andamento por etapa do Opera)</span></div>
   <div class="cd" style="margin-bottom:16px"><div class="tw" id="tEtapaResumo"></div></div>
   <div class="st">Motivos de Encerramento <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar tabela abaixo)</span></div>
   <div class="row1"><div class="cd"><div class="cw" style="height:340px"><canvas id="cMT"></canvas></div></div></div>
@@ -428,7 +428,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 </div>
 </div>
 
-<script src="data.js?v=1774026066"></script>
+<script src="data.js?v=1774033795"></script>
 <script>
 const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
@@ -1358,8 +1358,8 @@ function rFunil(){
   funilData.forEach(r=>{const e=ET[r[4]];if(!etResume[e])etResume[e]={count:0,vlr:0,vface:0};etResume[e].count++;etResume[e].vlr+=r[14];etResume[e].vface+=(r[21]||0)});
   const etSorted=Object.entries(etResume).sort((a,b)=>{const ia=etapaOrdem.indexOf(a[0]);const ib=etapaOrdem.indexOf(b[0]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
   const etTotal={count:0,vlr:0,vface:0};etSorted.forEach(([,d])=>{etTotal.count+=d.count;etTotal.vlr+=d.vlr;etTotal.vface+=d.vface});
-  let eth='<table><thead><tr><th>Etapa</th><th style="text-align:right">Contratos</th><th style="text-align:right">Valor Face</th><th style="text-align:right">Valor Liq. a Receber</th><th style="text-align:right">% Valor Liq.</th></tr></thead><tbody>';
-  etSorted.forEach(([name,d])=>{const pct=etTotal.vlr>0?(d.vlr/etTotal.vlr*100):0;eth+=`<tr><td><strong>${name}</strong></td><td style="text-align:right">${d.count}</td><td style="text-align:right">${F(d.vface)}</td><td style="text-align:right">${F(d.vlr)}</td><td><div class="pb" style="width:100px"><div class="pf" style="width:${pct}%;background:var(--blue)"></div></div> ${pct.toFixed(1)}%</td></tr>`});
+  let eth='<table><thead><tr><th>Etapa</th><th style="text-align:right">Contratos</th><th style="text-align:right">Valor Face</th><th style="text-align:right">Valor Liq. a Receber</th><th>% Valor Liq.</th></tr></thead><tbody>';
+  etSorted.forEach(([name,d])=>{const pct=etTotal.vlr>0?(d.vlr/etTotal.vlr*100):0;eth+=`<tr><td><strong>${name}</strong></td><td style="text-align:right">${d.count}</td><td style="text-align:right">${F(d.vface)}</td><td style="text-align:right">${F(d.vlr)}</td><td style="white-space:nowrap"><div class="pb" style="width:120px"><div class="pf" style="width:${pct}%;background:var(--blue)"></div></div> ${pct.toFixed(1)}%</td></tr>`});
   eth+=`<tr style="font-weight:bold;border-top:2px solid var(--border)"><td>TOTAL</td><td style="text-align:right">${etTotal.count}</td><td style="text-align:right">${F(etTotal.vface)}</td><td style="text-align:right">${F(etTotal.vlr)}</td><td>100%</td></tr>`;
   eth+='</tbody></table>';document.getElementById('tEtapaResumo').innerHTML=eth;
 
