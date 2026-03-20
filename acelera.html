@@ -368,6 +368,8 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
     <div class="cd"><h3>Funil por Etapa <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar devoluções)</span></h3><div class="cw" style="height:340px"><canvas id="cFN"></canvas></div></div>
     <div class="cd"><h3>Atividade Atual</h3><div class="cw" style="height:340px"><canvas id="cAT"></canvas></div></div>
   </div>
+  <div class="st">Estoque por Etapa</div>
+  <div class="cd" style="margin-bottom:16px"><div class="tw" id="tEtapaResumo"></div></div>
   <div class="st">Motivos de Encerramento <span style="font-size:10px;font-weight:400;color:var(--text4)">(clique para filtrar tabela abaixo)</span></div>
   <div class="row1"><div class="cd"><div class="cw" style="height:340px"><canvas id="cMT"></canvas></div></div></div>
   <div class="st" style="display:flex;align-items:center;justify-content:space-between">Tabela Analítica de Devoluções<button class="btn-export" onclick="exportDevCSV()" style="font-size:11px">Exportar Excel</button></div>
@@ -426,7 +428,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 </div>
 </div>
 
-<script src="data.js?v=1774022339"></script>
+<script src="data.js?v=1774022717"></script>
 <script>
 const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
@@ -1350,6 +1352,16 @@ function rFunil(){
   funilData.forEach(r=>{const a=AV[r[5]]||'Não informado';if(!ativGroups[a])ativGroups[a]=0;ativGroups[a]++});
   const ativSorted=Object.entries(ativGroups).filter(a=>a[0]).sort((a,b)=>b[1]-a[1]).slice(0,10);
   ch['cAT']=new Chart(document.getElementById('cAT'),{type:'bar',data:{labels:ativSorted.map(a=>a[0]),datasets:[{data:ativSorted.map(a=>a[1]),backgroundColor:'rgba(249,115,22,.55)',borderColor:'#f97316',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:false}},scales:{x:{beginAtZero:true,title:{display:true,text:'Quantidade'},grid:{color:'rgba(224,231,245,.6)'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  // Tabela Estoque por Etapa
+  const etResume={};
+  funilData.forEach(r=>{const e=ET[r[4]];if(!etResume[e])etResume[e]={count:0,vlr:0,vface:0};etResume[e].count++;etResume[e].vlr+=r[14];etResume[e].vface+=(r[21]||0)});
+  const etSorted=Object.entries(etResume).sort((a,b)=>{const ia=etapaOrdem.indexOf(a[0]);const ib=etapaOrdem.indexOf(b[0]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
+  const etTotal={count:0,vlr:0,vface:0};etSorted.forEach(([,d])=>{etTotal.count+=d.count;etTotal.vlr+=d.vlr;etTotal.vface+=d.vface});
+  let eth='<table><thead><tr><th>Etapa</th><th style="text-align:right">Contratos</th><th style="text-align:right">Valor Face</th><th style="text-align:right">Valor Liq. a Receber</th><th style="text-align:right">% Valor Liq.</th></tr></thead><tbody>';
+  etSorted.forEach(([name,d])=>{const pct=etTotal.vlr>0?(d.vlr/etTotal.vlr*100):0;eth+=`<tr><td><strong>${name}</strong></td><td style="text-align:right">${d.count}</td><td style="text-align:right">${F(d.vface)}</td><td style="text-align:right">${F(d.vlr)}</td><td><div class="pb" style="width:100px"><div class="pf" style="width:${pct}%;background:var(--blue)"></div></div> ${pct.toFixed(1)}%</td></tr>`});
+  eth+=`<tr style="font-weight:bold;border-top:2px solid var(--border)"><td>TOTAL</td><td style="text-align:right">${etTotal.count}</td><td style="text-align:right">${F(etTotal.vface)}</td><td style="text-align:right">${F(etTotal.vlr)}</td><td>100%</td></tr>`;
+  eth+='</tbody></table>';document.getElementById('tEtapaResumo').innerHTML=eth;
 
   const pendByReg={};
   funilData.filter(r=>r[7]===1&&r[2]>=0&&r[2]<=3).forEach(r=>{const reg=RN[r[2]];if(!pendByReg[reg])pendByReg[reg]={count:0,val:0};pendByReg[reg].count++;pendByReg[reg].val+=r[14]});
