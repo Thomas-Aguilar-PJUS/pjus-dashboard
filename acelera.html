@@ -428,7 +428,7 @@ if(sessionStorage.getItem('ac_auth')==='1'){document.addEventListener('DOMConten
 </div>
 </div>
 
-<script src="data.js?v=1774024269"></script>
+<script src="data.js?v=1"></script>
 <script>
 const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const RN=["Regional A", "Regional B", "Regional C", "Regional D", "Mid-Market"];
@@ -1355,7 +1355,7 @@ function rFunil(){
 
   // Tabela Estoque por Etapa
   const etResume={};
-  funilData.forEach(r=>{const e=ET[r[4]];if(!etResume[e])etResume[e]={count:0,vlr:0,vface:0};etResume[e].count++;etResume[e].vlr+=r[3];etResume[e].vface+=(r[21]||0)});
+  funilData.forEach(r=>{const e=ET[r[4]];if(!etResume[e])etResume[e]={count:0,vlr:0,vface:0};etResume[e].count++;etResume[e].vlr+=r[14];etResume[e].vface+=(r[21]||0)});
   const etSorted=Object.entries(etResume).sort((a,b)=>{const ia=etapaOrdem.indexOf(a[0]);const ib=etapaOrdem.indexOf(b[0]);return (ia===-1?999:ia)-(ib===-1?999:ib)});
   const etTotal={count:0,vlr:0,vface:0};etSorted.forEach(([,d])=>{etTotal.count+=d.count;etTotal.vlr+=d.vlr;etTotal.vface+=d.vface});
   let eth='<table><thead><tr><th>Etapa</th><th style="text-align:right">Contratos</th><th style="text-align:right">Valor Face</th><th style="text-align:right">Valor Liq. a Receber</th><th style="text-align:right">% Valor Liq.</th></tr></thead><tbody>';
