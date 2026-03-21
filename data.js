@@ -1,5 +1,5 @@
 // Dados extraídos automaticamente - Projeto Acelera Comercial
-// Última atualização: 21/03/2026 01:00
+// Última atualização: 21/03/2026 01:07
 // Fonte: Base Controle Operacional e Produção Anual.xlsx
 
 const ET=["Assinatura", "Avaliação do ativo", "Confecção de documentos", "Conferência final", "Conferência inicial", "Homologação", "Operações pagas", "Operações reprovadas", "Pagamento", "Parecer do titular", "Parecer jurídico", "Protocolo de cessão", "Providências jurídicas"];
